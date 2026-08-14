@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Next.js
+apps/web/.next/
+apps/web/out/
+
+# Python venv
+apps/api/.venv/
+apps/api/venv/
+
+# Docker volumes (local)
+.docker-data/
+
+# MinIO data
+minio-data/
+
+# Coverage
+htmlcov/
+.coverage
+coverage.xml
+
+# Alembic
+apps/api/alembic/versions/__pycache__/
+
+# Logs
+*.log
+logs/

@@ -1,0 +1,59 @@
+{
+  "Navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "network": "Ground Station Network",
+    "scheduling": "Pass Scheduling",
+    "telemetry": "Live Telemetry",
+    "satellites": "Satellites",
+    "catalog": "Data Downlinks",
+    "billing": "Billing",
+    "support": "SLA & Support",
+    "settings": "Settings",
+    "schedule_pass": "Schedule a Pass",
+    "nodes_online": "14/14 Network Nodes Online"
+  },
+  "Landing": {
+    "hero_badge": "Next-Gen Ground Station as a Service (GSaaS)",
+    "hero_title_prefix": "Africa's Federated ",
+    "hero_title_accent": "Ground Station Network",
+    "hero_title_suffix": " for Space Missions",
+    "hero_subtitle": "Unified satellite pass scheduling, real-time Telemetry Tracking & Command (TT&C), and Earth observation downlinks across 14 high-gain Pan-African antenna hubs.",
+    "cta_schedule": "Schedule Pass Now",
+    "cta_explore": "Explore Station Network",
+    "stat_nodes": "Pan-African Station Nodes",
+    "stat_uptime": "Platform SLA Uptime",
+    "stat_latency": "Data Delivery Latency",
+    "stat_passes": "Successful Downlinks",
+    "network_title": "Pan-African Ground Station Coverage",
+    "network_subtitle": "Strategic S-band, X-band, Ka-band, and UHF ground terminals positioned for optimal LEO, MEO, and GEO constellation tracking across the African continent.",
+    "simulator_title": "Interactive Orbit & Pass Calculator",
+    "simulator_subtitle": "Select a satellite mission to test SGP4 orbit prediction, line-of-sight elevation mask, and instant GSaaS pass pricing.",
+    "features_title": "Full-Stack Space Ground Segment Capabilities",
+    "features_subtitle": "Everything constellation operators and Earth observation missions need to communicate seamlessly with orbiting assets.",
+    "api_title": "Developer-First Open API & Cloud Ingestion",
+    "api_subtitle": "Seamlessly integrate pass reservations and real-time telemetry streams directly into your mission control system via REST & WebSocket APIs.",
+    "cta_banner_title": "Ready to Downlink Your Satellite Data?",
+    "cta_banner_subtitle": "Join space agencies, CubeSat operators, and Earth observation providers taking advantage of Africa's premier ground station aggregator.",
+    "cta_contact_sales": "Talk to Space Operations",
+    "cta_launch_app": "Launch Operator Console"
+  },
+  "Dashboard": {
+    "title": "Welcome to AfriGround",
+    "subtitle": "Africa's Premier Multi-Ground-Station Aggregator",
+    "upcoming_passes": "Upcoming Passes",
+    "station_status": "Station Status",
+    "recent_data": "Recent Data Delivered"
+  },
+  "Status": {
+    "operational": "Operational",
+    "maintenance": "Maintenance",
+    "offline": "Offline"
+  },
+  "Auth": {
+    "login": "Log In",
+    "logout": "Log Out",
+    "email": "Email Address",
+    "password": "Password"
+  }
+}

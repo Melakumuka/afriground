@@ -1,0 +1,59 @@
+{
+  "Navigation": {
+    "home": "首页",
+    "dashboard": "控制台",
+    "network": "地面站网络",
+    "scheduling": "过境调度",
+    "telemetry": "实时遥测",
+    "satellites": "卫星管理",
+    "catalog": "数据下传",
+    "billing": "账单服务",
+    "support": "SLA & 服务支持",
+    "settings": "系统设置",
+    "schedule_pass": "预订过境服务",
+    "nodes_online": "14/14 网络节点在线"
+  },
+  "Landing": {
+    "hero_badge": "下一代地面站即服务 (GSaaS)",
+    "hero_title_prefix": "面向航天任务的",
+    "hero_title_accent": "非洲联合地面站网络",
+    "hero_title_suffix": "",
+    "hero_subtitle": "跨越非洲大陆14个高增益天线枢纽，提供统一的卫星过境调度、实时遥测跟踪与控制 (TT&C) 以及对地观测数据下传。",
+    "cta_schedule": "立即预订过境",
+    "cta_explore": "探索地面站网络",
+    "stat_nodes": "泛非地面站节点",
+    "stat_uptime": "平台 SLA 可用率",
+    "stat_latency": "数据传输延迟",
+    "stat_passes": "成功下传次数",
+    "network_title": "泛非地面站覆盖网络",
+    "network_subtitle": "在非洲大陆战略部署 S波段、X波段、Ka波段和 UHF 地面终端，为 LEO、MEO 和 GEO 卫星星座提供最佳跟踪服务。",
+    "simulator_title": "交互式轨道与过境计算器",
+    "simulator_subtitle": "选择卫星任务以测试 SGP4 轨道预测、视线仰角掩模及即时 GSaaS 过境定价。",
+    "features_title": "全栈航天地面段能力",
+    "features_subtitle": "星座运营商与对地观测任务所需的一切通信与数据服务支持。",
+    "api_title": "开发者优先的 Open API 与云端接入",
+    "api_subtitle": "通过 REST 和 WebSocket API 将过境预订与实时遥测流无缝集成至您的任务控制系统中。",
+    "cta_banner_title": "准备好下传您的卫星数据了吗？",
+    "cta_banner_subtitle": "加入利用非洲首屈一指的地面站聚合平台的航天机构、立方星运营商和对地观测服务商。",
+    "cta_contact_sales": "联系航天运营团队",
+    "cta_launch_app": "启动控制台"
+  },
+  "Dashboard": {
+    "title": "欢迎来到 AfriGround",
+    "subtitle": "非洲首屈一指的多地面站聚合平台",
+    "upcoming_passes": "即将到来的过境",
+    "station_status": "地面站状态",
+    "recent_data": "最近下传数据"
+  },
+  "Status": {
+    "operational": "运行正常",
+    "maintenance": "维护中",
+    "offline": "离线"
+  },
+  "Auth": {
+    "login": "登录",
+    "logout": "退出",
+    "email": "电子邮箱",
+    "password": "密码"
+  }
+}
