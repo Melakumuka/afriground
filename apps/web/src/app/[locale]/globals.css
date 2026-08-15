@@ -1,19 +1,42 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0B0F19;
-  --foreground: #F1F5F9;
-  --card-bg: rgba(15, 23, 42, 0.7);
-  --card-border: rgba(255, 255, 255, 0.1);
-  --accent-cyan: #38BDF8;
-  --accent-indigo: #6366F1;
-  --accent-emerald: #10B981;
+  --bg-dark: #141619;
+  --card-dark: rgba(28, 31, 36, 0.85);
+  --border-dark: rgba(255, 255, 255, 0.09);
+  --ink: #E9E6DE;
+  --ink-mute: #9AA0A6;
+}
+
+@theme {
+  /* Type */
+  --font-sans: var(--font-space-grotesk), "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-space-grotesk), "Space Grotesk", ui-sans-serif, sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* AfriGround "Orbital Infrastructure" palette */
+  --color-mineral: #F0EDE5;          /* warm technical off-white */
+  --color-mineral-2: #E7E2D6;        /* deep mineral */
+  --color-mineral-3: #DDD7C9;        /* line on light */
+  --color-graphite: #15171A;         /* primary dark */
+  --color-graphite-800: #1B1E23;     /* panel dark */
+  --color-graphite-700: #23272D;     /* raised dark */
+  --color-graphite-600: #2C3138;     /* hover dark */
+  --color-graphite-mute: #6D737C;    /* muted on dark */
+  --color-green: #5C7D62;            /* muted industrial green (mid) */
+  --color-green-soft: #82A287;       /* industrial green on dark */
+  --color-green-tint: #E7EEE7;       /* green tint bg (light) */
+  --color-signal: #E2662F;           /* signal orange (mid) */
+  --color-signal-soft: #F39A6D;      /* signal orange on dark */
+  --color-signal-tint: #FBE9DF;      /* signal tint bg (light) */
+  --color-steel: #8D939B;            /* neutral technical grey */
+  --color-steel-2: #A7ADB4;          /* light technical grey */
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background: var(--bg-dark);
+  color: var(--ink);
+  font-family: var(--font-sans);
   overflow-x: hidden;
 }
 
@@ -22,89 +45,98 @@ body {
   width: 8px;
   height: 8px;
 }
-
 ::-webkit-scrollbar-track {
-  background: #0B0F19;
+  background: #141619;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: #1E293B;
+  background: #2C3138;
   border-radius: 4px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #3A4048;
 }
 
-/* Keyframe Animations */
+/* ── Motion ─────────────────────────────────────────────── */
 @keyframes radarSweep {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
-
-@keyframes pulseGlow {
-  0%, 100% {
-    opacity: 0.4;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.9;
-    transform: scale(1.05);
-  }
-}
-
 @keyframes floatSlow {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes fadeUp {
+  0% { opacity: 0; transform: translateY(18px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes beamPulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+@keyframes trace {
+  to { stroke-dashoffset: -24; }
+}
+@keyframes traceFlow {
+  to { stroke-dashoffset: -9; }
+}
+@keyframes radarPing {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(2.6); opacity: 0; }
 }
 
-.animate-radar {
-  animation: radarSweep 6s linear infinite;
-}
+.animate-radar { animation: radarSweep 6s linear infinite; }
+.animate-float { animation: floatSlow 5s ease-in-out infinite; }
+.animate-fade-up { animation: fadeUp 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.animate-beam { animation: beamPulse 2.4s ease-in-out infinite; }
+.animate-trace { animation: traceFlow 0.9s linear infinite; }
+.animate-radar-ping { animation: radarPing 2.4s ease-out infinite; transform-origin: center; transform-box: fill-box; }
 
-.animate-pulse-glow {
-  animation: pulseGlow 3s ease-in-out infinite;
-}
-
-.animate-float {
-  animation: floatSlow 5s ease-in-out infinite;
-}
-
-/* Glassmorphism utility */
+/* ── Surfaces ───────────────────────────────────────────── */
 .glass-panel {
-  background: rgba(15, 23, 42, 0.75);
+  background: var(--card-dark);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-dark);
 }
 
-.glass-panel-hover {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+.panel-light {
+  background: #FFFFFF;
+  border: 1px solid var(--color-mineral-3);
 }
 
-.glass-panel-hover:hover {
-  background: rgba(30, 41, 59, 0.85);
-  border-color: rgba(56, 189, 248, 0.3);
-  box-shadow: 0 10px 30px -10px rgba(56, 189, 248, 0.15);
+.console-panel {
+  background: var(--color-graphite-800);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6);
 }
 
-.gradient-text-cyan {
-  background: linear-gradient(135deg, #38BDF8 0%, #818CF8 50%, #C084FC 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.mono-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
 }
 
-.gradient-text-emerald {
-  background: linear-gradient(135deg, #34D399 0%, #38BDF8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.grid-paper {
+  background-image:
+    linear-gradient(rgba(21, 23, 26, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(21, 23, 26, 0.05) 1px, transparent 1px);
+  background-size: 32px 32px;
 }
 
+/* Signal accent used like a physical indicator: sharp, small, purposeful */
+.signal-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--color-signal);
+  box-shadow: 0 0 0 0 rgba(226, 102, 47, 0.5);
+  animation: beamPulse 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-radar, .animate-float, .animate-fade-up, .animate-beam,
+  .signal-indicator, .animate-pulse, .animate-ping, .animate-spin {
+    animation: none !important;
+  }
+}

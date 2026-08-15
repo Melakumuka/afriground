@@ -1,5 +1,4 @@
 import { getRequestConfig } from 'next-intl/server';
-import { notFound } from 'next/navigation';
 import fs from 'fs';
 import path from 'path';
 
@@ -7,7 +6,7 @@ const locales = ['en', 'zh'];
 
 export default getRequestConfig(async (params) => {
   const reqLocale = await params.requestLocale;
-  const locale = reqLocale || (params as any)?.locale || 'en';
+  const locale = reqLocale || 'en';
 
   const targetLocale = locales.includes(locale) ? locale : 'en';
 
@@ -19,7 +18,7 @@ export default getRequestConfig(async (params) => {
       locale: targetLocale,
       messages
     };
-  } catch (error) {
+  } catch {
     const fallbackPath = path.resolve(process.cwd(), `messages/en.json`);
     const fallbackContent = fs.readFileSync(fallbackPath, 'utf-8');
     return {
