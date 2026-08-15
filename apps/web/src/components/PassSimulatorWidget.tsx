@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useT } from "@/lib/useT";
 
 type SatellitePreset = {
   id: string;
@@ -12,11 +13,11 @@ type SatellitePreset = {
   downlinkRate: string;
 };
 
-const SATELLITES: SatellitePreset[] = [
-  { id: "aqua", name: "Aqua (NASA EOS)", norad: "27424", type: "Earth Observation LEO", altitude: "705 km", downlinkRate: "150 Mbps (X-band)" },
-  { id: "terra", name: "Terra (EOS AM-1)", norad: "25994", type: "Remote Sensing LEO", altitude: "705 km", downlinkRate: "150 Mbps (X-band)" },
-  { id: "sentinel2a", name: "Sentinel-2A (Copernicus)", norad: "40697", type: "Multispectral Imagery", altitude: "786 km", downlinkRate: "560 Mbps (Ka-band)" },
-  { id: "afrisat", name: "AfriSat-1 (CubeSat)", norad: "59001", type: "IoT Telemetry SmallSat", altitude: "530 km", downlinkRate: "9.6 Kbps (S-band)" },
+const SATELLITE_PRESETS: Omit<SatellitePreset, "name" | "type">[] = [
+  { id: "aqua", norad: "27424", altitude: "705 km", downlinkRate: "150 Mbps (X-band)" },
+  { id: "terra", norad: "25994", altitude: "705 km", downlinkRate: "150 Mbps (X-band)" },
+  { id: "sentinel2a", norad: "40697", altitude: "786 km", downlinkRate: "560 Mbps (Ka-band)" },
+  { id: "afrisat", norad: "59001", altitude: "530 km", downlinkRate: "9.6 Kbps (S-band)" },
 ];
 
 type PassResult = {
@@ -29,6 +30,18 @@ type PassResult = {
 };
 
 export default function PassSimulatorWidget({ currentLocale }: { currentLocale: string }) {
+  const { t } = useT("Simulator");
+  const satName = (id: string) =>
+    id === "aqua" ? t("st1_name", "Aqua（NASA EOS）", "Aqua (NASA EOS)")
+    : id === "terra" ? t("st2_name", "Terra（EOS AM-1）", "Terra (EOS AM-1)")
+    : id === "sentinel2a" ? t("st3_name", "Sentinel-2A（哥白尼计划）", "Sentinel-2A (Copernicus)")
+    : t("st4_name", "AfriSat-1（立方星）", "AfriSat-1 (CubeSat)");
+  const satType = (id: string) =>
+    id === "aqua" ? t("st1_type", "对地观测 LEO", "Earth Observation LEO")
+    : id === "terra" ? t("st2_type", "遥感 LEO", "Remote Sensing LEO")
+    : id === "sentinel2a" ? t("st3_type", "多光谱成像", "Multispectral Imagery")
+    : t("st4_type", "物联网遥测小卫星", "IoT Telemetry SmallSat");
+  const SATELLITES: SatellitePreset[] = SATELLITE_PRESETS.map((s) => ({ ...s, name: satName(s.id), type: satType(s.id) }));
   const [selectedSat, setSelectedSat] = useState<SatellitePreset>(SATELLITES[0]);
   const [stationId, setStationId] = useState("entoto");
   const [isCalculating, setIsCalculating] = useState(false);
@@ -76,11 +89,11 @@ export default function PassSimulatorWidget({ currentLocale }: { currentLocale: 
           
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-signal/10 text-signal-soft text-xs font-mono font-semibold mb-3 border border-signal/25">
-              ⚡ SGP4 Orbit Propagation Engine
+              {t("engine_badge", "⚡ SGP4 轨道传播引擎", "⚡ SGP4 Orbit Propagation Engine")}
             </div>
-            <h3 className="text-2xl font-bold text-white">Live Pass & Downlink Calculator</h3>
+            <h3 className="text-2xl font-bold text-white">{t("title", "实时过境与下传计算器", "Live Pass & Downlink Calculator")}</h3>
             <p className="text-sm text-graphite-mute mt-1">
-              Simulate orbital line-of-sight tracking and downlinked payload bandwidth for your satellite mission.
+              {t("subtitle", "为您的卫星任务模拟轨道视距跟踪与下传载荷带宽。", "Simulate orbital line-of-sight tracking and downlinked payload bandwidth for your satellite mission.")}
             </p>
           </div>
 
@@ -88,7 +101,7 @@ export default function PassSimulatorWidget({ currentLocale }: { currentLocale: 
             {/* Satellite Selector */}
             <div>
               <label className="block text-xs font-mono text-graphite-mute uppercase tracking-wider mb-2">
-                Select Target Satellite Mission
+                {t("select_sat", "选择目标卫星任务", "Select Target Satellite Mission")}
               </label>
               <select
                 value={selectedSat.id}
@@ -109,17 +122,17 @@ export default function PassSimulatorWidget({ currentLocale }: { currentLocale: 
             {/* Ground Station Selector */}
             <div>
               <label className="block text-xs font-mono text-graphite-mute uppercase tracking-wider mb-2">
-                Select Pan-African Ground Station Hub
+                {t("select_station", "选择泛非地面站枢纽", "Select Pan-African Ground Station Hub")}
               </label>
               <select
                 value={stationId}
                 onChange={(e) => setStationId(e.target.value)}
                 className="w-full p-3.5 bg-graphite-700 border border-graphite-500 rounded-sm text-white text-sm font-medium focus:ring-2 focus:ring-signal outline-none transition-all cursor-pointer"
               >
-                <option value="entoto">Entoto Space Observatory (Ethiopia) — 12.0m Antenna</option>
-                <option value="hart">Hartebeesthoek Station (South Africa) — 9.3m Ka/X</option>
-                <option value="malindi">Malindi Space Center (Kenya) — 10.0m S/X</option>
-                <option value="abuja">Abuja Space Hub (Nigeria) — 7.3m S/X</option>
+                <option value="entoto">{t("station_entoto", "恩托托航天观测站（埃塞俄比亚）— 12.0 米天线", "Entoto Space Observatory (Ethiopia) — 12.0m Antenna")}</option>
+                <option value="hart">{t("station_hart", "哈特比斯霍克站（南非）— 9.3 米 Ka/X", "Hartebeesthoek Station (South Africa) — 9.3m Ka/X")}</option>
+                <option value="malindi">{t("station_malindi", "马林迪航天中心（肯尼亚）— 10.0 米 S/X", "Malindi Space Center (Kenya) — 10.0m S/X")}</option>
+                <option value="abuja">{t("station_abuja", "阿布贾航天枢纽（尼日利亚）— 7.3 米 S/X", "Abuja Space Hub (Nigeria) — 7.3m S/X")}</option>
               </select>
             </div>
           </div>
@@ -132,11 +145,11 @@ export default function PassSimulatorWidget({ currentLocale }: { currentLocale: 
             {isCalculating ? (
               <>
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>Propagating TLE & Calculating Visibility...</span>
+                <span>{t("propagating", "正在传播 TLE 并计算可见性...", "Propagating TLE & Calculating Visibility...")}</span>
               </>
             ) : (
               <>
-                <span>🚀 Predict Next Pass & Quote</span>
+                <span>{t("predict", "🚀 预测下次过境并报价", "🚀 Predict Next Pass & Quote")}</span>
               </>
             )}
           </button>
@@ -149,12 +162,12 @@ export default function PassSimulatorWidget({ currentLocale }: { currentLocale: 
           <div className="flex justify-between items-center border-b border-graphite-600 pb-4">
             <div>
               <span className="text-[10px] font-mono text-signal-soft uppercase tracking-widest">
-                Simulation Output
+                {t("output", "模拟输出", "Simulation Output")}
               </span>
               <h4 className="text-lg font-bold text-white mt-0.5">{selectedSat.name}</h4>
             </div>
             <div className="text-right">
-              <span className="text-[10px] font-mono text-graphite-mute block uppercase">Signal Confidence</span>
+              <span className="text-[10px] font-mono text-graphite-mute block uppercase">{t("signal_confidence", "信号置信度", "Signal Confidence")}</span>
               <span className="text-green-soft font-mono font-bold text-sm">{passResult.signalLockProb}</span>
             </div>
           </div>
@@ -163,25 +176,25 @@ export default function PassSimulatorWidget({ currentLocale }: { currentLocale: 
           <div className="grid grid-cols-2 gap-4 font-mono">
             
             <div className="p-4 bg-graphite-800 rounded-sm border border-graphite-600">
-              <span className="text-graphite-mute text-[11px] block uppercase">Next Pass Start (UTC)</span>
+              <span className="text-graphite-mute text-[11px] block uppercase">{t("next_pass", "下次过境开始（UTC）", "Next Pass Start (UTC)")}</span>
               <span className="text-signal-soft font-bold text-xs mt-1 block">
                 {new Date(passResult.nextPassUTC).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })} UTC
               </span>
             </div>
 
             <div className="p-4 bg-graphite-800 rounded-sm border border-graphite-600">
-              <span className="text-graphite-mute text-[11px] block uppercase">Pass Window Duration</span>
-              <span className="text-white font-bold text-sm mt-1 block">{passResult.passDurationMin} minutes</span>
+              <span className="text-graphite-mute text-[11px] block uppercase">{t("duration", "过境窗口时长", "Pass Window Duration")}</span>
+              <span className="text-white font-bold text-sm mt-1 block">{passResult.passDurationMin} {t("minutes", "分钟", "minutes")}</span>
             </div>
 
             <div className="p-4 bg-graphite-800 rounded-sm border border-graphite-600">
-              <span className="text-graphite-mute text-[11px] block uppercase">Max Elevation Angle</span>
+              <span className="text-graphite-mute text-[11px] block uppercase">{t("max_el", "最大仰角", "Max Elevation Angle")}</span>
               <span className="text-steel-2 font-bold text-sm mt-1 block">{passResult.maxElevationDeg}°</span>
             </div>
 
             <div className="p-4 bg-graphite-800 rounded-sm border border-graphite-600">
-              <span className="text-graphite-mute text-[11px] block uppercase">Est. Downlink Data</span>
-              <span className="text-green-soft font-bold text-sm mt-1 block">{passResult.estimatedDataGB} GB Payload</span>
+              <span className="text-graphite-mute text-[11px] block uppercase">{t("est_data", "预计下传数据", "Est. Downlink Data")}</span>
+              <span className="text-green-soft font-bold text-sm mt-1 block">{passResult.estimatedDataGB} {t("payload", "GB 载荷", "GB Payload")}</span>
             </div>
 
           </div>
@@ -189,12 +202,12 @@ export default function PassSimulatorWidget({ currentLocale }: { currentLocale: 
           {/* Commercial Pricing Breakdown Box */}
           <div className="p-4 rounded-sm bg-gradient-to-r bg-graphite-700 border border-signal/30 flex justify-between items-center">
             <div>
-              <span className="text-graphite-mute text-xs block font-mono">Dynamic GSaaS Pricing</span>
-              <span className="text-xs text-steel-2 font-medium">Standard $15.00 / minute tier</span>
+              <span className="text-graphite-mute text-xs block font-mono">{t("pricing", "动态 GSaaS 定价", "Dynamic GSaaS Pricing")}</span>
+              <span className="text-xs text-steel-2 font-medium">{t("standard", "标准 $15.00 / 分钟档", "Standard $15.00 / minute tier")}</span>
             </div>
             <div className="text-right">
               <span className="text-2xl font-black text-white font-mono">${passResult.costUSD}</span>
-              <span className="text-[10px] text-signal-soft block font-mono">Instant Reservation</span>
+              <span className="text-[10px] text-signal-soft block font-mono">{t("instant", "即时预订", "Instant Reservation")}</span>
             </div>
           </div>
 
@@ -203,7 +216,7 @@ export default function PassSimulatorWidget({ currentLocale }: { currentLocale: 
             href={`/${currentLocale}/booking`}
             className="w-full py-3 rounded-sm bg-graphite-600 hover:bg-graphite-500 text-signal-soft hover:text-signal-soft font-semibold text-xs font-mono uppercase tracking-wider transition-colors flex items-center justify-center gap-2"
           >
-            <span>Proceed to Full Booking Wizard</span>
+            <span>{t("proceed", "进入完整预订向导", "Proceed to Full Booking Wizard")}</span>
             <span>→</span>
           </Link>
 

@@ -3,8 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { STATIONS, type GroundStationNode } from "@/data/stations";
+import { useT } from "@/lib/useT";
 
 export default function StationNetworkMap({ currentLocale }: { currentLocale: string }) {
+  const { t } = useT("StationMap");
   const [selectedStation, setSelectedStation] = useState<GroundStationNode>(STATIONS[0]);
 
   return (
@@ -51,13 +53,13 @@ export default function StationNetworkMap({ currentLocale }: { currentLocale: st
           <div className="flex justify-between items-center z-10">
             <div>
               <span className="text-xs font-mono text-signal-soft uppercase tracking-wider">
-                Interactive Pan-African Node Map
+                {t("interactive", "交互式泛非节点地图", "Interactive Pan-African Node Map")}
               </span>
-              <h3 className="text-lg font-bold text-white">Live Ground Antenna Telemetry</h3>
+              <h3 className="text-lg font-bold text-white">{t("live_title", "实时地面天线遥测", "Live Ground Antenna Telemetry")}</h3>
             </div>
             <div className="px-3 py-1 bg-green/15 border border-green/30 rounded-full text-[11px] font-mono text-green-soft flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-green-soft animate-ping" />
-              6 Active Nodes Highlighted
+              {t("nodes_active", "已高亮 6 个活跃节点", "6 Active Nodes Highlighted")}
             </div>
           </div>
 
@@ -104,8 +106,8 @@ export default function StationNetworkMap({ currentLocale }: { currentLocale: st
           </div>
 
           <div className="flex justify-between items-center text-xs text-graphite-mute font-mono z-10">
-            <span>Click any node pin to view station specs</span>
-            <span>Coverage: 35°N to 35°S</span>
+            <span>{t("click_hint", "点击任意节点以查看站点规格", "Click any node pin to view station specs")}</span>
+            <span>{t("coverage", "覆盖范围：北纬 35° 至南纬 35°", "Coverage: 35°N to 35°S")}</span>
           </div>
 
         </div>
@@ -118,7 +120,7 @@ export default function StationNetworkMap({ currentLocale }: { currentLocale: st
             <div className="flex justify-between items-start border-b border-graphite-600 pb-4">
               <div>
                 <span className="text-xs font-mono text-signal-soft uppercase tracking-widest">
-                  Station Profile
+                  {t("profile", "站点档案", "Station Profile")}
                 </span>
                 <h3 className="text-xl font-bold text-white mt-1">{selectedStation.name}</h3>
                 <p className="text-xs text-graphite-mute mt-0.5">{selectedStation.country}</p>
@@ -136,19 +138,19 @@ export default function StationNetworkMap({ currentLocale }: { currentLocale: st
             {/* Spec Metrics Grid */}
             <div className="grid grid-cols-2 gap-3 text-xs font-mono">
               <div className="p-3 bg-graphite-800/80 rounded-sm border border-graphite-600">
-                <span className="text-graphite-mute block text-[10px] uppercase">Antenna Size</span>
+                <span className="text-graphite-mute block text-[10px] uppercase">{t("antenna_size", "天线尺寸", "Antenna Size")}</span>
                 <span className="text-white font-bold text-sm">{selectedStation.dishSize}</span>
               </div>
               <div className="p-3 bg-graphite-800/80 rounded-sm border border-graphite-600">
-                <span className="text-graphite-mute block text-[10px] uppercase">G/T Figure of Merit</span>
+                <span className="text-graphite-mute block text-[10px] uppercase">{t("gt_figure", "G/T 品质因数", "G/T Figure of Merit")}</span>
                 <span className="text-signal-soft font-bold text-sm">{selectedStation.gtPerformance}</span>
               </div>
               <div className="p-3 bg-graphite-800/80 rounded-sm border border-graphite-600">
-                <span className="text-graphite-mute block text-[10px] uppercase">Min Elevation</span>
+                <span className="text-graphite-mute block text-[10px] uppercase">{t("min_elevation", "最低仰角", "Min Elevation")}</span>
                 <span className="text-white font-bold text-sm">{selectedStation.minElevation}</span>
               </div>
               <div className="p-3 bg-graphite-800/80 rounded-sm border border-graphite-600">
-                <span className="text-graphite-mute block text-[10px] uppercase">Coordinates</span>
+                <span className="text-graphite-mute block text-[10px] uppercase">{t("coordinates", "坐标", "Coordinates")}</span>
                 <span className="text-white font-bold text-sm">
                   {selectedStation.lat.toFixed(2)}°, {selectedStation.lng.toFixed(2)}°
                 </span>
@@ -158,7 +160,7 @@ export default function StationNetworkMap({ currentLocale }: { currentLocale: st
             {/* Frequency Bands Badges */}
             <div>
               <span className="text-xs font-mono text-graphite-mute uppercase tracking-wider block mb-2">
-                Supported Frequency Bands
+                {t("bands", "支持频率波段", "Supported Frequency Bands")}
               </span>
               <div className="flex flex-wrap gap-2">
                 {selectedStation.bands.map((b) => (
@@ -180,13 +182,13 @@ export default function StationNetworkMap({ currentLocale }: { currentLocale: st
               href={`/${currentLocale}/booking`}
               className="flex-1 py-3 text-center rounded-sm bg-gradient-to-r bg-signal hover:bg-signal-soft text-white font-semibold text-sm shadow-lg shadow-black/40 transition-all hover:scale-[1.02]"
             >
-              Book Pass on {selectedStation.name.split(" ")[0]}
+              {t("book_pass", "预订 {station} 过境", "Book Pass on {station}").replace("{station}", selectedStation.name.split(" ")[0])}
             </Link>
             <Link
               href={`/${currentLocale}/station`}
               className="px-4 py-3 rounded-sm bg-graphite-600 hover:bg-graphite-500 text-ink text-sm font-semibold transition-colors"
             >
-              Telemetry Stream
+              {t("telemetry_stream", "遥测数据流", "Telemetry Stream")}
             </Link>
           </div>
 

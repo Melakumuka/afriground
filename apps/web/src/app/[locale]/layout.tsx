@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Space_Grotesk, IBM_Plex_Mono } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
+import { getMessages, getTranslations } from 'next-intl/server';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -18,10 +18,18 @@ const ibmPlexMono = IBM_Plex_Mono({
   weight: ['400', '500', '600'],
 });
 
-export const metadata: Metadata = {
-  title: 'AfriGround GSaaS — Africa\'s Premier Ground Station Network',
-  description: "Federated Ground Station as a Service platform for satellite pass scheduling, TT&C, and Earth observation downlinks across Africa.",
-};
+export async function generateMetadata({
+  params
+}: {
+  params: Promise<{locale: string}>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Meta" });
+  return {
+    title: t("title"),
+    description: t("description"),
+  };
+}
 
 export default async function RootLayout({
   children,

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { STATIONS } from "@/data/stations";
+import { useT } from "@/lib/useT";
 
 type SatSearch = { norad: string; name: string; epochUtc: string };
 
@@ -37,9 +38,11 @@ const SIM_FALLBACK_PASSES: PassInfo[] = [
   { aosIso: "2026-08-15T04:20:00Z", losIso: "2026-08-15T04:31:20Z", durationMin: 11.3, maxElevationDeg: 88.9, aosAzimuthDeg: 331.4 },
 ];
 
-const STEPS = ["Satellite", "Passes", "Quote & Book"];
-
 export default function BookingWizard() {
+  const { t, isZh, ns } = useT("Booking");
+  const zhSteps = ["卫星", "过境", "报价与预订"];
+  const enSteps = ["Satellite", "Passes", "Quote & Book"];
+  const STEPS: string[] = Array.isArray(ns.steps) ? (ns.steps as string[]) : isZh ? zhSteps : enSteps;
   const [step, setStep] = useState(1);
 
   // Step 1 · catalog search
@@ -87,7 +90,7 @@ export default function BookingWizard() {
       return list;
     } catch {
       setResults([]);
-      setSearchError("GP FEED UNREACHABLE");
+      setSearchError(t("err_feed", "星历源不可达", "GP FEED UNREACHABLE"));
       return [];
     } finally {
       setSearching(false);
@@ -110,7 +113,7 @@ export default function BookingWizard() {
   const handleManualLookup = async () => {
     const n = noradManual.trim();
     if (!/^\d{1,9}$/.test(n)) {
-      setSearchError("NORAD ID MUST BE 1–9 DIGITS");
+      setSearchError(t("err_norad", "NORAD 编号必须为 1–9 位数字", "NORAD ID MUST BE 1–9 DIGITS"));
       return;
     }
     const list = await runSearch(n);
@@ -143,16 +146,16 @@ export default function BookingWizard() {
       );
       const data = (await res.json()) as PassesResponse;
       if (data.error || !data.passes) {
-        setPredError(data.error ?? "ENGINE ERROR");
+        setPredError(data.error ?? t("err_engine", "引擎错误", "ENGINE ERROR"));
       } else {
         setPasses(data.passes);
         setPassMeta(data.satellite ?? null);
         setCatalogSource(data.catalog ?? null);
-        if (data.passes.length === 0) setPredError("NO PASSES IN SELECTED WINDOW");
+        if (data.passes.length === 0) setPredError(t("err_no_passes", "所选窗口内无过境", "NO PASSES IN SELECTED WINDOW"));
       }
       setStep(2);
     } catch {
-      setPredError("SGP4 ENGINE UNREACHABLE");
+      setPredError(t("err_sgp4", "SGP4 引擎不可达", "SGP4 ENGINE UNREACHABLE"));
       setStep(2);
     }
     setPredicting(false);
@@ -173,7 +176,11 @@ export default function BookingWizard() {
       setQuote({
         total: cost,
         breakdown: [
-          { desc: `Pass Duration (${pass.durationMin.toFixed(1)} min)`, cost },
+          {
+            desc: t("pass_duration_desc", "过境时长（{min} 分钟）", "Pass Duration ({min} min)")
+              .replace("{min}", pass.durationMin.toFixed(1)),
+            cost,
+          },
         ],
       });
       setIsChecking(false);
@@ -198,21 +205,20 @@ export default function BookingWizard() {
         <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-14 py-14">
           <span className="mono-label text-signal inline-flex items-center gap-3">
             <span className="w-8 h-px bg-signal" />
-            OPS-MODULE 01 · PASS SCHEDULING
+            {t("module", "运营模块 01 · 过境调度", "OPS-MODULE 01 · PASS SCHEDULING")}
           </span>
           <div className="mt-5 flex flex-wrap items-end justify-between gap-6">
             <div>
               <h1 className="font-display font-bold text-4xl sm:text-5xl tracking-tight text-white">
-                Schedule a Satellite Pass
+                {t("title", "预订卫星过境", "Schedule a Satellite Pass")}
               </h1>
               <p className="mt-4 text-steel-2 leading-relaxed max-w-xl">
-                Search the live NORAD active catalog, pick a ground station, and get
-                SGP4-propagated pass predictions for your vehicle.
+                {t("subtitle", "检索 NORAD 实时活跃星历目录，选择地面站，为您的航天器获取基于 SGP4 传播的过境预报。", "Search the live NORAD active catalog, pick a ground station, and get SGP4-propagated pass predictions for your vehicle.")}
               </p>
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 border border-green/50">
               <span className="w-1.5 h-1.5 rounded-full bg-green-soft animate-pulse" />
-              <span className="mono-label text-green-soft">CelesTrak GP · Live Catalog</span>
+              <span className="mono-label text-green-soft">{t("live_badge", "CelesTrak GP · 实时星历目录", "CelesTrak GP · Live Catalog")}</span>
             </div>
           </div>
         </div>
@@ -252,15 +258,15 @@ export default function BookingWizard() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
                   {/* Left: satellite search */}
                   <div className="lg:col-span-7 space-y-5">
-                    <span className="mono-label text-signal-soft">01 · IDENTIFY VEHICLE</span>
+                    <span className="mono-label text-signal-soft">{t("identify", "01 · 选择航天器", "01 · IDENTIFY VEHICLE")}</span>
 
                     <div>
-                      <label className="mono-label text-steel-2 block mb-2">SEARCH ACTIVE CATALOG BY NAME</label>
+                      <label className="mono-label text-steel-2 block mb-2">{t("search_label", "按名称搜索活跃星历目录", "SEARCH ACTIVE CATALOG BY NAME")}</label>
                       <input
                         type="text"
                         value={query}
                         onChange={(e) => handleQueryChange(e.target.value)}
-                        placeholder="e.g. Sentinel, Aqua, ISS, Starlink..."
+                        placeholder={t("search_placeholder", "例如 Sentinel、Aqua、ISS、Starlink...", "e.g. Sentinel, Aqua, ISS, Starlink...")}
                         className="w-full px-4 py-3 bg-graphite border border-graphite-600 text-ink rounded-sm focus:border-signal/70 focus:outline-none"
                       />
                     </div>
@@ -268,7 +274,7 @@ export default function BookingWizard() {
                     {searching && (
                       <p className="mono-label text-graphite-mute flex items-center gap-3">
                         <span className="signal-indicator" />
-                        QUERYING NORAD CATALOG...
+                        {t("querying", "正在查询 NORAD 星历目录...", "QUERYING NORAD CATALOG...")}
                       </p>
                     )}
 
@@ -277,7 +283,7 @@ export default function BookingWizard() {
                         {catalogSource === "offline" && (
                           <div className="px-4 py-2 bg-signal/10 border-b border-signal/30">
                             <span className="font-mono text-[10px] text-signal-soft uppercase tracking-wider">
-                              OFFLINE FALLBACK CATALOG · 15 VEHICLES
+                              {t("offline_banner", "离线备用星历目录 · 15 颗卫星", "OFFLINE FALLBACK CATALOG · 15 VEHICLES")}
                             </span>
                           </div>
                         )}
@@ -297,7 +303,7 @@ export default function BookingWizard() {
                     )}
 
                     {!searching && results.length === 0 && query.trim().length >= 2 && !searchError && (
-                      <p className="mono-label text-graphite-mute">NO MATCHES IN ACTIVE CATALOG</p>
+                      <p className="mono-label text-graphite-mute">{t("no_matches", "活跃星历目录中无匹配结果", "NO MATCHES IN ACTIVE CATALOG")}</p>
                     )}
 
                     {searchError && (
@@ -306,18 +312,18 @@ export default function BookingWizard() {
 
                     <div className="flex items-center gap-3">
                       <div className="flex-1 h-px bg-graphite-600" />
-                      <span className="mono-label text-graphite-mute">OR</span>
+                      <span className="mono-label text-graphite-mute">{t("or", "或", "OR")}</span>
                       <div className="flex-1 h-px bg-graphite-600" />
                     </div>
 
                     <div className="flex gap-3 items-end">
                       <div className="flex-1">
-                        <label className="mono-label text-steel-2 block mb-2">NORAD CATALOG ID</label>
+                        <label className="mono-label text-steel-2 block mb-2">{t("norad_label", "NORAD 星历编号", "NORAD CATALOG ID")}</label>
                         <input
                           type="number"
                           value={noradManual}
                           onChange={(e) => setNoradManual(e.target.value)}
-                          placeholder="e.g. 25544 (ISS)"
+                          placeholder={t("norad_placeholder", "例如 25544（国际空间站）", "e.g. 25544 (ISS)")}
                           className="w-full px-4 py-3 bg-graphite border border-graphite-600 text-ink rounded-sm focus:border-signal/70 focus:outline-none"
                         />
                       </div>
@@ -325,7 +331,7 @@ export default function BookingWizard() {
                         onClick={handleManualLookup}
                         className="px-5 py-3 border border-graphite-600 text-steel-2 hover:text-white hover:border-steel font-semibold transition-colors"
                       >
-                        Lookup
+                        {t("lookup", "查询", "Lookup")}
                       </button>
                     </div>
 
@@ -333,17 +339,19 @@ export default function BookingWizard() {
                       <div className="flex flex-wrap items-center gap-3 border border-signal/40 bg-signal/10 px-4 py-3">
                         <span className="font-display font-semibold text-white text-sm">{sat.name}</span>
                         <span className="font-mono text-xs text-signal-soft">NORAD {sat.norad}</span>
-                        <span className="font-mono text-[10px] text-graphite-mute">TLE EPOCH · {sat.epochUtc}</span>
+                        <span className="font-mono text-[10px] text-graphite-mute">
+                          {t("tle_epoch", "TLE 历元 · ", "TLE EPOCH · ")}{sat.epochUtc}
+                        </span>
                       </div>
                     )}
                   </div>
 
                   {/* Right: station + config */}
                   <div className="lg:col-span-5 space-y-5">
-                    <span className="mono-label text-signal-soft">02 · TARGET STATION</span>
+                    <span className="mono-label text-signal-soft">{t("station_section", "02 · 目标地面站", "02 · TARGET STATION")}</span>
 
                     <div>
-                      <label className="mono-label text-steel-2 block mb-2">GROUND STATION</label>
+                      <label className="mono-label text-steel-2 block mb-2">{t("station_label", "地面站", "GROUND STATION")}</label>
                       <select
                         value={stationId}
                         onChange={(e) => setStationId(e.target.value)}
@@ -360,18 +368,18 @@ export default function BookingWizard() {
                     {station && (
                       <div className="border border-graphite-600 bg-graphite px-4 py-3 space-y-1.5 font-mono text-xs text-steel-2">
                         <div className="flex justify-between">
-                          <span className="text-graphite-mute">POSITION</span>
+                          <span className="text-graphite-mute">{t("position", "坐标", "POSITION")}</span>
                           <span>
                             {Math.abs(station.lat).toFixed(3)}°{station.lat >= 0 ? "N" : "S"} ·{" "}
                             {Math.abs(station.lng).toFixed(3)}°{station.lng < 0 ? "W" : "E"}
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-graphite-mute">BANDS</span>
+                          <span className="text-graphite-mute">{t("bands", "频段", "BANDS")}</span>
                           <span>{station.bands.join(" · ")}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-graphite-mute">DISH</span>
+                          <span className="text-graphite-mute">{t("dish", "天线口径", "DISH")}</span>
                           <span>{station.dishSize}</span>
                         </div>
                       </div>
@@ -379,7 +387,7 @@ export default function BookingWizard() {
 
                     <div className="grid grid-cols-2 gap-5">
                       <div>
-                        <label className="mono-label text-steel-2 block mb-2">ELEVATION MASK</label>
+                        <label className="mono-label text-steel-2 block mb-2">{t("mask_label", "仰角掩模", "ELEVATION MASK")}</label>
                         <select
                           value={elevation}
                           onChange={(e) => setElevation(Number(e.target.value))}
@@ -392,15 +400,15 @@ export default function BookingWizard() {
                         </select>
                       </div>
                       <div>
-                        <label className="mono-label text-steel-2 block mb-2">LOOKAHEAD WINDOW</label>
+                        <label className="mono-label text-steel-2 block mb-2">{t("window_label", "预报时间窗口", "LOOKAHEAD WINDOW")}</label>
                         <select
                           value={days}
                           onChange={(e) => setDays(Number(e.target.value))}
                           className="w-full px-4 py-3 bg-graphite border border-graphite-600 text-ink rounded-sm focus:border-signal/70 focus:outline-none"
                         >
-                          <option value={1}>24 hours</option>
-                          <option value={2}>48 hours</option>
-                          <option value={3}>72 hours</option>
+                          <option value={1}>{t("h24", "24 小时", "24 hours")}</option>
+                          <option value={2}>{t("h48", "48 小时", "48 hours")}</option>
+                          <option value={3}>{t("h72", "72 小时", "72 hours")}</option>
                         </select>
                       </div>
                     </div>
@@ -412,7 +420,7 @@ export default function BookingWizard() {
                   disabled={!sat || predicting}
                   className="w-full py-3.5 bg-signal hover:bg-signal-soft text-graphite font-semibold rounded-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  {predicting ? "Propagating SGP4 ..." : "Predict Passes"}
+                  {predicting ? t("predicting", "正在传播 SGP4 ...", "Propagating SGP4 ...") : t("predict", "预测过境", "Predict Passes")}
                 </button>
               </div>
             )}
@@ -422,7 +430,7 @@ export default function BookingWizard() {
               <div className="space-y-8">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="flex flex-wrap items-center gap-3">
-                    <span className="mono-label text-signal-soft">AVAILABLE PASSES</span>
+                    <span className="mono-label text-signal-soft">{t("available", "可用过境", "AVAILABLE PASSES")}</span>
                     {passMeta && (
                       <>
                         <span className="font-mono text-xs text-steel-2">
@@ -436,12 +444,12 @@ export default function BookingWizard() {
                   </div>
                   {usingFallback && (
                     <span className="px-2.5 py-1 border border-signal/50 text-signal-soft font-mono text-[10px]">
-                      SIM FALLBACK · NOT LIVE
+                      {t("sim_fallback", "模拟回退 · 非实时", "SIM FALLBACK · NOT LIVE")}
                     </span>
                   )}
                   {!usingFallback && catalogSource === "offline" && (
                     <span className="px-2.5 py-1 border border-signal/50 text-signal-soft font-mono text-[10px]">
-                      OFFLINE GP · FALLBACK TLEs
+                      {t("offline_gp", "离线星历 · 备用 TLE", "OFFLINE GP · FALLBACK TLEs")}
                     </span>
                   )}
                 </div>
@@ -453,7 +461,7 @@ export default function BookingWizard() {
                       onClick={handleUseSimulated}
                       className="mt-3 px-4 py-2 border border-signal/50 text-signal-soft hover:bg-signal/10 font-mono text-xs"
                     >
-                      LOAD SIMULATED PASSES INSTEAD
+                      {t("load_sim", "改为载入模拟过境", "LOAD SIMULATED PASSES INSTEAD")}
                     </button>
                   </div>
                 )}
@@ -477,26 +485,26 @@ export default function BookingWizard() {
                             </span>
                             <div>
                               <div className="font-display font-semibold text-white">
-                                {new Date(p.aosIso).toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" })}{" "}
-                                {new Date(p.aosIso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })} UTC
+                                {new Date(p.aosIso).toLocaleDateString(isZh ? "zh-CN" : "en-US", { weekday: "short", month: "short", day: "numeric" })}{" "}
+                                {new Date(p.aosIso).toLocaleTimeString(isZh ? "zh-CN" : "en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" })} UTC
                               </div>
                               <div className="font-mono text-xs text-graphite-mute mt-0.5">
-                                LOS {new Date(p.losIso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} UTC
+                                {t("los", "结束", "LOS")} {new Date(p.losIso).toLocaleTimeString(isZh ? "zh-CN" : "en-US", { hour: "2-digit", minute: "2-digit" })} UTC
                               </div>
                             </div>
                           </div>
                           <div className="flex items-center gap-5 font-mono text-sm">
                             <div className="text-right">
-                              <div className="text-steel-2">{p.durationMin.toFixed(1)} min</div>
-                              <div className="text-[10px] text-graphite-mute uppercase tracking-wider">Duration</div>
+                              <div className="text-steel-2">{p.durationMin.toFixed(1)} {t("min", "分钟", "min")}</div>
+                              <div className="text-[10px] text-graphite-mute uppercase tracking-wider">{t("duration", "持续时长", "Duration")}</div>
                             </div>
                             <div className="text-right">
                               <div className="text-green-soft">{p.maxElevationDeg.toFixed(1)}°</div>
-                              <div className="text-[10px] text-graphite-mute uppercase tracking-wider">Max El</div>
+                              <div className="text-[10px] text-graphite-mute uppercase tracking-wider">{t("max_el", "最大仰角", "Max El")}</div>
                             </div>
                             <div className="text-right hidden sm:block">
                               <div className="text-signal-soft">{p.aosAzimuthDeg.toFixed(0)}°</div>
-                              <div className="text-[10px] text-graphite-mute uppercase tracking-wider">AOS Az</div>
+                              <div className="text-[10px] text-graphite-mute uppercase tracking-wider">{t("aos_az", "捕获方位角", "AOS Az")}</div>
                             </div>
                           </div>
                         </div>
@@ -510,14 +518,14 @@ export default function BookingWizard() {
                     onClick={() => setStep(1)}
                     className="px-6 py-3.5 border border-graphite-600 font-medium text-steel-2 hover:text-white hover:border-steel transition-colors"
                   >
-                    Back
+                    {t("back", "返回", "Back")}
                   </button>
                   <button
                     onClick={startQuote}
                     disabled={selectedPassIndex === null}
                     className="flex-1 py-3.5 bg-signal hover:bg-signal-soft text-graphite font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
-                    Review & Request Quote
+                    {t("review_quote", "查看并申请报价", "Review & Request Quote")}
                   </button>
                 </div>
               </div>
@@ -526,13 +534,13 @@ export default function BookingWizard() {
             {/* STEP 3 · QUOTE & BOOK */}
             {step === 3 && quote && selectedPassIndex !== null && passes && (
               <div className="space-y-8">
-                <span className="mono-label text-signal-soft">REVIEW & REQUEST QUOTE</span>
+                <span className="mono-label text-signal-soft">{t("review_quote", "查看并申请报价", "REVIEW & REQUEST QUOTE")}</span>
 
                 <div className="p-6 sm:p-8 border border-graphite-600 bg-graphite">
-                  <span className="mono-label text-steel-2">SELECTED PASS</span>
+                  <span className="mono-label text-steel-2">{t("selected_pass", "已选过境", "SELECTED PASS")}</span>
                   <p className="mt-3 font-mono text-xs text-graphite-mute">
-                    {passMeta?.name ?? "Vehicle"} · NORAD {passMeta?.norad ?? "—"} · AOS{" "}
-                    {new Date(passes[selectedPassIndex].aosIso).toLocaleString()}
+                    {passMeta?.name ?? t("vehicle", "航天器", "Vehicle")} · NORAD {passMeta?.norad ?? "—"} · {t("aos", "捕获", "AOS")}{" "}
+                    {new Date(passes[selectedPassIndex].aosIso).toLocaleString(isZh ? "zh-CN" : "en-US")}
                   </p>
 
                   <div className="mt-6 space-y-3 mb-6">
@@ -544,8 +552,7 @@ export default function BookingWizard() {
                   </div>
 
                   <p className="text-xs text-graphite-mute font-mono">
-                    No payment is taken at this stage — a formal quote for this pass will be
-                    emailed to you by the sales desk.
+                    {t("no_payment", "本阶段不收取任何费用——本次过境的正式报价将由销售台通过电子邮件发送给您。", "No payment is taken at this stage — a formal quote for this pass will be emailed to you by the sales desk.")}
                   </p>
                 </div>
 
@@ -554,13 +561,13 @@ export default function BookingWizard() {
                     onClick={() => setStep(2)}
                     className="px-6 py-3.5 border border-graphite-600 font-medium text-steel-2 hover:text-white hover:border-steel transition-colors"
                   >
-                    Back
+                    {t("back", "返回", "Back")}
                   </button>
                   <button
                     onClick={handleConfirm}
                     className="flex-1 py-3.5 bg-green hover:bg-green-soft text-graphite font-semibold transition-colors"
                   >
-                    {isChecking ? "Requesting..." : "Request a Quote"}
+                    {isChecking ? t("requesting", "正在请求...", "Requesting...") : t("request_quote", "申请报价", "Request a Quote")}
                   </button>
                 </div>
               </div>
@@ -572,10 +579,9 @@ export default function BookingWizard() {
                 <div className="mx-auto w-20 h-20 bg-green/15 border border-green/50 rounded-full flex items-center justify-center mb-6">
                   <span className="text-3xl font-mono font-bold text-green-soft">✓</span>
                 </div>
-                <h2 className="font-display font-bold text-3xl text-white mb-3">Quote Request Received</h2>
+                <h2 className="font-display font-bold text-3xl text-white mb-3">{t("success_title", "报价申请已提交", "Quote Request Received")}</h2>
                 <p className="text-steel-2 mb-10 max-w-md mx-auto leading-relaxed">
-                  Your request has been received by the sales desk. A formal quote for the
-                  selected pass will be sent to you shortly.
+                  {t("success_body", "您的申请已被销售台接收。所选过境的正式报价将很快发送给您。", "Your request has been received by the sales desk. A formal quote for the selected pass will be sent to you shortly.")}
                 </p>
                 <button
                   onClick={() => {
@@ -586,9 +592,9 @@ export default function BookingWizard() {
                     setStep(1);
                   }}
                   className="mono-label text-signal-soft hover:text-signal transition-colors"
-                >
-                  START ANOTHER REQUEST →
-                </button>
+                  >
+                    {t("start_another", "再发起一次申请 →", "START ANOTHER REQUEST →")}
+                  </button>
               </div>
             )}
           </div>

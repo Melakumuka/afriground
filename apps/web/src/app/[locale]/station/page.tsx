@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useT } from "@/lib/useT";
 
 // Types matching our backend
 type StationRisk = {
@@ -22,6 +23,7 @@ type TelemetryData = {
 };
 
 export default function StationHealthDashboard() {
+  const { t } = useT("Station");
   // Mock data for MVP UI
   const [risk] = useState<StationRisk>({
     station_name: "Entoto Observatory · Antenna A (12m)",
@@ -82,7 +84,7 @@ export default function StationHealthDashboard() {
         <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-14 py-14">
           <span className="mono-label text-signal inline-flex items-center gap-3">
             <span className="w-8 h-px bg-signal" />
-            OPS-MODULE 02 · LIVE TELEMETRY
+            {t("module", "运营模块 02 · 实时遥测", "OPS-MODULE 02 · LIVE TELEMETRY")}
           </span>
           <div className="mt-5 flex flex-wrap items-end justify-between gap-6">
             <div>
@@ -90,7 +92,7 @@ export default function StationHealthDashboard() {
                 {risk.station_name}
               </h1>
               <p className="mt-4 text-steel-2 leading-relaxed max-w-lg">
-                Real-time RF, antenna and environmental telemetry with risk analysis.
+                {t("subtitle", "实时射频、天线与环境遥测数据，并附带风险分析。", "Real-time RF, antenna and environmental telemetry with risk analysis.")}
               </p>
             </div>
             <div
@@ -111,7 +113,7 @@ export default function StationHealthDashboard() {
                 />
               </span>
               <span className={`mono-label ${isConnected ? "text-green-soft" : "text-signal-soft"}`}>
-                {isConnected ? "WS Feed · Live" : "Feed · Offline"}
+                {isConnected ? t("feed_live", "WS 数据流 · 实时", "WS Feed · Live") : t("feed_offline", "数据流 · 离线", "Feed · Offline")}
               </span>
             </div>
           </div>
@@ -121,10 +123,10 @@ export default function StationHealthDashboard() {
       <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-14 py-12 space-y-6">
         {/* Risk Scores Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-px bg-graphite-600/60 border border-graphite-600/60">
-          <ScoreCard title="Overall Risk Score" score={risk.overall_score} />
-          <ScoreCard title="Availability" score={risk.availability_score} />
-          <ScoreCard title="Reliability" score={risk.reliability_score} />
-          <ScoreCard title="Weather Risk" score={risk.weather_risk} />
+          <ScoreCard title={t("overall", "综合风险评分", "Overall Risk Score")} score={risk.overall_score} />
+          <ScoreCard title={t("availability", "可用性", "Availability")} score={risk.availability_score} />
+          <ScoreCard title={t("reliability", "可靠性", "Reliability")} score={risk.reliability_score} />
+          <ScoreCard title={t("weather", "天气风险", "Weather Risk")} score={risk.weather_risk} />
         </div>
 
         {/* Live Telemetry Dashboard */}
@@ -133,19 +135,19 @@ export default function StationHealthDashboard() {
             {/* RF & Signal */}
             <div className="console-panel rounded-sm">
               <div className="px-6 sm:px-8 py-5 border-b border-graphite-600/60 bg-graphite-700/40 flex items-center justify-between">
-                <span className="mono-label text-signal-soft">RF & DEMODULATOR</span>
+                <span className="mono-label text-signal-soft">{t("rf_panel", "射频与解调器", "RF & DEMODULATOR")}</span>
                 <span className="font-mono text-[10px] text-graphite-mute">
                   {new Date(telemetry.timestamp).toLocaleTimeString()} UTC
                 </span>
               </div>
               <div className="px-6 sm:px-8 py-6 space-y-5">
-                <TelemetryRow label="Frequency (MHz)" value={telemetry.rf.frequency_mhz} />
-                <TelemetryRow label="Signal Strength (dBm)" value={telemetry.rf.signal_dbm} highlight={true} />
-                <TelemetryRow label="Modulation" value={telemetry.rf.modulation} />
-                <TelemetryRow label="SNR (dB)" value={telemetry.signal_quality.snr_db} />
+                <TelemetryRow label={t("frequency", "频率（MHz）", "Frequency (MHz)")} value={telemetry.rf.frequency_mhz} />
+                <TelemetryRow label={t("signal", "信号强度（dBm）", "Signal Strength (dBm)")} value={telemetry.rf.signal_dbm} highlight={true} />
+                <TelemetryRow label={t("modulation", "调制方式", "Modulation")} value={telemetry.rf.modulation} />
+                <TelemetryRow label={t("snr", "信噪比（dB）", "SNR (dB)")} value={telemetry.signal_quality.snr_db} />
                 <TelemetryRow
-                  label="Lock Status"
-                  value={telemetry.rf.lock ? "LOCKED" : "SEARCHING"}
+                  label={t("lock", "锁定状态", "Lock Status")}
+                  value={telemetry.rf.lock ? t("locked", "已锁定", "LOCKED") : t("searching", "搜索中", "SEARCHING")}
                   valueClass={telemetry.rf.lock ? "text-green-soft font-bold" : "text-signal-soft"}
                 />
               </div>
@@ -154,16 +156,16 @@ export default function StationHealthDashboard() {
             {/* Antenna & Environment */}
             <div className="console-panel rounded-sm">
               <div className="px-6 sm:px-8 py-5 border-b border-graphite-600/60 bg-graphite-700/40 flex items-center justify-between">
-                <span className="mono-label text-signal-soft">ANTENNA & ENVIRONMENT</span>
+                <span className="mono-label text-signal-soft">{t("ant_panel", "天线与环境", "ANTENNA & ENVIRONMENT")}</span>
               </div>
               <div className="px-6 sm:px-8 py-6 space-y-5">
-                <TelemetryRow label="Azimuth (°)" value={telemetry.antenna.azimuth} />
-                <TelemetryRow label="Elevation (°)" value={telemetry.antenna.elevation} />
-                <TelemetryRow label="Wind Speed (km/h)" value={telemetry.weather.wind_kph} />
-                <TelemetryRow label="Battery" value={`${telemetry.power.battery_pct}%`} />
+                <TelemetryRow label={t("azimuth", "方位角（°）", "Azimuth (°)")} value={telemetry.antenna.azimuth} />
+                <TelemetryRow label={t("elevation", "仰角（°）", "Elevation (°)")} value={telemetry.antenna.elevation} />
+                <TelemetryRow label={t("wind", "风速（km/h）", "Wind Speed (km/h)")} value={telemetry.weather.wind_kph} />
+                <TelemetryRow label={t("battery", "电池", "Battery")} value={`${telemetry.power.battery_pct}%`} />
                 <TelemetryRow
-                  label="Main Power"
-                  value={telemetry.power.main ? "ONLINE" : "OFFLINE"}
+                  label={t("main_power", "主电源", "Main Power")}
+                  value={telemetry.power.main ? t("online", "在线", "ONLINE") : t("offline", "离线", "OFFLINE")}
                   valueClass={telemetry.power.main ? "text-green-soft" : "text-signal-soft"}
                 />
               </div>
@@ -174,13 +176,13 @@ export default function StationHealthDashboard() {
         {!telemetry && (
           <div className="console-panel rounded-sm px-6 sm:px-8 py-20 text-center">
             <span className="signal-indicator inline-block" />
-            <p className="mono-label text-steel-2 mt-4">ACQUIRING TELEMETRY FEED...</p>
+            <p className="mono-label text-steel-2 mt-4">{t("acquiring", "正在获取遥测数据流...", "ACQUIRING TELEMETRY FEED...")}</p>
           </div>
         )}
 
         {/* Recommendation footnote */}
         <p className="mono-label text-graphite-mute">
-          RECOMMENDATION · {risk.recommendation.toUpperCase()}
+          {t("recommendation", "建议 · ", "RECOMMENDATION · ")}{t("rec_preferred", "首选——调度置信度高", "Preferred — high confidence for scheduling").toUpperCase()}
         </p>
       </div>
     </main>

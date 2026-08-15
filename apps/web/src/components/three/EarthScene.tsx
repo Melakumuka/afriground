@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { EffectComposer, Bloom, Vignette } from "@react-three/postprocessing";
+import { useMessages } from "next-intl";
 import { STATIONS } from "@/data/stations";
 import { EARTH_RADIUS } from "./geo";
 import SceneCameraRig from "./SceneCameraRig";
@@ -22,6 +23,8 @@ export default function EarthScene({ onReady }: { onReady?: () => void }) {
   const [contextLost, setContextLost] = useState(false);
   const onReadyRef = useRef(onReady);
   const readyTimer = useRef<number | null>(null);
+  const msgs = useMessages() as Record<string, Record<string, string>>;
+  const gpuText = msgs?.Landing?.gpu_recovering || "GPU CONTEXT RECOVERING...";
 
   useEffect(() => {
     onReadyRef.current = onReady;
@@ -105,7 +108,7 @@ export default function EarthScene({ onReady }: { onReady?: () => void }) {
         <div className="absolute inset-0 z-20 bg-graphite grid place-items-center">
           <div className="flex items-center gap-3 border border-signal/50 bg-signal/10 px-4 py-2.5">
             <span className="signal-indicator" />
-            <span className="mono-label text-signal-soft">GPU CONTEXT RECOVERING...</span>
+            <span className="mono-label text-signal-soft">{gpuText}</span>
           </div>
         </div>
       )}

@@ -85,7 +85,7 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
           <button
             onClick={toggleLocale}
             className="px-3 py-1.5 border border-graphite-600 text-steel-2 hover:text-white hover:border-graphite-500 text-xs font-mono tracking-wider transition-all cursor-pointer"
-            title="Switch Language"
+            title={isZh ? "切换语言" : "Switch Language"}
           >
             {currentLocale.toUpperCase()}
           </button>
