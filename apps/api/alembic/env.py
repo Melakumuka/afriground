@@ -1,7 +1,7 @@
 import asyncio
 from logging.config import fileConfig
 
-from sqlalchemy import pool
+from sqlalchemy import pool, text
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
@@ -17,8 +17,14 @@ from models import Base
 # access to the values within the .ini file in use.
 config = context.config
 
-# Set the SQLAlchemy URL from our config
-config.set_main_option("sqlalchemy.url", settings.database_url)
+# Allow tests/CI to override the target database URL
+import os
+_alembic_url = os.environ.get("AFRIGROUND_ALEMBIC_URL")
+if _alembic_url:
+    config.set_main_option("sqlalchemy.url", _alembic_url)
+else:
+    # Set the SQLAlchemy URL from our config
+    config.set_main_option("sqlalchemy.url", settings.database_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -28,6 +34,30 @@ if config.config_file_name is not None:
 # add your model's MetaData object here
 # for 'autogenerate' support
 target_metadata = Base.metadata
+
+
+def include_object(object, name, type_, reflected, compare_to):
+    """Only manage application tables in the 'public' schema; never touch
+    PostGIS/extension schemas (tiger, topology) or spatial_ref_sys."""
+    if type_ in ("table", "index"):
+        schema = getattr(object, "schema", None)
+        if schema not in (None, "public"):
+            return False
+        if name in ("spatial_ref_sys",):
+            return False
+    return True
+
+
+def include_name(name, type_, parent_names):
+    """Filter removed tables from non-public schemas (include_object is not
+    called for removed objects)."""
+    if type_ == "table":
+        schema = parent_names.get("schema_name")
+        if schema not in (None, "public"):
+            return False
+        if name == "spatial_ref_sys":
+            return False
+    return True
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
@@ -49,16 +79,22 @@ def run_migrations_offline() -> None:
         dialect_opts={"paramstyle": "named"},
         # Handle PostGIS types gracefully if needed
         compare_type=True,
+        include_object=include_object,
     )
 
     with context.begin_transaction():
         context.run_migrations()
 
 def do_run_migrations(connection: Connection) -> None:
+    # Keep extension schemas (tiger/topology) out of reflection/autogenerate.
+    # NOTE: search_path is set via asyncpg server_settings at connect time;
+    # running a SET here would open an implicit transaction that alembic's
+    # begin_transaction() does not commit, silently rolling back all DDL.
     context.configure(
         connection=connection, 
         target_metadata=target_metadata,
         compare_type=True,
+        include_object=include_object,
     )
 
     with context.begin_transaction():
@@ -73,6 +109,7 @@ async def run_async_migrations() -> None:
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
+        connect_args={"server_settings": {"search_path": '"$user", public'}},
     )
 
     async with connectable.connect() as connection:

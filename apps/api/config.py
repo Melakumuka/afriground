@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     
     # Database
     database_url: str
+    test_database_url: str = "postgresql+asyncpg://afriground:afriground_dev_password@localhost:5433/afriground_test"
     
     # Supabase Auth
     supabase_url: str

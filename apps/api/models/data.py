@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, DateTime, ForeignKey, Float, Boolean, Text
+from sqlalchemy import Column, String, DateTime, ForeignKey, Float, Boolean, Text, Index
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.sql import func
 from geoalchemy2 import Geometry
@@ -7,12 +7,15 @@ import uuid
 
 class Dataset(Base):
     __tablename__ = 'datasets'
+    __table_args__ = (
+        Index('idx_datasets_aoi', 'aoi', postgresql_using='gist'),
+    )
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     schedule_id = Column(UUID(as_uuid=True), ForeignKey('schedules.id'))
     satellite_id = Column(UUID(as_uuid=True), ForeignKey('satellites.id'))
     sensor_type = Column(String(100))
-    aoi = Column(Geometry('POLYGON', srid=4326))
+    aoi = Column(Geometry('POLYGON', srid=4326, spatial_index=False))
     cloud_cover = Column(Float)
     processing_level = Column(String(50))
     product_type = Column(String(100))
