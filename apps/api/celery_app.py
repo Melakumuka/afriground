@@ -29,5 +29,9 @@ celery_app.conf.update(
             "task": "orchestration.drain_outbox",
             "schedule": settings.outbox_poll_interval,
         },
+        "check-heartbeats": {
+            "task": "orchestration.check_heartbeats",
+            "schedule": settings.heartbeat_check_interval_s,
+        },
     },
 )

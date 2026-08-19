@@ -56,3 +56,16 @@ def outbox_metrics() -> dict:
             return await metrics(db)
 
     return _run_async(_run)
+
+
+@celery_app.task(name="orchestration.check_heartbeats")
+def check_heartbeats(threshold_s: float = 120.0) -> dict:
+    """Flag stations whose edge agents missed their heartbeat window."""
+    from services.edge_agent import check_missed_heartbeats
+
+    async def _run(factory):
+        async with factory() as db:
+            flagged = await check_missed_heartbeats(db, threshold_s=threshold_s)
+        return {"flagged": flagged}
+
+    return _run_async(_run)

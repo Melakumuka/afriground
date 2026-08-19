@@ -137,6 +137,11 @@ async def process_observation_events(db: AsyncSession, simulate: bool = SIMULATE
         await driver.advance(job.id, target, reason="Simulated edge agent")
         applied += 1
 
+        if target == "COMPLETED":
+            from services.delivery import DeliveryService
+
+            await DeliveryService(db).on_job_completed(job)
+
     if applied:
         await db.commit()
     return applied

@@ -103,17 +103,17 @@ Phase 2 stays inside the Phase 1 guardrails: no full edge execution, no frontend
 ### Phase 2.0 — Orchestration Runtime — COMPLETE
 - Implement: shared runtime (`services/orchestration_runtime.py`: `drain`, `SystemJobDriver`, `process_observation_events`, `metrics`); Celery app (`celery_app.py`) + beat task (`tasks.py::drain_outbox`); outbox retry/backoff (`attempt_count`, `next_retry_at`, migration `b5935c0e3f2d`); simulated edge lifecycle driving (`AFRIGROUND_ORCHESTRATION_SIMULATE`); admin metrics endpoint `GET /api/v1/orchestration/metrics`; asyncio worker (`scripts/outbox_worker.py`) shares the same runtime.
 
-### Phase 2.1 — Edge Agent Heartbeat & Time-Sync Ingestion
-- Implement: agent `POST` endpoint for heartbeat + time-status reporting (already modelled: `StationAgentIdentity`, `StationTimeStatus`); missed-heartbeat detection job that flags the station twin `degraded`; audit-log every state change. No hardware execution yet (guardrail).
+### Phase 2.1 — Edge Agent Heartbeat & Time-Sync Ingestion — COMPLETE
+- Implement: `services/edge_agent.py` (`EdgeAgentService`: register agent, heartbeat with heartbeat records, time-status ingestion that flags the station twin degraded on large offsets, telemetry ingestion with auto-incident surfacing); system watchdog `check_missed_heartbeats` (flags stations degraded + opens incidents, emits `STATION.DEGRADED`); Celery beat task `orchestration.check_heartbeats`; migration `a4f7c9d1e2b3` adds `station_heartbeats` + `station_telemetry_readings`; edge routes `routes/edge.py`.
 
-### Phase 2.2 — Telemetry & Monitoring
-- Implement: telemetry ingestion from simulated agents into structured tables; station health/risk recompute (`StationQualityScore`, incident surfacing); operational dashboards behind `operations` API.
+### Phase 2.2 — Telemetry & Monitoring — COMPLETE
+- Implement: structured telemetry ingestion (`station_telemetry_readings`), `recompute_quality` persisting `StationQualityScore` (availability/reliability/timeliness from heartbeats, SNR, time offsets), quality + telemetry API endpoints; incidents auto-opened on critical telemetry (power loss, SNR floor) with outbox events.
 
-### Phase 2.3 — Data Delivery Pipeline
-- Implement: on job `COMPLETED`, auto-create delivery jobs (dataset → destination) and execute them (`routes/data.py`); emit `DATA_DELIVERY.*` outbox events; mark delivered with checksum audit.
+### Phase 2.3 — Data Delivery Pipeline — COMPLETE
+- Implement: `services/delivery.py` — on job `COMPLETED` the runtime materializes a dataset (`datasets.observation_job_id`) and executes delivery jobs to every active destination (checksummed, retention expiry), emitting `DATA_DELIVERY.COMPLETED`; idempotent per (dataset, destination).
 
-### Phase 2.4 — End-to-End Simulation & Demo
-- Deliver: `scripts/simulate_edge.py` — a scripted edge agent that consumes outbox events, drives `QUEUED → … → COMPLETED`, emits receipts + telemetry, and completes a delivery; produces a reproducible demo timeline on the dev DB.
+### Phase 2.4 — End-to-End Simulation & Demo — COMPLETE
+- Deliver: `scripts/simulate_edge.py` — self-cleaning scripted edge agent building the full chain (station → mission → contact → job), streaming heartbeat/telemetry, driving `QUEUED → … → COMPLETED` through the runtime, executing delivery, recomputing quality, demonstrating the missed-heartbeat watchdog, and printing a demo timeline.
 
-### Phase 2.5 — Verification
-- Deliver: tests for the orchestrator runtime, heartbeat monitor, delivery pipeline, and the full-loop simulation; run the complete suite.
+### Phase 2.5 — Verification — COMPLETE
+- Deliver: `tests/test_edge_agent.py`, `tests/test_delivery.py`, endpoint permission tests in `test_api.py`; full suite green (78 tests); migration applied to dev + test DBs; live demo run on the dev DB.

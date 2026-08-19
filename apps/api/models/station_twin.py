@@ -118,3 +118,25 @@ class StationAgentIdentity(Base):
     last_heartbeat_at = Column(DateTime(timezone=True))
     status = Column(String(50), default='active')  # active, inactive, revoked
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class StationHeartbeat(Base):
+    """Per-agent heartbeat records used by the missed-heartbeat watchdog."""
+    __tablename__ = 'station_heartbeats'
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    station_id = Column(UUID(as_uuid=True), ForeignKey('ground_stations.id'), nullable=False)
+    agent_id = Column(String(255), nullable=False)
+    agent_version = Column(String(100))
+    metrics = Column(JSONB)
+    received_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class StationTelemetryReading(Base):
+    """Structured telemetry readings reported by station agents."""
+    __tablename__ = 'station_telemetry_readings'
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    station_id = Column(UUID(as_uuid=True), ForeignKey('ground_stations.id'), nullable=False)
+    agent_id = Column(String(255), nullable=False)
+    telemetry_type = Column(String(50), nullable=False)  # antenna, rf, signal, weather, power, recording
+    payload = Column(JSONB)
+    recorded_at = Column(DateTime(timezone=True), server_default=func.now())

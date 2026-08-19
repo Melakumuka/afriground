@@ -13,6 +13,7 @@ class Dataset(Base):
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     schedule_id = Column(UUID(as_uuid=True), ForeignKey('schedules.id'))
+    observation_job_id = Column(UUID(as_uuid=True), ForeignKey('observation_jobs.id'))
     satellite_id = Column(UUID(as_uuid=True), ForeignKey('satellites.id'))
     sensor_type = Column(String(100))
     aoi = Column(Geometry('POLYGON', srid=4326, spatial_index=False))

@@ -13,6 +13,7 @@ from models.station import GroundStation, MaintenanceEvent, Incident
 from models.station_twin import (
     StationCapability, StationHardware, StationLicense, StationCertification,
     StationCertificationEvent, StationQualityScore, StationTimeStatus, StationAgentIdentity,
+    StationHeartbeat, StationTelemetryReading,
 )
 from models.scheduling import PassPrediction, RecurringMission, Booking, Schedule, Operation
 from models.contact import (
@@ -34,6 +35,7 @@ __all__ = [
     "GroundStation", "MaintenanceEvent", "Incident",
     "StationCapability", "StationHardware", "StationLicense", "StationCertification",
     "StationCertificationEvent", "StationQualityScore", "StationTimeStatus", "StationAgentIdentity",
+    "StationHeartbeat", "StationTelemetryReading",
     "PassPrediction", "RecurringMission", "Booking", "Schedule", "Operation",
     "VisibilityOpportunity", "ContactOpportunity", "Reservation", "ScheduledContact",
     "ObservationJob", "ExecutionReceipt",

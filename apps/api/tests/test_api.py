@@ -226,3 +226,38 @@ def test_orchestration_metrics_ok_for_admin(authed_client):
     body = resp.json()
     assert "outbox" in body
     assert "jobs_by_status" in body
+
+
+def test_edge_heartbeat_requires_station_manage(client, seeded_user):
+    """POST /api/v1/edge/.../heartbeat requires station.manage."""
+    from services.tenancy import get_tenant_context as gtc
+    from services.tenancy import TenantContext
+
+    app = main.app
+
+    async def _override_tenant():
+        return TenantContext(
+            user=seeded_user["user"],
+            organization=seeded_user["org"],
+            roles=[],
+            permissions=set(),
+            org_id=seeded_user["org"].id,
+        )
+
+    app.dependency_overrides[gtc] = _override_tenant
+    resp = client.post(
+        f"/api/v1/edge/stations/{uuid.uuid4()}/agents/some-agent/heartbeat",
+        json={"agent_version": "1.0.0", "metrics": {}},
+    )
+    assert resp.status_code == 403
+    app.dependency_overrides.pop(gtc, None)
+
+
+def test_edge_telemetry_list_unknown_station_404(authed_client):
+    resp = authed_client.get(f"/api/v1/edge/stations/{uuid.uuid4()}/telemetry")
+    assert resp.status_code == 404
+
+
+def test_edge_quality_unknown_station_404(authed_client):
+    resp = authed_client.get(f"/api/v1/edge/stations/{uuid.uuid4()}/quality")
+    assert resp.status_code == 404
