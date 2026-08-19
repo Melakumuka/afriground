@@ -1,10 +1,12 @@
-"""
-Phase 3.1 tests — per-org webhook fan-out with HMAC signatures.
+﻿"""
+Phase 3.1/4.1 tests — per-org webhook fan-out with HMAC signatures and
+retry/backoff for failed deliveries.
 """
 import hashlib
 import hmac
 import json
 import threading
+from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 from sqlalchemy import select
@@ -13,6 +15,10 @@ from models.data import Webhook, WebhookDelivery
 from models.events import OutboxEvent
 from services.outbox import emit, publish_pending
 from services.webhooks import _signature, deliver_org_webhooks
+
+
+def _now():
+    return datetime.now(timezone.utc)
 
 
 class _CaptureHandler(BaseHTTPRequestHandler):
@@ -95,7 +101,7 @@ async def test_fan_out_delivers_signed_payload(session, tenant):
         event = await _published_event(session, tenant.org_id)
 
         stats = await deliver_org_webhooks(session)
-        assert stats == {"delivered": 1, "failed": 0}
+        assert stats == {"delivered": 1, "failed": 0, "retried": 0}
 
         captured = _CaptureHandler.captured
         assert len(captured) == 1
@@ -124,7 +130,7 @@ async def test_fan_out_is_idempotent(session, tenant):
         second = await deliver_org_webhooks(session)
 
         assert first["delivered"] == 1
-        assert second == {"delivered": 0, "failed": 0}
+        assert second == {"delivered": 0, "failed": 0, "retried": 0}
         assert len(_CaptureHandler.captured) == 1
 
 
@@ -134,7 +140,7 @@ async def test_fan_out_skips_non_matching_event_types(session, tenant):
         await _published_event(session, tenant.org_id, event_type="STATION.REGISTERED")
 
         stats = await deliver_org_webhooks(session)
-        assert stats == {"delivered": 0, "failed": 0}
+        assert stats == {"delivered": 0, "failed": 0, "retried": 0}
         assert _CaptureHandler.captured == []
 
 
@@ -151,3 +157,60 @@ async def test_fan_out_tracks_failures(session, tenant):
         ).scalars().all()
         assert len(deliveries) == 1
         assert deliveries[0].status == "failed"
+
+
+# ---- Phase 4.1 retry/backoff ----
+
+async def test_fan_out_retries_failed_delivery(session, tenant):
+    with _CaptureServer() as srv:
+        await _add_webhook(session, tenant.org_id, ["OBSERVATION_JOB."], srv.url + "/down")
+        await _published_event(session, tenant.org_id)
+
+        first = await deliver_org_webhooks(session)
+        assert first == {"delivered": 0, "failed": 1, "retried": 0}
+
+        delivery = (
+            await session.execute(select(WebhookDelivery))
+        ).scalars().first()
+        assert delivery.attempt_count == 1
+        assert delivery.next_retry_at is not None
+
+        # Backoff has not elapsed yet -> no retry.
+        idle = await deliver_org_webhooks(session)
+        assert idle == {"delivered": 0, "failed": 0, "retried": 0}
+        assert delivery.attempt_count == 1
+
+        # Window elapses and the endpoint recovers -> retry succeeds.
+        delivery.next_retry_at = _now() - timedelta(seconds=1)
+        await session.commit()
+        webhook = await session.get(Webhook, delivery.webhook_id)
+        webhook.url = srv.url  # working endpoint now
+        await session.commit()
+
+        retry = await deliver_org_webhooks(session)
+        assert retry == {"delivered": 1, "failed": 0, "retried": 1}
+        await session.refresh(delivery)
+        assert delivery.status == "delivered"
+        assert delivery.attempt_count == 2
+        assert delivery.delivered_at is not None
+        assert len(_CaptureHandler.captured) == 2
+
+
+async def test_fan_out_gives_up_after_max_attempts(session, tenant):
+    from services.webhooks import MAX_ATTEMPTS
+
+    with _CaptureServer() as srv:
+        await _add_webhook(session, tenant.org_id, ["OBSERVATION_JOB."], srv.url + "/down")
+        await _published_event(session, tenant.org_id)
+        await deliver_org_webhooks(session)
+
+        delivery = (
+            await session.execute(select(WebhookDelivery))
+        ).scalars().first()
+        delivery.attempt_count = MAX_ATTEMPTS  # exhausted
+        delivery.next_retry_at = _now() - timedelta(seconds=1)
+        await session.commit()
+
+        stats = await deliver_org_webhooks(session)
+        assert stats == {"delivered": 0, "failed": 0, "retried": 0}
+        assert len(_CaptureHandler.captured) == 1  # no extra attempt

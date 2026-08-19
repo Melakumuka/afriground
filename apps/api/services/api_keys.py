@@ -75,10 +75,27 @@ async def get_api_key_context(
     db: AsyncSession = Depends(get_db_session),
     x_api_key: Optional[str] = Header(None),
 ) -> dict:
-    """Dependency: authenticate a request via the X-API-Key header."""
+    """Dependency: authenticate a request via the X-API-Key header and enforce
+    the key's rate-limit tier (Phase 4.1, Redis token bucket)."""
     if not x_api_key:
         raise HTTPException(status_code=401, detail="Missing X-API-Key header")
     row = await verify_api_key(db, x_api_key)
     if not row:
         raise HTTPException(status_code=401, detail="Invalid or revoked API key")
-    return {"org_id": row.org_id, "key_id": row.id, "scopes": row.scopes or []}
+
+    from services.rate_limit import check_rate_limit
+
+    rl = await check_rate_limit(row.id, row.rate_limit_tier or "standard")
+    if not rl["allowed"]:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Rate limit exceeded ({rl['limit']} req/min)",
+            headers={"Retry-After": str(rl["reset_after_s"])},
+        )
+
+    return {
+        "org_id": row.org_id,
+        "key_id": row.id,
+        "scopes": row.scopes or [],
+        "rate_limit": rl,
+    }

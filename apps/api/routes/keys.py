@@ -43,6 +43,7 @@ class KeyMeResponse(BaseModel):
     org_id: uuid.UUID
     key_id: uuid.UUID
     scopes: List[str]
+    rate_limit: Optional[dict] = None
 
 
 @router.post("", response_model=KeyCreateResponse)
@@ -113,4 +114,5 @@ async def key_me(
         org_id=ctx["org_id"],
         key_id=ctx["key_id"],
         scopes=ctx["scopes"],
+        rate_limit=ctx.get("rate_limit"),
     )

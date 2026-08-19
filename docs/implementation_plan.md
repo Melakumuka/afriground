@@ -151,8 +151,10 @@ Phase 4 turns the simulated edge lifecycle into a real machine-facing contract w
 - Deliver: `scripts/gen_agent_certs.py` (dev CA + server + per-agent client certs via `cryptography`), `entrypoint.sh` (uvicorn mTLS flags: `--ssl-cert-reqs 2`), migration `d6e7f8a9b0c1` adds `certificate_valid_until` + `revoked_at` to `station_agent_identities`; `scripts/agent_sim.py` end-to-end demo (dispatch → fetch → ack → chain → receipt → delivery → watchdog).
 - Verify: `tests/test_agent.py` (11 tests) — auth 401s, expired/revoked rejection, station-scoped dispatch, chain validation, receipt idempotency + delivery trigger, dispatch_due_jobs, HTTP endpoint flow; full suite green (113 tests); migration applied to dev + test DBs; live agent demo run on the dev DB.
 
-### Phase 4.1 — Rate Limiting & Webhook Retry (cross-cutting) — PLANNED
-- Implement: enforce `APIKey.rate_limit_tier` with a token-bucket (Redis-backed), webhook delivery retry/backoff using `webhook_deliveries.attempt_count` + `next_retry_at` (mirroring the outbox pattern).
+### Phase 4.1 — Rate Limiting & Webhook Retry (cross-cutting) — COMPLETE
+- Implement: `services/rate_limit.py` — Redis-backed sliding-minute token bucket per `APIKey.rate_limit_tier` (standard 60 / pro 600 / enterprise 6000 req/min), returns `{allowed, remaining, limit, reset_after_s}`, fails open with a warning on Redis outage; clients are cached per event loop so pytest/TestClient loops stay isolated; `services/api_keys.get_api_key_context` now enforces the limiter (429 + `Retry-After` via `KeyMeResponse`), `/api/v1/keys/me` surfaces `rate_limit` in the payload.
+- Implement: webhook retry/backoff in `services/webhooks.deliver_org_webhooks` — new PUBLISHED outbox events fan out (attempt 1), failed deliveries get `next_retry_at = now + 30 * 2^attempt` (max 5 attempts) and are retried once the window elapses; returns `{delivered, failed, retried}`; migration `e7f8a9b0c1d2` adds `attempt_count` + `next_retry_at` to `webhook_deliveries`.
+- Verify: `tests/test_webhooks.py` (retry after window, give-up at max attempts, updated stats dict), `tests/test_api_keys.py` (tier enforcement, fail-open); full suite green (117 tests); migration applied to dev + test DBs; docker redis re-created with host port 6379 mapping.
 
 ### Phase 4.2 — Web Frontend Integration — PLANNED
 - Wire `apps/web` to the Phase 1–3 API surface (missions, station twins, orchestration metrics, SLA violations, network ranking) replacing mock/simulated data; preserves the existing landing experience and 3D visualization.

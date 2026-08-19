@@ -68,7 +68,8 @@ class Webhook(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class WebhookDelivery(Base):
-    """Idempotent per-webhook delivery record for a published outbox event (Phase 3.1)."""
+    """Idempotent per-webhook delivery record for a published outbox event
+    (Phase 3.1) with retry/backoff tracking (Phase 4.1)."""
     __tablename__ = 'webhook_deliveries'
     __table_args__ = (
         UniqueConstraint('webhook_id', 'outbox_event_id', name='uq_webhook_delivery'),
@@ -79,6 +80,8 @@ class WebhookDelivery(Base):
     outbox_event_id = Column(UUID(as_uuid=True), ForeignKey('outbox_events.id'), nullable=False)
     status = Column(String(50), nullable=False)  # delivered, failed
     response_code = Column(Integer)
+    attempt_count = Column(Integer, default=0)
+    next_retry_at = Column(DateTime(timezone=True))
     delivered_at = Column(DateTime(timezone=True))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

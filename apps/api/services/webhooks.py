@@ -14,7 +14,7 @@ import json
 import logging
 import urllib.request
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
 from sqlalchemy import select
@@ -27,10 +27,16 @@ logger = logging.getLogger(__name__)
 
 TIMEOUT_S = 5.0
 DELIVERY_BATCH = 100
+MAX_ATTEMPTS = 5
+BACKOFF_BASE_S = 30.0
 
 
 def _now() -> datetime:
     return datetime.now(timezone.utc)
+
+
+def _backoff(attempt: int) -> datetime:
+    return _now() + timedelta(seconds=BACKOFF_BASE_S * (2 ** min(attempt, 6)))
 
 
 def _json_dumps(obj) -> str:
@@ -84,10 +90,16 @@ async def _deliver_one(event: OutboxEvent, webhook: Webhook) -> Optional[int]:
 
 
 async def deliver_org_webhooks(db: AsyncSession, limit: int = DELIVERY_BATCH) -> dict:
-    """Fan out published outbox events to per-org webhooks.
+    """Fan out published outbox events to per-org webhooks, then retry
+    failed deliveries whose backoff window has elapsed (Phase 4.1).
 
-    Returns counts of deliveries made. The caller owns the transaction.
+    Returns counts {delivered, failed, retried}. The caller owns the transaction.
     """
+    delivered = 0
+    failed = 0
+    retried = 0
+
+    # 1. New fan-out from PUBLISHED outbox events.
     events = (
         await db.execute(
             select(OutboxEvent)
@@ -97,8 +109,6 @@ async def deliver_org_webhooks(db: AsyncSession, limit: int = DELIVERY_BATCH) ->
         )
     ).scalars().all()
 
-    delivered = 0
-    failed = 0
     for event in events:
         org_id = (event.payload or {}).get("org_id")
         if not org_id:
@@ -129,20 +139,60 @@ async def deliver_org_webhooks(db: AsyncSession, limit: int = DELIVERY_BATCH) ->
                 continue
 
             status = await _deliver_one(event, webhook)
+            ok = status is not None and status < 300
             db.add(
                 WebhookDelivery(
                     webhook_id=webhook.id,
                     outbox_event_id=event.id,
-                    status="delivered" if status is not None and status < 300 else "failed",
+                    status="delivered" if ok else "failed",
                     response_code=status,
-                    delivered_at=_now(),
+                    attempt_count=1,
+                    next_retry_at=None if ok else _backoff(1),
+                    delivered_at=_now() if ok else None,
                 )
             )
-            if status is not None and status < 300:
+            if ok:
                 delivered += 1
             else:
                 failed += 1
 
-    if delivered or failed:
+    # 2. Retry failed deliveries with an elapsed backoff window.
+    retries = (
+        await db.execute(
+            select(WebhookDelivery)
+            .where(
+                WebhookDelivery.status == "failed",
+                WebhookDelivery.attempt_count < MAX_ATTEMPTS,
+                WebhookDelivery.next_retry_at.isnot(None),
+                WebhookDelivery.next_retry_at <= _now(),
+            )
+            .order_by(WebhookDelivery.next_retry_at)
+            .limit(limit)
+        )
+    ).scalars().all()
+
+    for delivery in retries:
+        webhook = await db.get(Webhook, delivery.webhook_id)
+        event = await db.get(OutboxEvent, delivery.outbox_event_id)
+        if not webhook or not webhook.is_active or not event:
+            continue
+        if not _matches(event.event_type, webhook.events or []):
+            continue
+
+        status = await _deliver_one(event, webhook)
+        delivery.attempt_count += 1
+        ok = status is not None and status < 300
+        delivery.status = "delivered" if ok else "failed"
+        delivery.response_code = status
+        retried += 1
+        if ok:
+            delivery.delivered_at = _now()
+            delivery.next_retry_at = None
+            delivered += 1
+        else:
+            delivery.next_retry_at = _backoff(delivery.attempt_count)
+            failed += 1
+
+    if delivered or failed or retried:
         await db.commit()
-    return {"delivered": delivered, "failed": failed}
+    return {"delivered": delivered, "failed": failed, "retried": retried}
