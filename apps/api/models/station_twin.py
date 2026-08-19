@@ -106,7 +106,7 @@ class StationTimeStatus(Base):
     reported_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class StationAgentIdentity(Base):
-    """Edge agent identity for a station (future mTLS bridge)."""
+    """Edge agent identity for a station (mTLS bridge, Phase 4.0)."""
     __tablename__ = 'station_agent_identities'
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -115,7 +115,9 @@ class StationAgentIdentity(Base):
     agent_version = Column(String(100))
     public_key_pem = Column(Text)
     certificate_serial = Column(String(255))
+    certificate_valid_until = Column(DateTime(timezone=True))
     last_heartbeat_at = Column(DateTime(timezone=True))
+    revoked_at = Column(DateTime(timezone=True))
     status = Column(String(50), default='active')  # active, inactive, revoked
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

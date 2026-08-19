@@ -13,7 +13,7 @@ Provides:
 import logging
 import os
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from sqlalchemy import func, select
@@ -102,6 +102,14 @@ class SystemJobDriver:
             except Exception:  # noqa: BLE001
                 logger.exception("sla enforcement failed for job %s", job.id)
 
+        if to_state == "COMPLETED":
+            from services.delivery import DeliveryService
+
+            try:
+                await DeliveryService(self.db).on_job_completed(job)
+            except Exception:  # noqa: BLE001
+                logger.exception("delivery pipeline failed for job %s", job.id)
+
         return job
 
 
@@ -146,25 +154,66 @@ async def process_observation_events(db: AsyncSession, simulate: bool = SIMULATE
         await driver.advance(job.id, target, reason="Simulated edge agent")
         applied += 1
 
-        if target == "COMPLETED":
-            from services.delivery import DeliveryService
-
-            await DeliveryService(db).on_job_completed(job)
-
     if applied:
         await db.commit()
     return applied
 
 
+async def dispatch_due_jobs(db: AsyncSession, lead_s: Optional[float] = None) -> int:
+    """System-side dispatcher (real-agent mode): transition QUEUED jobs to
+    DISPATCHED when their scheduled contact is within the dispatch lead window
+    (default: settings.agent_dispatch_lead_s) or already underway.
+
+    Real edge agents poll for DISPATCHED jobs; the simulated runtime skips this
+    (process_observation_events drives DISPATCHED itself).
+    """
+    from models.contact import ScheduledContact as SC
+    from config import settings as _settings
+
+    lead = lead_s if lead_s is not None else _settings.agent_dispatch_lead_s
+    cutoff = _now() + timedelta(seconds=lead)
+    rows = (
+        await db.execute(
+            select(ObservationJob.id, SC.scheduled_start)
+            .join(SC, SC.id == ObservationJob.scheduled_contact_id)
+            .where(
+                ObservationJob.status == "QUEUED",
+                SC.scheduled_start <= cutoff,
+            )
+            .order_by(SC.scheduled_start)
+            .limit(100)
+        )
+    ).all()
+
+    driver = SystemJobDriver(db)
+    dispatched = 0
+    for job_id, _start in rows:
+        job = await db.get(ObservationJob, job_id)
+        if not job or job.status != "QUEUED":
+            continue
+        await driver.advance(job.id, "DISPATCHED", reason="Dispatch lead reached")
+        dispatched += 1
+
+    if dispatched:
+        await db.commit()
+        logger.info("orchestrator: dispatched %d job(s) to edge agents", dispatched)
+    return dispatched
+
+
 async def drain(session_factory, limit: int = 50) -> dict:
-    """Poll outbox events, publish them, and fan out to per-org webhooks.
+    """Poll outbox events, publish them, fan out to per-org webhooks, and
+    (in real-agent mode) dispatch due jobs to edge agents.
     Shared by worker + Celery task."""
     async with session_factory() as db:
         published = await publish_pending(db, limit=limit)
         from services.webhooks import deliver_org_webhooks
 
         fan_out = await deliver_org_webhooks(db)
-        return {"published": published, "webhooks": fan_out}
+
+        dispatched = 0
+        if not SIMULATE:
+            dispatched = await dispatch_due_jobs(db)
+        return {"published": published, "webhooks": fan_out, "dispatched": dispatched}
 
 
 async def metrics(db: AsyncSession) -> dict:

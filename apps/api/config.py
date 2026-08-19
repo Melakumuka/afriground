@@ -33,6 +33,11 @@ class Settings(BaseSettings):
     # Phase 3.0 — Commercial / recurring missions
     recurring_sweep_interval_s: float = 3600.0
 
+    # Phase 4.0 — Edge agent mTLS bridge
+    agent_mtls_header: str = "X-Client-Cert-CN"
+    agent_mtls_header_trusted: bool = True  # proxy terminates mTLS and injects the header
+    agent_dispatch_lead_s: float = 600.0  # dispatch lead before AOS
+
     model_config = SettingsConfigDict(
         env_file=os.path.join(os.path.dirname(__file__), "../../.env"),
         env_file_encoding="utf-8",

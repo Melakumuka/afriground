@@ -77,13 +77,19 @@ class QualityResponse(BaseModel):
 # ── Service ──────────────────────────────────────────────────────────────────
 
 class EdgeAgentService:
-    def __init__(self, db: AsyncSession, tenant: TenantContext):
+    """Heartbeat/time/telemetry ingestion. Tenant-scoped for the management
+    API; tenant=None when called from the mTLS agent bridge (identity is the
+    authorization — the station is resolved from the agent identity)."""
+
+    def __init__(self, db: AsyncSession, tenant: Optional[TenantContext] = None):
         self.db = db
         self.tenant = tenant
 
     async def _get_station(self, station_id: uuid.UUID) -> GroundStation:
         station = await self.db.get(GroundStation, station_id)
-        if not station or station.org_id != self.tenant.org_id:
+        if not station:
+            raise HTTPException(status_code=404, detail="Station not found")
+        if self.tenant and station.org_id != self.tenant.org_id:
             raise HTTPException(status_code=404, detail="Station not found")
         return station
 
@@ -99,6 +105,13 @@ class EdgeAgentService:
         if not agent:
             raise HTTPException(status_code=404, detail="Agent identity not found")
         return agent
+
+    async def _audit(self, action: str, resource_type: str, resource_id: uuid.UUID, details: dict) -> None:
+        if self.tenant:
+            await write_audit_log(
+                self.db, self.tenant, action=action,
+                resource_type=resource_type, resource_id=resource_id, details=details,
+            )
 
     async def register_agent(
         self,
@@ -117,8 +130,8 @@ class EdgeAgentService:
             status="active",
         )
         self.db.add(agent)
-        await write_audit_log(
-            self.db, self.tenant, action="agent.register",
+        await self._audit(
+            action="agent.register",
             resource_type="ground_station", resource_id=station.id,
             details={"agent_id": agent_id},
         )
@@ -197,8 +210,8 @@ class EdgeAgentService:
                 "offset_ms": offset_ms,
             },
         )
-        await write_audit_log(
-            self.db, self.tenant, action="agent.time_status",
+        await self._audit(
+            action="agent.time_status",
             resource_type="ground_station", resource_id=station.id,
             details={"sync_status": sync_status, "offset_ms": offset_ms},
         )
@@ -269,8 +282,8 @@ class EdgeAgentService:
             event_type="STATION.INCIDENT_OPENED",
             payload={"station_id": str(station.id), "severity": severity, "description": description},
         )
-        await write_audit_log(
-            self.db, self.tenant, action="station.incident_auto",
+        await self._audit(
+            action="station.incident_auto",
             resource_type="ground_station", resource_id=station.id,
             details={"severity": severity, "description": description},
         )
@@ -349,8 +362,8 @@ class EdgeAgentService:
             calculated_at=now,
         )
         self.db.add(row)
-        await write_audit_log(
-            self.db, self.tenant, action="station.quality",
+        await self._audit(
+            action="station.quality",
             resource_type="ground_station", resource_id=station.id,
             details={"score": score},
         )

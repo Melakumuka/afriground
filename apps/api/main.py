@@ -67,7 +67,7 @@ async def healthz_check(db: AsyncSession = Depends(get_db_session)):
 async def read_users_me(current_user: dict = Depends(get_current_user)):
     return {"user_id": current_user.get("sub"), "email": current_user.get("email")}
 
-from routes import commercial, operations, telemetry, data, support, routing, tenancy, missions, stations, contact, regulatory, orchestration, edge, business, keys, webhooks, network
+from routes import commercial, operations, telemetry, data, support, routing, tenancy, missions, stations, contact, regulatory, orchestration, edge, business, keys, webhooks, network, agent
 
 app.include_router(commercial.router)
 app.include_router(operations.router)
@@ -86,3 +86,4 @@ app.include_router(business.router)
 app.include_router(keys.router)
 app.include_router(webhooks.router)
 app.include_router(network.router)
+app.include_router(agent.router)

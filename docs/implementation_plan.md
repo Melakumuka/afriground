@@ -138,3 +138,24 @@ Phase 3 stays inside the Phase 1 guardrails: no full edge execution, no frontend
 
 ### Phase 3.4 — Verification — COMPLETE
 - Deliver: `tests/test_sla.py`, `tests/test_webhooks.py`, `tests/test_api_keys.py`, `tests/test_network_routing.py`, new endpoint permission tests in `test_api.py`; full suite green (102 tests); migration `c5d6e7f8a9b0` applied to dev + test DBs; seed idempotent (adds `api.manage` permission).
+
+---
+
+## M. Detailed Implementation Plan for Phase 4 (Edge Agent & Data Integration Layer)
+
+Phase 4 turns the simulated edge lifecycle into a real machine-facing contract while staying inside the Phase 1 guardrails (no Yamcs/GNU Radio/SatDump/NATS/K8s, no unrestricted TX, no frontend rewrite).
+
+### Phase 4.0 — mTLS Edge Agent Bridge — COMPLETE
+- Implement: mTLS identity resolution `services/agent_auth.py` (client-cert CN → `StationAgentIdentity`, rejects unknown/revoked/expired identities); `AgentDispatchService` (`services/agent_dispatch.py`) giving the agent a station-scoped contract: fetch DISPATCHED jobs (with contact window + RF bundle), ACK, drive the execution chain (`ACKNOWLEDGED → PREPARING → EXECUTING → RECEIVING → PROCESSING → terminal`), and submit execution receipts (idempotent per job); agent HTTP routes `routes/agent.py` (`/api/v1/agent/jobs|ack|state|receipt|heartbeat|time-status|telemetry`) — no tenant JWT, the mTLS identity is the authorization.
+- Implement runtime integration: `orchestration_runtime.dispatch_due_jobs` transitions QUEUED → DISPATCHED when the contact enters the dispatch lead window (Celery `drain` runs it in real-agent mode); data delivery moved into `SystemJobDriver.advance` so the real agent path triggers the Phase 2.3 pipeline on COMPLETED, not just the simulator.
+- Deliver: `scripts/gen_agent_certs.py` (dev CA + server + per-agent client certs via `cryptography`), `entrypoint.sh` (uvicorn mTLS flags: `--ssl-cert-reqs 2`), migration `d6e7f8a9b0c1` adds `certificate_valid_until` + `revoked_at` to `station_agent_identities`; `scripts/agent_sim.py` end-to-end demo (dispatch → fetch → ack → chain → receipt → delivery → watchdog).
+- Verify: `tests/test_agent.py` (11 tests) — auth 401s, expired/revoked rejection, station-scoped dispatch, chain validation, receipt idempotency + delivery trigger, dispatch_due_jobs, HTTP endpoint flow; full suite green (113 tests); migration applied to dev + test DBs; live agent demo run on the dev DB.
+
+### Phase 4.1 — Rate Limiting & Webhook Retry (cross-cutting) — PLANNED
+- Implement: enforce `APIKey.rate_limit_tier` with a token-bucket (Redis-backed), webhook delivery retry/backoff using `webhook_deliveries.attempt_count` + `next_retry_at` (mirroring the outbox pattern).
+
+### Phase 4.2 — Web Frontend Integration — PLANNED
+- Wire `apps/web` to the Phase 1–3 API surface (missions, station twins, orchestration metrics, SLA violations, network ranking) replacing mock/simulated data; preserves the existing landing experience and 3D visualization.
+
+### Phase 4.3 — Production Infrastructure — PLANNED
+- Complete `terraform/` provisioning (Postgres/Redis/MinIO), API + worker images with mTLS, Vercel API deployment, secrets management.
