@@ -197,3 +197,32 @@ def test_regulatory_register_requires_station_manage(client, seeded_user):
     )
     assert resp.status_code == 403
     app.dependency_overrides.pop(gtc, None)
+
+
+def test_orchestration_metrics_requires_admin(client, seeded_user):
+    """GET /api/v1/orchestration/metrics requires platform.admin."""
+    from services.tenancy import get_tenant_context as gtc
+    from services.tenancy import TenantContext
+
+    app = main.app
+
+    async def _override_tenant():
+        return TenantContext(
+            user=seeded_user["user"],
+            organization=seeded_user["org"],
+            roles=[],
+            permissions=set(),
+            org_id=seeded_user["org"].id,
+        )
+
+    app.dependency_overrides[gtc] = _override_tenant
+    assert client.get("/api/v1/orchestration/metrics").status_code == 403
+    app.dependency_overrides.pop(gtc, None)
+
+
+def test_orchestration_metrics_ok_for_admin(authed_client):
+    resp = authed_client.get("/api/v1/orchestration/metrics")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert "outbox" in body
+    assert "jobs_by_status" in body

@@ -1,6 +1,7 @@
 """
-Transactional outbox dispatcher — polls PENDING outbox events and marks them
-PUBLISHED/FAILED via registered hooks (services/hooks.py).
+Orchestration runtime dispatcher — polls the outbox, publishes due events, and
+(in simulate mode) drives the observation job lifecycle. Single implementation
+shared with the Celery beat task (tasks.py::drain_outbox).
 
 Run from apps/api:
     $env:AFRIGROUND_WORKER_URL="postgresql+asyncpg://afriground:afriground_dev_password@localhost:5433/afriground"
@@ -16,7 +17,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 import services.hooks  # noqa: F401  (registers publish hooks)
-from services.outbox import publish_pending
+from services.orchestration_runtime import drain, process_observation_events
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger("outbox_worker")
@@ -35,9 +36,8 @@ def _request_stop(signame: str) -> None:
 
 
 async def drain_once(session_factory, limit: int) -> int:
-    async with session_factory() as db:
-        published = await publish_pending(db, limit=limit)
-        return published
+    stats = await drain(session_factory, limit=limit)
+    return stats["published"]
 
 
 async def run(poll_interval: float, limit: int) -> None:
@@ -49,9 +49,13 @@ async def run(poll_interval: float, limit: int) -> None:
             await conn.execute(text("SELECT 1 FROM outbox_events LIMIT 0"))
 
         while not _stop.is_set():
-            published = await drain_once(session_factory, limit)
-            if published:
-                logger.info("published %d outbox event(s)", published)
+            stats = await drain(session_factory, limit)
+            if stats["published"]:
+                logger.info("published %d outbox event(s)", stats["published"])
+            async with session_factory() as db:
+                applied = await process_observation_events(db)
+            if applied:
+                logger.info("simulated %d job transition(s)", applied)
             try:
                 await asyncio.wait_for(_stop.wait(), timeout=poll_interval)
             except asyncio.TimeoutError:

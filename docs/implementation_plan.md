@@ -85,3 +85,35 @@ Regulatory compliance as a hard backend constraint.
 
 ### Phase 1.6 — API Contracts, Seeds, and Tests
 - Deliver: API schemas, Demo seed data, Simulation-ready domain data, Tenant isolation tests, State machine tests, Regulatory tests, Alembic migration tests.
+
+### Phase 1.7 — Outbox Consumer (Edge Orchestrator seed) — COMPLETE
+- Deliver: Transactional-outbox worker (`scripts/outbox_worker.py`) polling PENDING events, webhook dispatch hooks (`services/hooks.py`) for `OBSERVATION_JOB.*`, `EXECUTION_RECEIPT.*`, `STATION.*`, idempotent publishing, FAILED/retry semantics.
+
+### Phase 1.8 — API Integration Tests — COMPLETE
+- Deliver: `tests/test_api.py` TestClient route tests (auth deps overridden, real test DB), 403 permission enforcement checks, health/tenancy smoke tests.
+
+> **Phase 1 status: COMPLETE** — 53 tests green; migration `a59283fc1078` applied to dev + test DBs; seed `scripts/seed_phase1.py` idempotent.
+
+---
+
+## K. Detailed Implementation Plan for Phase 2 (Orchestration Runtime & Data Value Chain)
+
+Phase 2 stays inside the Phase 1 guardrails: no full edge execution, no frontend rewrite, no Yamcs/GNU Radio/SatDump/NATS/K8s. It turns the outbox consumer into a real orchestration runtime and completes the observation value chain (mission → contact → job → delivery).
+
+### Phase 2.0 — Orchestration Runtime — COMPLETE
+- Implement: shared runtime (`services/orchestration_runtime.py`: `drain`, `SystemJobDriver`, `process_observation_events`, `metrics`); Celery app (`celery_app.py`) + beat task (`tasks.py::drain_outbox`); outbox retry/backoff (`attempt_count`, `next_retry_at`, migration `b5935c0e3f2d`); simulated edge lifecycle driving (`AFRIGROUND_ORCHESTRATION_SIMULATE`); admin metrics endpoint `GET /api/v1/orchestration/metrics`; asyncio worker (`scripts/outbox_worker.py`) shares the same runtime.
+
+### Phase 2.1 — Edge Agent Heartbeat & Time-Sync Ingestion
+- Implement: agent `POST` endpoint for heartbeat + time-status reporting (already modelled: `StationAgentIdentity`, `StationTimeStatus`); missed-heartbeat detection job that flags the station twin `degraded`; audit-log every state change. No hardware execution yet (guardrail).
+
+### Phase 2.2 — Telemetry & Monitoring
+- Implement: telemetry ingestion from simulated agents into structured tables; station health/risk recompute (`StationQualityScore`, incident surfacing); operational dashboards behind `operations` API.
+
+### Phase 2.3 — Data Delivery Pipeline
+- Implement: on job `COMPLETED`, auto-create delivery jobs (dataset → destination) and execute them (`routes/data.py`); emit `DATA_DELIVERY.*` outbox events; mark delivered with checksum audit.
+
+### Phase 2.4 — End-to-End Simulation & Demo
+- Deliver: `scripts/simulate_edge.py` — a scripted edge agent that consumes outbox events, drives `QUEUED → … → COMPLETED`, emits receipts + telemetry, and completes a delivery; produces a reproducible demo timeline on the dev DB.
+
+### Phase 2.5 — Verification
+- Deliver: tests for the orchestrator runtime, heartbeat monitor, delivery pipeline, and the full-loop simulation; run the complete suite.

@@ -20,6 +20,12 @@ class Settings(BaseSettings):
     # Redis
     redis_url: str
 
+    # Phase 2.0 — Orchestration runtime
+    celery_broker_url: str = "redis://localhost:6379/0"
+    outbox_poll_interval: float = 5.0
+    outbox_retry_base_s: float = 5.0
+    outbox_retry_max_s: float = 3600.0
+
     model_config = SettingsConfigDict(
         env_file=os.path.join(os.path.dirname(__file__), "../../.env"),
         env_file_encoding="utf-8",

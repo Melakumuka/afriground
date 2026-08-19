@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, DateTime, ForeignKey, Boolean, Text
+from sqlalchemy import Column, String, DateTime, ForeignKey, Boolean, Text, Integer
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.sql import func
 from database import Base
@@ -28,3 +28,5 @@ class OutboxEvent(Base):
     status = Column(String(50), default='PENDING', nullable=False)  # PENDING, PUBLISHED, FAILED
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     published_at = Column(DateTime(timezone=True))
+    attempt_count = Column(Integer, default=0, nullable=False, server_default='0')
+    next_retry_at = Column(DateTime(timezone=True))

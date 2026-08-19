@@ -52,7 +52,7 @@ async def health_check():
 async def read_users_me(current_user: dict = Depends(get_current_user)):
     return {"user_id": current_user.get("sub"), "email": current_user.get("email")}
 
-from routes import commercial, operations, telemetry, data, support, routing, tenancy, missions, stations, contact, regulatory
+from routes import commercial, operations, telemetry, data, support, routing, tenancy, missions, stations, contact, regulatory, orchestration
 
 app.include_router(commercial.router)
 app.include_router(operations.router)
@@ -65,3 +65,4 @@ app.include_router(missions.router)
 app.include_router(stations.router)
 app.include_router(contact.router)
 app.include_router(regulatory.router)
+app.include_router(orchestration.router)

@@ -31,7 +31,7 @@ services:
     container_name: afriground-redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "6379:6379"   # host access for Celery broker (celery_app.py)
     volumes:
       - .docker-data/redis:/data
     healthcheck:
