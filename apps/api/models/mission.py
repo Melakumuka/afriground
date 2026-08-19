@@ -112,3 +112,18 @@ class MissionSLA(Base):
     unit = Column(String(50), default='percent')
     reporting_window_days = Column(Integer, default=30)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class SLASLAViolation(Base):
+    """Recorded SLA breach (Phase 3.0) — created by the runtime on job completion."""
+    __tablename__ = 'sla_violations'
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    mission_id = Column(UUID(as_uuid=True), ForeignKey('missions.id'), nullable=False)
+    observation_job_id = Column(UUID(as_uuid=True), ForeignKey('observation_jobs.id'), nullable=False)
+    sla_type = Column(String(50), nullable=False)  # availability, latency, success_rate, timeliness
+    target_value = Column(Float, nullable=False)
+    actual_value = Column(Float, nullable=False)
+    unit = Column(String(50))
+    status = Column(String(50), default='open')  # open, acknowledged, resolved, disputed
+    violated_at = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

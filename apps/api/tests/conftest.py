@@ -58,6 +58,7 @@ PERMISSION_CODES = [
     "contact.plan",
     "job.operate",
     "audit.view",
+    "api.manage",
 ]
 
 

@@ -1,7 +1,8 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.ext.asyncio import AsyncSession
 from config import settings
-from auth import get_current_user
+from auth import get_current_user, get_db_session
 
 app = FastAPI(
     title=settings.app_name,
@@ -48,11 +49,25 @@ async def tenant_context_middleware(request, call_next):
 async def health_check():
     return {"status": "ok", "app": settings.app_name, "env": settings.app_env}
 
+
+@app.get("/healthz")
+async def healthz_check(db: AsyncSession = Depends(get_db_session)):
+    """Liveness probe (Phase 3.3): verifies DB reachability. 503 when down."""
+    from fastapi import Response
+    from sqlalchemy import text
+
+    try:
+        await db.execute(text("SELECT 1"))
+        return {"status": "ok", "db": "up"}
+    except Exception:
+        return Response(status_code=503, content='{"status":"degraded","db":"down"}',
+                        media_type="application/json")
+
 @app.get("/api/v1/users/me")
 async def read_users_me(current_user: dict = Depends(get_current_user)):
     return {"user_id": current_user.get("sub"), "email": current_user.get("email")}
 
-from routes import commercial, operations, telemetry, data, support, routing, tenancy, missions, stations, contact, regulatory, orchestration, edge
+from routes import commercial, operations, telemetry, data, support, routing, tenancy, missions, stations, contact, regulatory, orchestration, edge, business, keys, webhooks, network
 
 app.include_router(commercial.router)
 app.include_router(operations.router)
@@ -67,3 +82,7 @@ app.include_router(contact.router)
 app.include_router(regulatory.router)
 app.include_router(orchestration.router)
 app.include_router(edge.router)
+app.include_router(business.router)
+app.include_router(keys.router)
+app.include_router(webhooks.router)
+app.include_router(network.router)

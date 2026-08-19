@@ -33,5 +33,9 @@ celery_app.conf.update(
             "task": "orchestration.check_heartbeats",
             "schedule": settings.heartbeat_check_interval_s,
         },
+        "sweep-recurring": {
+            "task": "commercial.sweep_recurring",
+            "schedule": settings.recurring_sweep_interval_s,
+        },
     },
 )

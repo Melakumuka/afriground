@@ -26,6 +26,7 @@ PERMISSION_CODES = [
     "contact.plan",
     "job.operate",
     "audit.view",
+    "api.manage",
 ]
 
 ROLE_DEFS = {

@@ -7,7 +7,7 @@ from models.spacecraft import Satellite, TLESet, SatelliteRFConfig, Constellatio
 from models.mission import (
     Spacecraft, Mission, MissionProfile, MissionRFProfile,
     MissionTelemetryDefinition, MissionTelecommandDefinition,
-    MissionOperationalConstraint, MissionSLA,
+    MissionOperationalConstraint, MissionSLA, SLASLAViolation,
 )
 from models.station import GroundStation, MaintenanceEvent, Incident
 from models.station_twin import (
@@ -21,7 +21,7 @@ from models.contact import (
     ObservationJob, ExecutionReceipt,
 )
 from models.events import JobEvent, OutboxEvent
-from models.data import Dataset, DataDeliveryDestination, DataDeliveryJob, APIKey, Webhook, SupportTicket
+from models.data import Dataset, DataDeliveryDestination, DataDeliveryJob, APIKey, Webhook, WebhookDelivery, SupportTicket
 
 # This ensures all models are registered with Base.metadata
 __all__ = [
@@ -31,7 +31,7 @@ __all__ = [
     "Satellite", "TLESet", "SatelliteRFConfig", "Constellation", "ConstellationSatellite", "ConstellationTasking",
     "Spacecraft", "Mission", "MissionProfile", "MissionRFProfile",
     "MissionTelemetryDefinition", "MissionTelecommandDefinition",
-    "MissionOperationalConstraint", "MissionSLA",
+    "MissionOperationalConstraint", "MissionSLA", "SLASLAViolation",
     "GroundStation", "MaintenanceEvent", "Incident",
     "StationCapability", "StationHardware", "StationLicense", "StationCertification",
     "StationCertificationEvent", "StationQualityScore", "StationTimeStatus", "StationAgentIdentity",
@@ -40,5 +40,5 @@ __all__ = [
     "VisibilityOpportunity", "ContactOpportunity", "Reservation", "ScheduledContact",
     "ObservationJob", "ExecutionReceipt",
     "JobEvent", "OutboxEvent",
-    "Dataset", "DataDeliveryDestination", "DataDeliveryJob", "APIKey", "Webhook", "SupportTicket"
+    "Dataset", "DataDeliveryDestination", "DataDeliveryJob", "APIKey", "Webhook", "WebhookDelivery", "SupportTicket"
 ]

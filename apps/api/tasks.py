@@ -69,3 +69,16 @@ def check_heartbeats(threshold_s: float = 120.0) -> dict:
         return {"flagged": flagged}
 
     return _run_async(_run)
+
+
+@celery_app.task(name="commercial.sweep_recurring")
+def sweep_recurring() -> dict:
+    """Auto-generate bookings for active recurring missions (Phase 3.0)."""
+    from services.commercial_engine import RecurringMissionSweeper
+
+    async def _run(factory):
+        async with factory() as db:
+            created = await RecurringMissionSweeper(db).sweep()
+        return {"created_bookings": created}
+
+    return _run_async(_run)

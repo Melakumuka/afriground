@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     heartbeat_check_interval_s: float = 60.0
     heartbeat_threshold_s: float = 120.0
 
+    # Phase 3.0 — Commercial / recurring missions
+    recurring_sweep_interval_s: float = 3600.0
+
     model_config = SettingsConfigDict(
         env_file=os.path.join(os.path.dirname(__file__), "../../.env"),
         env_file_encoding="utf-8",

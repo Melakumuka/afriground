@@ -93,6 +93,15 @@ class SystemJobDriver:
             },
         )
         await self.db.flush()
+
+        if to_state in ("COMPLETED", "PARTIAL_SUCCESS", "FAILED"):
+            from services.sla import SLAService
+
+            try:
+                await SLAService(self.db).enforce_job(job)
+            except Exception:  # noqa: BLE001
+                logger.exception("sla enforcement failed for job %s", job.id)
+
         return job
 
 
@@ -148,10 +157,14 @@ async def process_observation_events(db: AsyncSession, simulate: bool = SIMULATE
 
 
 async def drain(session_factory, limit: int = 50) -> dict:
-    """Poll outbox events and publish them. Shared by worker + Celery task."""
+    """Poll outbox events, publish them, and fan out to per-org webhooks.
+    Shared by worker + Celery task."""
     async with session_factory() as db:
         published = await publish_pending(db, limit=limit)
-        return {"published": published}
+        from services.webhooks import deliver_org_webhooks
+
+        fan_out = await deliver_org_webhooks(db)
+        return {"published": published, "webhooks": fan_out}
 
 
 async def metrics(db: AsyncSession) -> dict:

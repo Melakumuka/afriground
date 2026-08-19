@@ -117,3 +117,24 @@ Phase 2 stays inside the Phase 1 guardrails: no full edge execution, no frontend
 
 ### Phase 2.5 — Verification — COMPLETE
 - Deliver: `tests/test_edge_agent.py`, `tests/test_delivery.py`, endpoint permission tests in `test_api.py`; full suite green (78 tests); migration applied to dev + test DBs; live demo run on the dev DB.
+
+---
+
+## L. Detailed Implementation Plan for Phase 3 (Commercial Value Chain & Integrations)
+
+Phase 3 stays inside the Phase 1 guardrails: no full edge execution, no frontend rewrite, no Yamcs/GNU Radio/SatDump/NATS/K8s. It monetizes the operational runtime from Phase 2: contract usage, SLA enforcement, per-org webhooks, programmatic access, and network-aware routing.
+
+### Phase 3.0 — Commercial Engine & SLA Enforcement — COMPLETE
+- Implement: real contract usage aggregation (`CommercialEngine._aggregate_used_minutes` sums completed on-air minutes in the contract window); `RecurringMissionSweeper` auto-generating bookings for active recurring missions from TLE pass predictions (Celery beat `commercial.sweep_recurring` + manual API trigger); `SLAService.enforce_job` evaluating timeliness/latency/success-rate SLAs at job terminal states, recording `sla_violations` idempotently and emitting `SLA.VIOLATION`; business routes `routes/business.py` (contract usage, SLA violations, recurring sweep); migration `c5d6e7f8a9b0`.
+
+### Phase 3.1 — Webhooks & API Keys — COMPLETE
+- Implement: per-org webhook fan-out `services/webhooks.py` (`deliver_org_webhooks` runs inside `drain`, HMAC-signed payloads, idempotent `webhook_deliveries` unique per webhook+event); webhook CRUD routes `routes/webhooks.py` (`api.manage`); SHA-256-hashed API keys `services/api_keys.py` (prefix `agk_`, plaintext shown once, scopes + rate-limit tier, `X-API-Key` auth dependency); key management routes `routes/keys.py`; migration `c5d6e7f8a9b0`.
+
+### Phase 3.2 — Network Routing — COMPLETE
+- Implement: `services/network_routing.py` computing a composite routing score per station (60% operational risk, 30% measured quality, certification ±, heartbeat freshness ±) with live network ranking; contact planning folds `station_bonus` into opportunity scoring and enforces mission operational constraints (station restrictions, min elevation, blackout windows) via `ContactPlanningService._constraint_block`; routes `routes/network.py`. No schema change (computed from existing twin tables).
+
+### Phase 3.3 — Production Packaging & Liveness — COMPLETE
+- Implement: `Dockerfile` (API image, `/healthz` DB-aware liveness probe returning 503 when down), `Dockerfile.worker` (Celery worker + beat), `docker-compose.yml` `api` + `worker` services, `.dockerignore`.
+
+### Phase 3.4 — Verification — COMPLETE
+- Deliver: `tests/test_sla.py`, `tests/test_webhooks.py`, `tests/test_api_keys.py`, `tests/test_network_routing.py`, new endpoint permission tests in `test_api.py`; full suite green (102 tests); migration `c5d6e7f8a9b0` applied to dev + test DBs; seed idempotent (adds `api.manage` permission).

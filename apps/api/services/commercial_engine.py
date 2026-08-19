@@ -2,15 +2,17 @@
 Commercial Engine — Manages Quotes, Orders, Contracts, Billing, and Recurring Missions.
 """
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update
 from fastapi import HTTPException
 
 from models.core import Quote, Contract, Organization
 from models.scheduling import Booking, RecurringMission, PassPrediction, Schedule
-from models.spacecraft import Satellite
+from models.spacecraft import Satellite, TLESet
+from models.contact import ObservationJob, ScheduledContact
+from models.station import GroundStation
+from sqlalchemy import select, update, func, or_
 
 
 # ── Pydantic Schemas ─────────────────────────────────────────────────────────
@@ -233,14 +235,16 @@ class CommercialEngine:
         )
 
     async def get_contract_usage(self, contract_id: uuid.UUID) -> ContractResponse:
-        """Get contract details including usage against reserved capacity."""
+        """Get contract details including usage against reserved capacity.
+
+        Usage is aggregated from completed observation jobs under the org whose
+        completion falls inside the contract window (minutes on air).
+        """
         contract = await self.db.get(Contract, contract_id)
         if not contract:
             raise HTTPException(status_code=404, detail="Contract not found")
 
-        # Calculate used minutes from completed operations under this org
-        # In production this would be a proper aggregation query
-        used_minutes = 0  # placeholder — would aggregate from operations table
+        used_minutes = await self._aggregate_used_minutes(contract)
 
         return ContractResponse(
             id=contract.id,
@@ -251,8 +255,34 @@ class CommercialEngine:
             sla_availability_target=contract.sla_availability_target,
             status=contract.status,
             used_minutes=used_minutes,
-            remaining_minutes=contract.reserved_capacity_minutes - used_minutes,
+            remaining_minutes=max(contract.reserved_capacity_minutes - used_minutes, 0),
         )
+
+    async def _aggregate_used_minutes(self, contract: Contract) -> int:
+        """Sum completed contact durations (minutes) for the org in the contract window."""
+        on_air_seconds = (
+            func.extract(
+                "epoch",
+                ScheduledContact.scheduled_end - ScheduledContact.scheduled_start,
+            )
+        )
+        stmt = (
+            select(func.coalesce(func.sum(on_air_seconds), 0.0))
+            .select_from(ObservationJob)
+            .join(ScheduledContact, ScheduledContact.id == ObservationJob.scheduled_contact_id)
+            .where(
+                ObservationJob.org_id == contract.org_id,
+                ObservationJob.status == "COMPLETED",
+                ObservationJob.completed_at.isnot(None),
+            )
+        )
+        if contract.start_date:
+            stmt = stmt.where(ObservationJob.completed_at >= contract.start_date)
+        if contract.end_date:
+            stmt = stmt.where(ObservationJob.completed_at <= contract.end_date)
+
+        total_seconds = (await self.db.execute(stmt)).scalar() or 0.0
+        return int(total_seconds // 60)
 
     # ── Recurring Missions ───────────────────────────────────────────────────
 
@@ -295,3 +325,136 @@ class CommercialEngine:
         )
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
+
+
+# ── Recurring Mission Sweeper (Phase 3.0) ────────────────────────────────────
+
+class RecurringMissionSweeper:
+    """Auto-generates bookings for active recurring missions from TLE pass
+    predictions. Runs on a Celery beat schedule (and manually via API)."""
+
+    SWEEP_WINDOW_HOURS = 24
+
+    def __init__(self, db: AsyncSession):
+        self.db = db
+        from services.sgp4_engine import SGP4Engine
+
+        self.sgp4 = SGP4Engine()
+
+    async def sweep(self, org_id: Optional[uuid.UUID] = None) -> int:
+        """Create bookings for every due recurring mission. Returns count created."""
+        now = datetime.now(timezone.utc)
+        stmt = select(RecurringMission).where(
+            RecurringMission.status == "active",
+            RecurringMission.start_date <= now,
+            or_(
+                RecurringMission.end_date.is_(None),
+                RecurringMission.end_date >= now,
+            ),
+        )
+        if org_id:
+            stmt = stmt.where(RecurringMission.org_id == org_id)
+        result = await self.db.execute(stmt)
+        missions = result.scalars().all()
+
+        created = 0
+        for mission in missions:
+            created += await self._sweep_mission(mission, now)
+
+        if created:
+            await self.db.commit()
+        return created
+
+    async def _sweep_mission(self, mission: RecurringMission, now: datetime) -> int:
+        tle = (
+            await self.db.execute(
+                select(TLESet).where(
+                    TLESet.satellite_id == mission.satellite_id,
+                    TLESet.is_active == True,  # noqa: E712
+                )
+            )
+        ).scalars().first()
+        if not tle:
+            return 0
+
+        station_ids = [mission.station_id] if mission.station_id else None
+        if station_ids is None:
+            rows = await self.db.execute(
+                select(GroundStation.id).where(GroundStation.status == "operational")
+            )
+            station_ids = rows.scalars().all()
+
+        window_end = now + timedelta(hours=self.SWEEP_WINDOW_HOURS)
+
+        candidates = []
+        for station_id in station_ids:
+            station = await self.db.get(GroundStation, station_id)
+            if not station:
+                continue
+            passes = self.sgp4.predict_passes(
+                tle.line1,
+                tle.line2,
+                station.latitude,
+                station.longitude,
+                station.altitude_m,
+                now,
+                window_end,
+                min_elevation_deg=max(station.min_elevation_deg or 5.0, 5.0),
+            )
+            for p in passes:
+                candidates.append((station, p))
+
+        if not candidates:
+            return 0
+
+        # Dedupe against passes already booked for this recurring mission.
+        booked_pairs = set(
+            (
+                await self.db.execute(
+                    select(PassPrediction.station_id, PassPrediction.aos)
+                    .join(Schedule, Schedule.pass_prediction_id == PassPrediction.id)
+                    .join(Booking, Booking.id == Schedule.booking_id)
+                    .where(Booking.recurring_mission_id == mission.id)
+                )
+            ).all()
+        )
+
+        # Pick the best passes_per_day opportunities (by elevation then time).
+        candidates.sort(key=lambda c: (-c[1].max_elevation, c[1].aos))
+        created = 0
+        for station, p in candidates:
+            if created >= mission.passes_per_day:
+                break
+            if (station.id, p.aos) in booked_pairs:
+                continue
+
+            pred = PassPrediction(
+                satellite_id=mission.satellite_id,
+                station_id=station.id,
+                aos=p.aos,
+                los=p.los,
+                max_elevation=p.max_elevation,
+                duration_seconds=p.duration_seconds,
+            )
+            self.db.add(pred)
+            await self.db.flush()
+
+            booking = Booking(
+                org_id=mission.org_id,
+                satellite_id=mission.satellite_id,
+                status="REQUESTED",
+                recurring_mission_id=mission.id,
+            )
+            self.db.add(booking)
+            await self.db.flush()
+
+            self.db.add(
+                Schedule(
+                    booking_id=booking.id,
+                    pass_prediction_id=pred.id,
+                    station_id=station.id,
+                    status="SCHEDULED",
+                )
+            )
+            created += 1
+        return created

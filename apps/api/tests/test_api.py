@@ -261,3 +261,151 @@ def test_edge_telemetry_list_unknown_station_404(authed_client):
 def test_edge_quality_unknown_station_404(authed_client):
     resp = authed_client.get(f"/api/v1/edge/stations/{uuid.uuid4()}/quality")
     assert resp.status_code == 404
+
+
+# ── Phase 3 API tests ────────────────────────────────────────────────────────
+
+def test_api_key_create_requires_permission(client, seeded_user):
+    from services.tenancy import get_tenant_context as gtc
+    from services.tenancy import TenantContext
+
+    app = main.app
+
+    async def _override_tenant():
+        return TenantContext(
+            user=seeded_user["user"],
+            organization=seeded_user["org"],
+            roles=[],
+            permissions=set(),
+            org_id=seeded_user["org"].id,
+        )
+
+    app.dependency_overrides[gtc] = _override_tenant
+    resp = client.post("/api/v1/keys", json={"name": "no-perm"})
+    assert resp.status_code == 403
+    app.dependency_overrides.pop(gtc, None)
+
+
+def test_api_key_create_and_me(authed_client, seeded_user):
+    resp = authed_client.post("/api/v1/keys", json={"name": "ops-bot", "scopes": ["jobs:read"]})
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["api_key"].startswith("agk_")
+    assert body["scopes"] == ["jobs:read"]
+
+    me = authed_client.get("/api/v1/keys/me", headers={"X-API-Key": body["api_key"]})
+    assert me.status_code == 200
+    me_body = me.json()
+    assert me_body["org_id"] == str(seeded_user["org"].id)
+
+    me_bad = authed_client.get("/api/v1/keys/me", headers={"X-API-Key": "agk_bad" * 6})
+    assert me_bad.status_code == 401
+
+    listed = authed_client.get("/api/v1/keys")
+    assert listed.status_code == 200
+    assert any(k["name"] == "ops-bot" for k in listed.json())
+
+    revoked = authed_client.delete(f"/api/v1/keys/{body['id']}")
+    assert revoked.status_code == 200
+
+    me_revoked = authed_client.get("/api/v1/keys/me", headers={"X-API-Key": body["api_key"]})
+    assert me_revoked.status_code == 401
+
+
+def test_webhook_crud_and_permission(client, authed_client, seeded_user):
+    from services.tenancy import get_tenant_context as gtc
+    from services.tenancy import TenantContext
+
+    app = main.app
+
+    async def _override_tenant():
+        return TenantContext(
+            user=seeded_user["user"],
+            organization=seeded_user["org"],
+            roles=[],
+            permissions=set(),
+            org_id=seeded_user["org"].id,
+        )
+
+    app.dependency_overrides[gtc] = _override_tenant
+    resp = client.post("/api/v1/webhooks", json={"url": "https://x.test/h", "events": ["OBSERVATION_JOB."]})
+    assert resp.status_code == 403
+    app.dependency_overrides.pop(gtc, None)
+    app.dependency_overrides[gtc] = _tenant_override_for(seeded_user)
+
+    created = authed_client.post(
+        "/api/v1/webhooks",
+        json={"url": "https://x.test/h", "events": ["OBSERVATION_JOB."]},
+    )
+    assert created.status_code == 200
+    wh = created.json()
+    assert wh["is_active"] is True
+
+    listed = authed_client.get("/api/v1/webhooks")
+    assert listed.status_code == 200
+    assert len(listed.json()) == 1
+
+    toggled = authed_client.patch(f"/api/v1/webhooks/{wh['id']}/toggle")
+    assert toggled.status_code == 200
+    assert toggled.json()["is_active"] is False
+
+    deleted = authed_client.delete(f"/api/v1/webhooks/{wh['id']}")
+    assert deleted.status_code == 200
+
+
+def test_sla_violations_requires_admin(client, authed_client, seeded_user):
+    from services.tenancy import get_tenant_context as gtc
+    from services.tenancy import TenantContext
+
+    app = main.app
+
+    async def _override_tenant():
+        return TenantContext(
+            user=seeded_user["user"],
+            organization=seeded_user["org"],
+            roles=[],
+            permissions=set(),
+            org_id=seeded_user["org"].id,
+        )
+
+    app.dependency_overrides[gtc] = _override_tenant
+    resp = client.get("/api/v1/business/sla-violations")
+    assert resp.status_code == 403
+    app.dependency_overrides.pop(gtc, None)
+    app.dependency_overrides[gtc] = _tenant_override_for(seeded_user)
+
+    ok = authed_client.get("/api/v1/business/sla-violations")
+    assert ok.status_code == 200
+    assert ok.json() == []
+
+
+def test_network_ranking_requires_admin(client, authed_client, seeded_user):
+    from services.tenancy import get_tenant_context as gtc
+    from services.tenancy import TenantContext
+
+    app = main.app
+
+    async def _override_tenant():
+        return TenantContext(
+            user=seeded_user["user"],
+            organization=seeded_user["org"],
+            roles=[],
+            permissions=set(),
+            org_id=seeded_user["org"].id,
+        )
+
+    app.dependency_overrides[gtc] = _override_tenant
+    resp = client.get("/api/v1/network/ranking")
+    assert resp.status_code == 403
+    app.dependency_overrides.pop(gtc, None)
+    app.dependency_overrides[gtc] = _tenant_override_for(seeded_user)
+
+    ok = authed_client.get("/api/v1/network/ranking")
+    assert ok.status_code == 200
+    assert isinstance(ok.json(), list)
+
+
+def test_healthz_reports_db(authed_client):
+    resp = authed_client.get("/healthz")
+    assert resp.status_code == 200
+    assert resp.json()["db"] == "up"

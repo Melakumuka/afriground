@@ -29,6 +29,7 @@ from services.outbox import emit
 from services.sgp4_engine import SGP4Engine
 from services.state_machine import RESERVATION_SM, CONTACT_OPPORTUNITY_SM
 from services.tenancy import TenantContext, write_audit_log
+from services.network_routing import NetworkRoutingService
 
 
 def _now() -> datetime:
@@ -40,6 +41,7 @@ class ContactPlanningService:
         self.db = db
         self.tenant = tenant
         self.sgp4 = SGP4Engine()
+        self.routing = NetworkRoutingService(db)
 
     # ── Visibility opportunities ────────────────────────────────────────────
 
@@ -155,8 +157,15 @@ class ContactPlanningService:
                     detail=f"Station {station.code} is not certified for contacts",
                 )
 
+            # Mission operational constraints (Phase 3.2): station restrictions
+            # and minimum elevation turn infeasible opportunities CLOSED.
+            constraint_reason = await self._constraint_block(profile.mission_id, station, vis)
+
             # RF feasibility vs station capabilities
             band_ok, score = await self._score_opportunity(vis, station, rf_profile)
+            if constraint_reason:
+                band_ok = False
+                score = 0.0
 
             opp = ContactOpportunity(
                 org_id=self.tenant.org_id,
@@ -198,7 +207,52 @@ class ContactPlanningService:
             score += vis.duration_seconds / 300.0  # bonus for longer passes
         if cap_row.gain_dbi:
             score += cap_row.gain_dbi / 10.0
+        # Network routing bonus (Phase 3.2): measured quality + risk + heartbeat.
+        score += await self.routing.station_bonus(station.id)
         return True, round(score, 2)
+
+    async def _constraint_block(
+        self,
+        mission_id: uuid.UUID,
+        station: Optional[GroundStation],
+        vis: VisibilityOpportunity,
+    ) -> Optional[str]:
+        """Return a reason string when a mission operational constraint makes
+        this opportunity infeasible, else None (Phase 3.2)."""
+        result = await self.db.execute(
+            select(MissionOperationalConstraint).where(
+                MissionOperationalConstraint.mission_id == mission_id,
+                MissionOperationalConstraint.is_active == True,  # noqa: E712
+            )
+        )
+        constraints = result.scalars().all()
+        if not constraints:
+            return None
+
+        for constraint in constraints:
+            value = constraint.value or {}
+            if constraint.constraint_type == "station_restriction":
+                allowed = value.get("station_ids") or []
+                if station and allowed and station.id not in allowed:
+                    return f"station restricted by mission constraints (allowed: {len(allowed)})"
+            elif constraint.constraint_type == "min_elevation":
+                required = float(value.get("min_elevation_deg", 0) or 0)
+                if vis.max_elevation_deg < required:
+                    return f"pass elevation {vis.max_elevation_deg} below required {required}"
+            elif constraint.constraint_type == "blackout_window":
+                start = value.get("start")
+                end = value.get("end")
+                if start and end:
+                    from datetime import datetime as _dt
+
+                    try:
+                        start_dt = _dt.fromisoformat(start.replace("Z", "+00:00"))
+                        end_dt = _dt.fromisoformat(end.replace("Z", "+00:00"))
+                    except ValueError:
+                        continue
+                    if start_dt <= vis.aos <= end_dt:
+                        return "inside mission blackout window"
+        return None
 
     # ── Reservations ────────────────────────────────────────────────────────
 
