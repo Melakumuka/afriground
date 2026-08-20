@@ -56,3 +56,7 @@ logs/
 terraform/free/.ssh/
 
 terraform/**/.terraform/
+
+**/terraform.tfvars
+
+.vercel

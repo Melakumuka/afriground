@@ -136,7 +136,7 @@ resource "aws_db_instance" "afriground_db" {
   allocated_storage = 20
   storage_type      = "gp2"
   engine            = "postgres"
-  engine_version    = "16.3"
+  engine_version    = "16.14"
   instance_class    = "db.t3.micro" # free-tier eligible
   db_name           = "afriground"
   username          = "afriground_admin"
@@ -262,6 +262,11 @@ resource "aws_iam_policy" "ec2" {
 resource "aws_iam_role_policy_attachment" "ec2" {
   role       = aws_iam_role.ec2.name
   policy_arn = aws_iam_policy.ec2.arn
+}
+
+resource "aws_iam_role_policy_attachment" "ec2_ssm" {
+  role       = aws_iam_role.ec2.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
 resource "aws_iam_instance_profile" "ec2" {

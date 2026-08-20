@@ -1,0 +1,9 @@
+node_modules
+.git
+.venv
+.terraform
+.docker-data
+.next
+terraform/free/.terraform
+apps/web/node_modules
+apps/web/.next
