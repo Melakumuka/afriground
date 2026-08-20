@@ -57,6 +57,7 @@
     "mission_title": "An operational interface, not a demo.",
     "mission_subtitle": "Spacecraft status, pass scheduling, command queues and contact state — in one console.",
     "mission_simulation": "Operational preview · simulation",
+    "mission_live": "Operational preview · live API feed",
     "mission_spacecraft_label": "Spacecraft under contact",
     "mission_spacecraft_value": "AG-MISSION-01",
     "mission_contact_label": "Contact state",

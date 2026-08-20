@@ -12,6 +12,13 @@ import EngineeringSection from "@/components/EngineeringSection";
 import CoverageSection from "@/components/CoverageSection";
 import ProofSection from "@/components/ProofSection";
 import RevealOnScroll from "@/components/RevealOnScroll";
+import {
+  fetchMissions,
+  fetchNetworkRanking,
+  fetchOrchestrationMetrics,
+  fetchSlaViolations,
+  type MissionControlLive,
+} from "@/lib/api";
 
 export default async function LandingPage({
   params,
@@ -20,6 +27,36 @@ export default async function LandingPage({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "Landing" });
+
+  // Phase 4.2 — live operational feed from the FastAPI surface. Every call
+  // fails soft; when the API is unreachable the section renders its mock text.
+  const [missions, metrics, sla, ranking] = await Promise.all([
+    fetchMissions(),
+    fetchOrchestrationMetrics(),
+    fetchSlaViolations(5),
+    fetchNetworkRanking(),
+  ]);
+  const missionControlLive: MissionControlLive | undefined =
+    missions || metrics || sla || ranking
+      ? {
+          source: "api",
+          spacecraft: missions ? `${missions.length} ACTIVE` : undefined,
+          contactState: metrics
+            ? metrics.outbox.by_status.FAILED > 0
+              ? "RETRYING"
+              : "OUTBOX HEALTHY"
+            : undefined,
+          telemetry: sla
+            ? sla.length > 0
+              ? `${sla.length} VIOLATIONS`
+              : "NO VIOLATIONS"
+            : undefined,
+          alerts: sla?.map((v) => ({
+            level: v.status === "VIOLATED" ? "WARNING" : "NOMINAL",
+            msg: `${v.sla_type.toUpperCase()} · target ${v.target_value}${v.unit ?? ""} / actual ${v.actual_value}${v.unit ?? ""}`,
+          })),
+        }
+      : undefined;
 
   return (
     <main className="relative min-h-screen bg-graphite">
@@ -97,6 +134,7 @@ export default async function LandingPage({
           title: t("mission_title"),
           subtitle: t("mission_subtitle"),
           simulationLabel: t("mission_simulation"),
+          liveLabel: t("mission_live"),
           spacecraftLabel: t("mission_spacecraft_label"),
           spacecraftValue: t("mission_spacecraft_value"),
           contactStateLabel: t("mission_contact_label"),
@@ -110,6 +148,7 @@ export default async function LandingPage({
           alerts: t.raw("mission_alerts"),
           alertsLabel: t("mission_alerts_label"),
         }}
+        live={missionControlLive}
       />
 
       {/* ── 05 · DATA — signal to intelligence flow ───────────────── */}

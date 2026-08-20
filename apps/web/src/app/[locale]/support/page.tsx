@@ -15,13 +15,53 @@ export default function SupportPortal() {
   const [status, setStatus] = useState<"idle" | "submitting" | "submitted">("idle");
   const [ticketId, setTicketId] = useState("");
 
-  const handleSubmit = (e: FormEvent) => {
+  const CATEGORY_CODES: Record<string, string> = {
+    "技术支持": "technical",
+    "Technical Support": "technical",
+    "账单与合同": "billing",
+    "Billing & Contracts": "billing",
+    "调度与预订": "scheduling",
+    "Scheduling & Bookings": "scheduling",
+    "合作与销售": "hardware",
+    "Partnership & Sales": "hardware",
+  };
+  const PRIORITY_CODES: Record<string, string> = {
+    "普通": "normal",
+    "Normal": "normal",
+    "高": "high",
+    "High": "high",
+    "紧急": "urgent",
+    "Urgent": "urgent",
+    "低": "low",
+    "Low": "low",
+  };
+
+  // Phase 4.2 — open a real ticket via the platform proxy; falls back to the
+  // simulated TKT reference when the API is unreachable.
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setStatus("submitting");
-    window.setTimeout(() => {
+    try {
+      const res = await fetch("/api/platform/support/tickets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          category: CATEGORY_CODES[category] ?? "technical",
+          priority: PRIORITY_CODES[priority] ?? "normal",
+          subject: subject || "Website inquiry",
+          description: `${description}\n\nContact: ${email}\nStation: ${stationId}`,
+        }),
+      });
+      const payload = await res.json();
+      if (res.ok && payload?.ok) {
+        setTicketId(payload.data.id.slice(0, 8).toUpperCase());
+      } else {
+        setTicketId(`TKT-${String(Math.floor(1000 + Math.random() * 9000))}`);
+      }
+    } catch {
       setTicketId(`TKT-${String(Math.floor(1000 + Math.random() * 9000))}`);
-      setStatus("submitted");
-    }, 900);
+    }
+    setStatus("submitted");
   };
 
   const resetForm = () => {

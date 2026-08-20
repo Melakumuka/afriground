@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useT } from "@/lib/useT";
+import type { Agent, Station, TimeStatus } from "@/lib/api";
 
 // Types matching our backend
 type StationRisk = {
@@ -24,6 +25,12 @@ type TelemetryData = {
 
 export default function StationHealthDashboard() {
   const { t } = useT("Station");
+  const [station, setStation] = useState<Station | null>(null);
+  const [agents, setAgents] = useState<Agent[] | null>(null);
+  const [timeStatus, setTimeStatus] = useState<TimeStatus[] | null>(null);
+  const [source, setSource] = useState<"mock" | "api">("mock");
+  const [stationName, setStationName] = useState("Entoto Observatory · Antenna A (12m)");
+
   // Mock data for MVP UI
   const [risk] = useState<StationRisk>({
     station_name: "Entoto Observatory · Antenna A (12m)",
@@ -36,6 +43,29 @@ export default function StationHealthDashboard() {
 
   const [telemetry, setTelemetry] = useState<TelemetryData | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+
+  // Phase 4.2 — resolve the station twin from the API (falls back to the
+  // simulated feed when the backend is unreachable).
+  useEffect(() => {
+    fetch("/api/platform/stations")
+      .then((res) => (res.ok ? res.json() : null))
+      .then(async (payload) => {
+        if (!payload?.ok || !Array.isArray(payload.data) || payload.data.length === 0) return;
+        const first: Station = payload.data[0];
+        setStation(first);
+        setStationName(`${first.name} · ${first.code}`);
+        setSource("api");
+        const [agentsRes, timeRes] = await Promise.all([
+          fetch(`/api/platform/stations/${first.id}/agents`).then((r) => (r.ok ? r.json() : null)),
+          fetch(`/api/platform/stations/${first.id}/time-status`).then((r) => (r.ok ? r.json() : null)),
+        ]);
+        if (agentsRes?.ok) setAgents(agentsRes.data);
+        if (timeRes?.ok) setTimeStatus(timeRes.data);
+      })
+      .catch(() => {
+        /* API unreachable — keep simulated feed */
+      });
+  }, []);
 
   // Connect to telemetry websocket
   useEffect(() => {
@@ -89,9 +119,10 @@ export default function StationHealthDashboard() {
           <div className="mt-5 flex flex-wrap items-end justify-between gap-6">
             <div>
               <h1 className="font-display font-bold text-4xl sm:text-5xl tracking-tight text-white">
-                {risk.station_name}
+                {stationName}
               </h1>
               <p className="mt-4 text-steel-2 leading-relaxed max-w-lg">
+                {station ? `${station.country} · ${station.certification_state} · TX ${station.tx_enabled ? "ENABLED" : "DISABLED"} · ` : ""}
                 {t("subtitle", "实时射频、天线与环境遥测数据，并附带风险分析。", "Real-time RF, antenna and environmental telemetry with risk analysis.")}
               </p>
             </div>
@@ -177,6 +208,59 @@ export default function StationHealthDashboard() {
           <div className="console-panel rounded-sm px-6 sm:px-8 py-20 text-center">
             <span className="signal-indicator inline-block" />
             <p className="mono-label text-steel-2 mt-4">{t("acquiring", "正在获取遥测数据流...", "ACQUIRING TELEMETRY FEED...")}</p>
+          </div>
+        )}
+
+        {(agents || timeStatus) && (
+          <div className="console-panel rounded-sm">
+            <div className="px-6 sm:px-8 py-5 border-b border-graphite-600/60 bg-graphite-700/40 flex items-center justify-between">
+              <span className="mono-label text-signal-soft">{t("platform_panel", "平台 · 边缘代理与时钟同步", "PLATFORM · EDGE AGENTS & CLOCK SYNC")}</span>
+              <span className="font-mono text-[10px] text-green-soft">LIVE · API FEED</span>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-px bg-graphite-600/60">
+              <div className="px-6 sm:px-8 py-6 space-y-4">
+                <span className="mono-label text-steel-2">{t("agents_label", "已注册边缘代理", "REGISTERED EDGE AGENTS")}</span>
+                {(agents ?? []).length === 0 && (
+                  <p className="font-mono text-xs text-graphite-mute">—</p>
+                )}
+                {(agents ?? []).map((a) => (
+                  <div key={a.id} className="flex items-center justify-between py-2 border-b border-graphite-600/40 last:border-0">
+                    <div>
+                      <div className="font-mono text-sm text-white">{a.agent_id}</div>
+                      <div className="font-mono text-[10px] text-graphite-mute">
+                        v{a.agent_version ?? "?"} · {a.last_heartbeat_at ? new Date(a.last_heartbeat_at).toLocaleTimeString() : "no heartbeat"}
+                      </div>
+                    </div>
+                    <span
+                      className={`px-2 py-0.5 text-[10px] font-mono border ${
+                        a.status === "active" && !a.revoked_at
+                          ? "text-green-soft border-green/40"
+                          : "text-signal-soft border-signal/40"
+                      }`}
+                    >
+                      {a.status.toUpperCase()}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className="px-6 sm:px-8 py-6 space-y-4">
+                <span className="mono-label text-steel-2">{t("sync_label", "时间同步状态", "TIME SYNC STATUS")}</span>
+                {(timeStatus ?? []).length === 0 && (
+                  <p className="font-mono text-xs text-graphite-mute">—</p>
+                )}
+                {(timeStatus ?? []).slice(0, 6).map((s) => (
+                  <div key={s.id} className="flex items-center justify-between py-2 border-b border-graphite-600/40 last:border-0">
+                    <div>
+                      <div className="font-mono text-sm text-white">{s.sync_status}</div>
+                      <div className="font-mono text-[10px] text-graphite-mute">{s.clock_source ?? "—"}</div>
+                    </div>
+                    <span className="font-mono text-xs text-signal-soft">
+                      {s.offset_ms != null ? `${s.offset_ms >= 0 ? "+" : ""}${s.offset_ms} ms` : "—"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 

@@ -5,6 +5,7 @@ export type MissionControlText = {
   title: string;
   subtitle: string;
   simulationLabel: string;
+  liveLabel: string;
   spacecraftLabel: string;
   spacecraftValue: string;
   contactStateLabel: string;
@@ -19,7 +20,22 @@ export type MissionControlText = {
   alertsLabel: string;
 };
 
-export default function MissionControlPreview({ text }: { text: MissionControlText }) {
+export type MissionControlLive = {
+  source: "api" | "mock";
+  spacecraft?: string;
+  contactState?: string;
+  telemetry?: string;
+  alerts?: { level: string; msg: string }[];
+};
+
+export default function MissionControlPreview({
+  text,
+  live,
+}: {
+  text: MissionControlText;
+  live?: MissionControlLive;
+}) {
+  const alerts = live?.alerts && live.alerts.length > 0 ? live.alerts : text.alerts;
   return (
     <section id="mission" className="relative z-10 bg-graphite/90 text-ink py-24 px-6 sm:px-10 lg:px-14">
       <div className="max-w-7xl mx-auto">
@@ -37,7 +53,7 @@ export default function MissionControlPreview({ text }: { text: MissionControlTe
             <div className="lg:col-span-4">
               <p className="text-steel leading-relaxed">{text.subtitle}</p>
               <p className="mono-label text-graphite-mute mt-4">
-                {text.simulationLabel}
+                {live?.source === "api" ? text.liveLabel : text.simulationLabel}
               </p>
             </div>
           </div>
@@ -47,13 +63,15 @@ export default function MissionControlPreview({ text }: { text: MissionControlTe
           {/* Row 1: spacecraft + contact state + telemetry */}
           <div className="lg:col-span-4 console-panel p-7">
             <span className="mono-label text-graphite-mute">{text.spacecraftLabel}</span>
-            <div className="font-mono text-2xl font-semibold text-white mt-2">{text.spacecraftValue}</div>
+            <div className="font-mono text-2xl font-semibold text-white mt-2">
+              {live?.spacecraft ?? text.spacecraftValue}
+            </div>
           </div>
           <div className="lg:col-span-4 console-panel p-7 flex items-end justify-between">
             <div>
               <span className="mono-label text-graphite-mute">{text.contactStateLabel}</span>
               <div className="font-mono text-2xl font-semibold mt-2 text-green-soft">
-                {text.contactStateValue}
+                {live?.contactState ?? text.contactStateValue}
               </div>
             </div>
             <span className="signal-indicator" />
@@ -61,7 +79,7 @@ export default function MissionControlPreview({ text }: { text: MissionControlTe
           <div className="lg:col-span-4 console-panel p-7">
             <span className="mono-label text-graphite-mute">{text.telemetryLabel}</span>
             <div className="font-mono text-2xl font-semibold text-signal-soft mt-2">
-              {text.telemetryValue}
+              {live?.telemetry ?? text.telemetryValue}
             </div>
           </div>
 
@@ -107,7 +125,7 @@ export default function MissionControlPreview({ text }: { text: MissionControlTe
           <div className="lg:col-span-12 console-panel p-7 border-t border-graphite-600/60">
             <span className="mono-label text-graphite-mute">{text.alertsLabel}</span>
             <div className="mt-4 flex flex-col sm:flex-row gap-3 font-mono text-[11px]">
-              {text.alerts.map((a) => (
+              {alerts.map((a) => (
                 <div
                   key={a.msg}
                   className="flex items-center gap-3 px-4 py-2.5 border border-graphite-600 text-steel-2"

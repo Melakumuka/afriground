@@ -57,6 +57,7 @@
     "mission_title": "运营级界面，而非演示。",
     "mission_subtitle": "航天器状态、过境调度、指令队列与联络状态——尽在一个控制台。",
     "mission_simulation": "运营预览 · 模拟数据",
+    "mission_live": "运营预览 · 实时 API 数据",
     "mission_spacecraft_label": "联络中的航天器",
     "mission_spacecraft_value": "AG-MISSION-01",
     "mission_contact_label": "联络状态",

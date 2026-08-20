@@ -90,6 +90,8 @@ class SupportTicket(Base):
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     org_id = Column(UUID(as_uuid=True), ForeignKey('organizations.id'), nullable=False)
+    reporter_id = Column(UUID(as_uuid=True), ForeignKey('users.id'))
+    category = Column(String(50))  # billing, technical, scheduling, hardware
     subject = Column(String(255), nullable=False)
     status = Column(String(50), default='open')
     priority = Column(String(50), default='normal')

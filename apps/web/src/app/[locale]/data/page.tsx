@@ -1,20 +1,61 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useT } from "@/lib/useT";
+import type { Dataset } from "@/lib/api";
+
+type DatasetRow = {
+  id: string;
+  satellite: string;
+  product_type: string;
+  capture_time: string;
+  cloud_cover: number;
+  size: string;
+  status: "AVAILABLE" | "DELIVERING";
+};
 
 // Mock dataset
-const MOCK_DATASETS = [
+const MOCK_DATASETS: DatasetRow[] = [
   { id: "ds-1", satellite: "Aqua", product_type: "L1B_RAD", capture_time: "2024-05-12T14:30:00Z", cloud_cover: 12.5, size: "1.2 GB", status: "AVAILABLE" },
   { id: "ds-2", satellite: "Terra", product_type: "L0_RAW", capture_time: "2024-05-11T16:15:00Z", cloud_cover: 45.0, size: "850 MB", status: "AVAILABLE" },
   { id: "ds-3", satellite: "Aqua", product_type: "L1B_RAD", capture_time: "2024-05-10T14:28:00Z", cloud_cover: 5.2, size: "1.1 GB", status: "DELIVERING" },
 ];
 
+function mapDataset(d: Dataset): DatasetRow {
+  const satellite = d.satellite_id
+    ? `SAT-${d.satellite_id.slice(0, 8).toUpperCase()}`
+    : d.sensor_type ?? "UNKNOWN";
+  return {
+    id: d.id,
+    satellite,
+    product_type: d.product_type ?? d.processing_level ?? "—",
+    capture_time: d.acquisition_date ?? "—",
+    cloud_cover: d.cloud_cover ?? 0,
+    size: d.storage_url ? "READY" : "—",
+    status: d.storage_url ? "AVAILABLE" : "DELIVERING",
+  };
+}
+
 export default function DataCatalog() {
   const { t } = useT("Data");
-  const [datasets, setDatasets] = useState(MOCK_DATASETS);
+  const [datasets, setDatasets] = useState<DatasetRow[]>(MOCK_DATASETS);
+  const [source, setSource] = useState<"mock" | "api">("mock");
   const [deliveryTarget, setDeliveryTarget] = useState("");
   const [isDelivering, setIsDelivering] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/platform/data/datasets")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((payload) => {
+        if (payload?.ok && Array.isArray(payload.data) && payload.data.length > 0) {
+          setDatasets(payload.data.map(mapDataset));
+          setSource("api");
+        }
+      })
+      .catch(() => {
+        /* API unreachable — keep the mock catalog */
+      });
+  }, []);
 
   const handleDeliver = (id: string) => {
     setIsDelivering(id);
@@ -72,7 +113,9 @@ export default function DataCatalog() {
         <div className="console-panel rounded-sm overflow-hidden">
           <div className="px-6 sm:px-8 py-5 border-b border-graphite-600/60 bg-graphite-700/40 flex items-center justify-between">
             <span className="mono-label text-signal-soft">{t("captured", "已采集数据集", "CAPTURED DATASETS")}</span>
-            <span className="font-mono text-[10px] text-graphite-mute">{t("mock_feed", "模拟数据 · 模拟环境", "MOCK FEED · SIM ENV")}</span>
+            <span className="font-mono text-[10px] text-graphite-mute">
+              {source === "api" ? "LIVE · API FEED" : t("mock_feed", "模拟数据 · 模拟环境", "MOCK FEED · SIM ENV")}
+            </span>
           </div>
 
           <div className="overflow-x-auto">
@@ -137,7 +180,9 @@ export default function DataCatalog() {
         </div>
 
         <p className="mono-label text-graphite-mute">
-          {t("sim_footer", "模拟环境 · 记录为模拟数据，并非真实任务产品", "SIMULATION ENVIRONMENT · RECORDS ARE MOCK DATA, NOT LIVE MISSION PRODUCTS")}
+          {source === "api"
+            ? t("live_footer", "实时环境 · 来自 AfriGround API 的实时数据集", "LIVE ENVIRONMENT · DATASETS FROM THE AFRIGROUND API")
+            : t("sim_footer", "模拟环境 · 记录为模拟数据，并非真实任务产品", "SIMULATION ENVIRONMENT · RECORDS ARE MOCK DATA, NOT LIVE MISSION PRODUCTS")}
         </p>
       </div>
     </main>
