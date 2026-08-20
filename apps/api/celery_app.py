@@ -39,3 +39,8 @@ celery_app.conf.update(
         },
     },
 )
+
+# Register the Celery tasks on this app so `celery -A celery_app worker`
+# knows them (they are defined in tasks.py and would otherwise be
+# "unregistered task" for beat).
+from tasks import check_heartbeats, drain_outbox, outbox_metrics, sweep_recurring  # noqa: E402,F401

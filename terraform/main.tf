@@ -462,10 +462,15 @@ resource "aws_ecs_task_definition" "worker" {
     environment = [
       { name = "REDIS_URL", value = local.redis_url },
       { name = "CELERY_BROKER_URL", value = local.redis_url },
+      { name = "SUPABASE_URL", value = var.supabase_url },
       { name = "AFRIGROUND_ORCHESTRATION_SIMULATE", value = var.orchestration_simulate },
     ]
     secrets     = [
       { name = "AFRIGROUND_WORKER_URL", valueFrom = aws_ssm_parameter.database_url.arn },
+      { name = "DATABASE_URL", valueFrom = aws_ssm_parameter.database_url.arn },
+      { name = "SECRET_KEY", valueFrom = aws_ssm_parameter.secret_key.arn },
+      { name = "SUPABASE_SERVICE_ROLE_KEY", valueFrom = aws_ssm_parameter.supabase_service_role_key.arn },
+      { name = "SUPABASE_JWT_SECRET", valueFrom = aws_ssm_parameter.supabase_jwt_secret.arn },
     ]
     logConfiguration = {
       logDriver = "awslogs"

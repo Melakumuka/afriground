@@ -115,6 +115,11 @@ services:
         condition: service_healthy
     environment:
       AFRIGROUND_WORKER_URL: postgresql+asyncpg://afriground:afriground_dev_password@postgres:5432/afriground
+      DATABASE_URL: postgresql+asyncpg://afriground:afriground_dev_password@postgres:5432/afriground
       REDIS_URL: redis://redis:6379/0
       CELERY_BROKER_URL: redis://redis:6379/0
+      SECRET_KEY: afriground_dev_secret
+      SUPABASE_URL: ${SUPABASE_URL:-https://placeholder.supabase.co}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-placeholder}
+      SUPABASE_JWT_SECRET: ${SUPABASE_JWT_SECRET:-placeholder}
       AFRIGROUND_ORCHESTRATION_SIMULATE: "1"
