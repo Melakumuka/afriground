@@ -168,7 +168,7 @@ export default function StationHealthDashboard() {
               <div className="px-6 sm:px-8 py-5 border-b border-graphite-600/60 bg-graphite-700/40 flex items-center justify-between">
                 <span className="mono-label text-signal-soft">{t("rf_panel", "射频与解调器", "RF & DEMODULATOR")}</span>
                 <span className="font-mono text-[10px] text-graphite-mute">
-                  {new Date(telemetry.timestamp).toLocaleTimeString()} UTC
+                  {new Date(telemetry.timestamp).toLocaleTimeString([], { timeZone: "UTC" })} UTC
                 </span>
               </div>
               <div className="px-6 sm:px-8 py-6 space-y-5">
@@ -228,7 +228,7 @@ export default function StationHealthDashboard() {
                     <div>
                       <div className="font-mono text-sm text-white">{a.agent_id}</div>
                       <div className="font-mono text-[10px] text-graphite-mute">
-                        v{a.agent_version ?? "?"} · {a.last_heartbeat_at ? new Date(a.last_heartbeat_at).toLocaleTimeString() : "no heartbeat"}
+                        v{a.agent_version ?? "?"} · {a.last_heartbeat_at ? new Date(a.last_heartbeat_at).toLocaleTimeString([], { timeZone: "UTC" }) : "no heartbeat"}
                       </div>
                     </div>
                     <span

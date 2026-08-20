@@ -485,11 +485,11 @@ export default function BookingWizard() {
                             </span>
                             <div>
                               <div className="font-display font-semibold text-white">
-                                {new Date(p.aosIso).toLocaleDateString(isZh ? "zh-CN" : "en-US", { weekday: "short", month: "short", day: "numeric" })}{" "}
-                                {new Date(p.aosIso).toLocaleTimeString(isZh ? "zh-CN" : "en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" })} UTC
+                                {new Date(p.aosIso).toLocaleDateString(isZh ? "zh-CN" : "en-US", { timeZone: "UTC", weekday: "short", month: "short", day: "numeric" })}{" "}
+                                {new Date(p.aosIso).toLocaleTimeString(isZh ? "zh-CN" : "en-US", { timeZone: "UTC", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false })} UTC
                               </div>
                               <div className="font-mono text-xs text-graphite-mute mt-0.5">
-                                {t("los", "结束", "LOS")} {new Date(p.losIso).toLocaleTimeString(isZh ? "zh-CN" : "en-US", { hour: "2-digit", minute: "2-digit" })} UTC
+                                {t("los", "结束", "LOS")} {new Date(p.losIso).toLocaleTimeString(isZh ? "zh-CN" : "en-US", { timeZone: "UTC", hour: "2-digit", minute: "2-digit", hour12: false })} UTC
                               </div>
                             </div>
                           </div>

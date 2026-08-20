@@ -137,7 +137,7 @@ export default function DataCatalog() {
                     <td className="px-6 sm:px-8 py-4 font-medium text-white">{dataset.satellite}</td>
                     <td className="px-6 py-4 font-mono text-sm text-signal-soft">{dataset.product_type}</td>
                     <td className="px-6 py-4 text-steel-2 font-mono text-sm">
-                      {new Date(dataset.capture_time).toLocaleString()}
+                      {new Date(dataset.capture_time).toLocaleString([], { timeZone: "UTC" })}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">

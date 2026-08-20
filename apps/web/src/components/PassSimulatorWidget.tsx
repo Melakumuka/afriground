@@ -178,7 +178,7 @@ export default function PassSimulatorWidget({ currentLocale }: { currentLocale: 
             <div className="p-4 bg-graphite-800 rounded-sm border border-graphite-600">
               <span className="text-graphite-mute text-[11px] block uppercase">{t("next_pass", "下次过境开始（UTC）", "Next Pass Start (UTC)")}</span>
               <span className="text-signal-soft font-bold text-xs mt-1 block">
-                {new Date(passResult.nextPassUTC).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })} UTC
+                {new Date(passResult.nextPassUTC).toLocaleTimeString([], { timeZone: "UTC", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false })} UTC
               </span>
             </div>
 
