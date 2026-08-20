@@ -1,0 +1,126 @@
+# AfriGround AWS Deployment Plan (Phase 4.3 apply)
+
+Status: PLANNED — execute only with AWS credentials.
+
+## Goal
+Take the Phase 4.3 terraform provisioning (already committed) from "code" to
+"live": stand up the API + Celery worker on ECS Fargate behind an ALB in
+`af-south-1` (Cape Town, African data residency), backed by RDS PostgreSQL 16
+and ElastiCache Redis 7, and point the Vercel web app at the public API so the
+platform pages serve real data instead of the fail-soft mock fallback.
+
+## What gets provisioned (from terraform/)
+| Resource | Detail | Approx monthly cost (april-2026 list, af-south-1) |
+|---|---|---|
+| VPC | public/private/database subnets, 3 AZs, 1 NAT gateway | ~$32 |
+| RDS | `db.r6g.large` Postgres 16, Multi-AZ, 100GB gp3, deletion protection | ~$450 |
+| ElastiCache | `cache.t4g.medium` Redis 7, 1 node | ~$130 |
+| ECS Fargate | API (512/1024) + worker (512/1024), 1 task each | ~$30 |
+| ALB | 1 application LB + target group | ~$16 |
+| ECR × 2 | api + worker repos with lifecycle policies | $0 |
+| S3 | `afriground-prod-datasets-af-south` (versioned) | storage only |
+| SSM | 4–7 SecureString secrets (DB URL, secret keys, optional mTLS certs) | $0.05 per 10k params |
+| CloudWatch | 2 log groups, 30-day retention | logs only |
+
+Total baseline ≈ **$650–700/mo**. See "Cost reduction options" before applying.
+
+## Prerequisites
+- AWS account with permissions: IAM (roles/policies), VPC, RDS, ElastiCache,
+  ECS, ALB, ECR, S3, DynamoDB, SSM, CloudWatch, ECR image push.
+- AWS CLI installed + authenticated (access keys or SSO).
+- Terraform CLI installed.
+- Local docker images `afriground-api:latest` / `afriground-worker:latest`
+  (already built in the Phase 4.3 deploy session).
+
+## Steps
+
+### 1. Authenticate
+```bash
+aws sts get-caller-identity          # confirms who you are + region default
+```
+Recommended: IAM user with the permissions above + `aws configure`, or
+`aws sso login` if the org uses Identity Center.
+
+### 2. Bootstrap remote state (one-time)
+State must live in S3 (backend block in `terraform/main.tf`). The committed
+`terraform/bootstrap_state.sh` does it; on Windows run the equivalent:
+```powershell
+aws s3api create-bucket --bucket afriground-terraform-state --region af-south-1 --create-bucket-configuration LocationConstraint=af-south-1
+aws s3api put-bucket-versioning --bucket afriground-terraform-state --versioning-configuration Status=Enabled
+aws s3api put-public-access-block --bucket afriground-terraform-state --public-access-block-configuration BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true
+aws dynamodb create-table --table-name afriground-terraform-lock --attribute-definitions AttributeName=LockID,AttributeType=S --key-schema AttributeName=LockID,KeyType=HASH --billing-mode PAY_PER_REQUEST --region af-south-1
+```
+Note: bucket name must be globally unique; if `afriground-terraform-state` is
+taken, change it in `terraform/main.tf` too.
+
+### 3. Init + plan
+```bash
+cd terraform
+terraform init
+terraform plan -out=plan.tfplan \
+  -var db_password='<strong random>' \
+  -var secret_key='<random 32+ chars>' \
+  -var supabase_url='...' \
+  -var supabase_service_role_key='...' \
+  -var supabase_jwt_secret='...'
+```
+Review the plan — expect ~35 resources. Confirm no accidental public DB.
+
+### 4. Apply
+```bash
+terraform apply plan.tfplan
+terraform output   # alb_dns_name, rds_endpoint, redis_endpoint, ecr_api_url, ecr_worker_url
+```
+Give RDS ~10–15 min to reach `available`. Apply the schema migrations:
+```powershell
+# from a machine with network access to the RDS endpoint (or a bastion/SSM port-forward)
+$env:AFRIGROUND_ALEMBIC_URL="postgresql+asyncpg://afriground_admin:<pw>@<rds_endpoint>/afriground"
+python -m alembic upgrade head        # from apps/api
+```
+
+### 5. Push images to ECR
+```powershell
+aws ecr get-login-password --region af-south-1 | docker login --username AWS --password-stdin <account_id>.dkr.ecr.af-south-1.amazonaws.com
+docker tag afriground-api:latest  <ecr_api_url>:latest
+docker tag afriground-worker:latest <ecr_worker_url>:latest
+docker push <ecr_api_url>:latest
+docker push <ecr_worker_url>:latest
+```
+Optional tag: `<url>:<git-short>` for rollback pinning. Then force new
+deployment (or wait for the services to pick up `latest`):
+```powershell
+aws ecs update-service --cluster afriground-prod --service afriground-api --force-new-deployment
+aws ecs update-service --cluster afriground-prod --service afriground-worker --force-new-deployment
+```
+
+### 6. Deploy the web app
+Set on Vercel (project `web`, env "Production"):
+```
+AFRIGROUND_API_URL=http://<alb_dns_name>
+AFRIGROUND_SERVICE_SUB=<uuid of the provisioned service user>
+AFRIGROUND_SERVICE_ORG=<uuid of that user's organization>
+SUPABASE_JWT_SECRET=<same as API>
+```
+Then `cd apps/web && vercel --prod`.
+
+### 7. Verify
+- `curl http://<alb_dns>/health` → 200 `{"status":"ok",...}`
+- `curl http://<alb_dns>/api/v1/stations` with a service JWT → real rows
+- Web: https://<vercel-app> shows LIVE · API FEED instead of mock fallback
+- Worker: CloudWatch `/ecs/afriground-worker` shows `drain_outbox ... succeeded`
+
+## Cost reduction options (before you burn $700/mo)
+- `db.r6g.large` multi-AZ is the dominant cost. For a demo: `db.t4g.small`
+  single-AZ (`multi_az=false`, `availability_zone`) ≈ **$40/mo**.
+- `cache.t4g.medium` → `cache.t4g.small` ≈ **$60/mo**.
+- NAT gateway → `enable_nat_gateway=false` if ECS uses public subnets or SSM
+  port-forward instead (saves ~$32).
+- Scale ECS desired_count to 0 when idle.
+
+## Rollback / teardown
+```bash
+terraform plan -destroy -out=destroy.tfplan -var ...   # same vars as apply
+terraform apply destroy.tfplan
+```
+Secrets live in SSM; delete them with the resources. The datasets bucket and
+DB snapshots are preserved by default (`skip_final_snapshot=false`).

@@ -54,3 +54,5 @@ logs/
 .env*
 
 terraform/free/.ssh/
+
+terraform/**/.terraform/
