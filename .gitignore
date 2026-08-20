@@ -60,3 +60,5 @@ terraform/**/.terraform/
 **/terraform.tfvars
 
 .vercel
+
+terraform/**/*.tfplan

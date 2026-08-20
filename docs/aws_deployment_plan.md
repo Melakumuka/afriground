@@ -1,6 +1,11 @@
-# AfriGround AWS Deployment Plan (Phase 4.3 apply)
+# AfriGround AWS Deployment Plan (Phase 4.3)
 
-Status: PLANNED — execute only with AWS credentials.
+> **Deployment status (Aug 2026): the free-tier path is LIVE.** The production
+> ECS/ALB plan below remains the "when funded" option; the running deployment
+> uses `terraform/free/` (Tokyo, ap-northeast-1) — see "Free-tier deployment
+> (live)" at the end of this document.
+
+Status: PLANNED (production path) — execute only with AWS credentials.
 
 ## Goal
 Take the Phase 4.3 terraform provisioning (already committed) from "code" to
@@ -124,3 +129,47 @@ terraform apply destroy.tfplan
 ```
 Secrets live in SSM; delete them with the resources. The datasets bucket and
 DB snapshots are preserved by default (`skip_final_snapshot=false`).
+
+## Free-tier deployment (live)
+
+The running deployment (verified 2026-08-20) is `terraform/free/` in
+`ap-northeast-1` (Tokyo, free-tier eligible; af-south-1 is not):
+
+| Resource | Detail | Cost |
+|---|---|---|
+| VPC | 2 AZs, no NAT, no ALB | $0 |
+| RDS | `db.t3.micro` Postgres 16.14, gp2 20GB, single-AZ | free tier |
+| ElastiCache | `cache.t3.micro` Redis 7.1 | free tier |
+| EC2 | `t3.micro` AL2023, public IP, runs ONLY api+worker containers | free tier |
+| S3 | `afriground-free-repo` (repo zip) + `afriground-free-datasets` | free tier |
+| SSM | 4 SecureString params under `/afriground/free/` | ~$0 |
+
+Total ≈ **$0/mo** within the 12-month free tier.
+
+- **API:** `http://13.231.123.242:8000` (`.env` on the host from SSM; health
+  check `/healthz`; demo service JWT from `SUPABASE_JWT_SECRET=mockjwtsecret`).
+- **DB:** `afriground-free-db.<...>.ap-northeast-1.rds.amazonaws.com` — 60 tables,
+  alembic at head `f1a2b3c4d5e6`, PostGIS extension created, demo org/user
+  seeded with the fixed IDs the web proxy's JWT sub/org expect
+  (`b569d5d7-…`, `9b6b697e-…`), admin bound to the `Platform Admin` role.
+- **Worker:** celery + beat in the same compose stack; `drain_outbox` runs on
+  schedule against RDS + ElastiCache.
+- **Management:** SSH (`terraform/free/.ssh/afriground`) + SSM (role carries
+  `AmazonSSMManagedInstanceCore`) — the host is managed via `aws ssm
+  send-command` since the operator network blocks direct ports.
+- **Web:** https://afriground.vercel.app (project `web`, production env:
+  `AFRIGROUND_API_URL=http://13.231.123.242:8000`, service sub/org, JWT secret).
+  Vercel Authentication was disabled so the domain is public.
+
+### Redeploying the host (bring-up recipe)
+1. `git archive HEAD --format=zip -o afriground.zip` (commit first!) and upload
+   to `s3://afriground-free-repo/` together with the current `bootstrap.sh`
+   (the SSM-driven variant used for the live bring-up).
+2. On the instance (or new one): install docker via `dnf`, pin compose
+   `v2.24.7` (amazon buildx 0.12.1), unzip, `sed -i 's/\r$//'` over `.sh/.py`
+   files (Windows-built archives ship CRLF), write `.env` from SSM, create the
+   PostGIS extension with `psql`, then
+   `docker compose -f docker-compose.yml -f docker-compose.aws.yml up -d
+   --build --no-deps api worker` and `alembic upgrade head`.
+3. Seeding is idempotent (`scripts/seed_phase1.py`) but only inserts fixed IDs
+   when the org/user are pre-inserted — see the SQL in this bring-up.
