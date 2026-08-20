@@ -220,31 +220,39 @@ async def seed(db):
         )
 
     print("Seeding edge agents + time status (station panel)...")
-    zademo = (
-        await db.execute(select(GroundStation).where(GroundStation.code == "ZADEMO-01"))
-    ).scalar_one()
-    agents = [
-        ("zademo-01-rf", "afriground-agent 1.4.2", "ser-9F2C1A"),
-        ("zademo-01-power", "afriground-agent 1.4.2", "ser-7B1E93"),
+    station_rows = (await db.execute(select(GroundStation))).scalars().all()
+    station_agents = [
+        ("ZADEMO-01", [("zademo-01-rf", "ser-9F2C1A"), ("zademo-01-power", "ser-7B1E93")]),
+        ("ZADEMO-02", [("zademo-02-rf", "ser-4A2D77"), ("zademo-02-weather", "ser-8C3E12")]),
+        ("ZADEMO-03", [("zademo-03-rf", "ser-5B8F40")]),
     ]
-    for agent_id, ver, serial in agents:
-        await get_or_create(
-            db, StationAgentIdentity, station_id=zademo.id, agent_id=agent_id,
-            defaults={
-                "agent_version": ver, "certificate_serial": serial,
-                "certificate_valid_until": now + timedelta(days=340),
-                "last_heartbeat_at": now - timedelta(seconds=45),
-                "status": "active",
-            },
-        )
-    for status, offset in [("SYNCED", 3.2), ("DEGRADED", 180.0)]:
-        await get_or_create(
-            db, StationTimeStatus, station_id=zademo.id, sync_status=status, offset_ms=offset,
-            defaults={
-                "last_sync_at": now - timedelta(minutes=4) if status == "SYNCED" else now - timedelta(hours=6),
-                "clock_source": "ntp", "reported_at": now - timedelta(seconds=45),
-            },
-        )
+    agent_meta = {"zademo-01": "afriground-agent 1.4.2", "zademo-02": "afriground-agent 1.4.1", "zademo-03": "afriground-agent 1.4.0"}
+    for station_row in station_rows:
+        code = station_row.code
+        entry = next((e for e in station_agents if e[0] == code), None)
+        if not entry:
+            continue
+        version = agent_meta[code.lower()]
+        for agent_id, serial in entry[1]:
+            await get_or_create(
+                db, StationAgentIdentity, station_id=station_row.id, agent_id=agent_id,
+                defaults={
+                    "agent_version": version, "certificate_serial": serial,
+                    "certificate_valid_until": now + timedelta(days=340),
+                    "last_heartbeat_at": now - timedelta(seconds=45),
+                    "status": "active",
+                },
+            )
+        offsets = [3.2, 180.0] if code == "ZADEMO-01" else [5.8, 96.4] if code == "ZADEMO-02" else [12.1]
+        for offset in offsets:
+            await get_or_create(
+                db, StationTimeStatus, station_id=station_row.id, sync_status="SYNCED" if offset < 100 else "DEGRADED",
+                offset_ms=offset,
+                defaults={
+                    "last_sync_at": now - timedelta(minutes=4) if offset < 100 else now - timedelta(hours=6),
+                    "clock_source": "ntp", "reported_at": now - timedelta(seconds=45),
+                },
+            )
 
     print("Seed complete.")
 
