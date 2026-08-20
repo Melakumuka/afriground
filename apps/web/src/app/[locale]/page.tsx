@@ -12,11 +12,14 @@ import EngineeringSection from "@/components/EngineeringSection";
 import CoverageSection from "@/components/CoverageSection";
 import ProofSection from "@/components/ProofSection";
 import RevealOnScroll from "@/components/RevealOnScroll";
+import LiveNetworkStrip, { type LiveNetwork } from "@/components/LiveNetworkStrip";
 import {
   fetchMissions,
   fetchNetworkRanking,
   fetchOrchestrationMetrics,
   fetchSlaViolations,
+  fetchStations,
+  fetchDatasets,
   type MissionControlLive,
 } from "@/lib/api";
 
@@ -30,11 +33,13 @@ export default async function LandingPage({
 
   // Phase 4.2 — live operational feed from the FastAPI surface. Every call
   // fails soft; when the API is unreachable the section renders its mock text.
-  const [missions, metrics, sla, ranking] = await Promise.all([
+  const [missions, metrics, sla, ranking, stations, datasets] = await Promise.all([
     fetchMissions(),
     fetchOrchestrationMetrics(),
     fetchSlaViolations(5),
     fetchNetworkRanking(),
+    fetchStations(),
+    fetchDatasets(),
   ]);
   const missionControlLive: MissionControlLive | undefined =
     missions || metrics || sla || ranking
@@ -55,6 +60,18 @@ export default async function LandingPage({
             level: v.status === "VIOLATED" ? "WARNING" : "NOMINAL",
             msg: `${v.sla_type.toUpperCase()} · target ${v.target_value}${v.unit ?? ""} / actual ${v.actual_value}${v.unit ?? ""}`,
           })),
+        }
+      : undefined;
+
+  const liveNetwork: LiveNetwork | undefined =
+    missions && stations && datasets && metrics
+      ? {
+          missions: missions.length,
+          stations: stations.length,
+          datasets: datasets.length,
+          slaViolations: sla?.length ?? 0,
+          rankedStations: ranking?.length ?? 0,
+          outboxHealthy: metrics.outbox.by_status.FAILED === 0,
         }
       : undefined;
 
@@ -91,6 +108,9 @@ export default async function LandingPage({
           simulLabel: t("hud_simul"),
         }}
       />
+
+      {/* ── 01b · LIVE NETWORK — backend status strip (Phase 4.2) ─── */}
+      <LiveNetworkStrip network={liveNetwork} />
 
       {/* ── 02 · NETWORK — federated infrastructure ───────────────── */}
       <section
