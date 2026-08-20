@@ -10,7 +10,13 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv(Path(__file__).resolve().parents[3] / ".env")
+try:
+    env_file = Path(__file__).resolve().parents[3] / ".env"
+    if env_file.is_file():
+        load_dotenv(env_file)
+except IndexError:
+    # Outside the repo layout (e.g. inside a container) there is no root .env.
+    pass
 
 
 def database_url(specific_var: str | None = None, *, default_db: str = "afriground") -> str:
