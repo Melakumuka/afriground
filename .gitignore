@@ -52,3 +52,5 @@ logs/
 
 .vercel
 .env*
+
+terraform/free/.ssh/

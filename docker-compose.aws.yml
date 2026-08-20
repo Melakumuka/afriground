@@ -1,0 +1,31 @@
+# AfriGround AWS override — used on the EC2 host (terraform/free).
+# Runs ONLY the api + worker containers; Postgres/Redis/MinIO stay on AWS
+# (RDS/ElastiCache/S3), so their compose services are never started.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.aws.yml \
+#        up -d --build --no-deps api worker
+services:
+  api:
+    depends_on: []
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      SECRET_KEY: ${SECRET_KEY}
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      SUPABASE_JWT_SECRET: ${SUPABASE_JWT_SECRET}
+      API_CORS_ORIGINS: ${API_CORS_ORIGINS}
+      AFRIGROUND_ORCHESTRATION_SIMULATE: "1"
+
+  worker:
+    depends_on: []
+    environment:
+      AFRIGROUND_WORKER_URL: ${DATABASE_URL}
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      SECRET_KEY: ${SECRET_KEY}
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      SUPABASE_JWT_SECRET: ${SUPABASE_JWT_SECRET}
+      AFRIGROUND_ORCHESTRATION_SIMULATE: "1"
