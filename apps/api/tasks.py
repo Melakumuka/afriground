@@ -14,9 +14,10 @@ from celery_app import celery_app
 
 logger = logging.getLogger(__name__)
 
-WORKER_URL = os.environ.get(
-    "AFRIGROUND_WORKER_URL",
-    "postgresql+asyncpg://afriground:afriground_dev_password@localhost:5433/afriground",
+WORKER_URL = (
+    os.environ.get("AFRIGROUND_WORKER_URL")
+    or os.environ.get("DATABASE_URL")
+    or "postgresql+asyncpg://localhost:5433/afriground"
 )
 
 

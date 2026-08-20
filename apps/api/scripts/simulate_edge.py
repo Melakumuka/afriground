@@ -6,8 +6,8 @@ registers an edge agent, then runs the orchestration runtime to drive the job
 QUEUED -> COMPLETED while streaming heartbeat + telemetry, and finally executes
 the data delivery pipeline. Produces a reproducible demo timeline.
 
-Run from apps/api:
-    $env:AFRIGROUND_SIM_URL="postgresql+asyncpg://afriground:afriground_dev_password@localhost:5433/afriground"
+Run from apps/api (credentials come from the gitignored repo-root `.env`:
+    $env:AFRIGROUND_SIM_URL=$env:DATABASE_URL   # or set both in .env
     & .venv\Scripts\python.exe scripts\simulate_edge.py
 """
 import asyncio
@@ -19,11 +19,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 import services.hooks  # noqa: F401  (registers publish hooks)
+from scripts._env import database_url
 
-URL = __import__("os").environ.get(
-    "AFRIGROUND_SIM_URL",
-    "postgresql+asyncpg://afriground:afriground_dev_password@localhost:5433/afriground",
-)
+URL = database_url("AFRIGROUND_SIM_URL")
 
 PERMISSION_CODES = [
     "platform.admin", "rbac.manage", "station.manage", "station.certify",

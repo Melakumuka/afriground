@@ -1,21 +1,19 @@
 """
 Idempotent demo seed for Phase 1 (tenancy, mission, station twin, contact chain, jobs).
-Run from apps/api:
-    $env:AFRIGROUND_SEED_URL="postgresql+asyncpg://afriground:afriground_dev_password@localhost:5433/afriground"
+Run from apps/api (credentials come from the gitignored repo-root `.env`:
+    $env:AFRIGROUND_SEED_URL=$env:DATABASE_URL   # or set both in .env
     & .venv\Scripts\python.exe scripts\seed_phase1.py
 """
 import asyncio
-import os
 import uuid
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
-URL = os.environ.get(
-    "AFRIGROUND_SEED_URL",
-    "postgresql+asyncpg://afriground:afriground_dev_password@localhost:5433/afriground",
-)
+from scripts._env import database_url
+
+URL = database_url("AFRIGROUND_SEED_URL")
 
 PERMISSION_CODES = [
     "platform.admin",

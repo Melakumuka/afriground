@@ -11,13 +11,12 @@ The agent-side steps go through AgentDispatchService — the same service the
 `/api/v1/agent/*` routes expose over mTLS — so this is the reference flow for
 the afriground-station-agent client.
 
-Run from apps/api:
-    $env:AFRIGROUND_SIM_URL="postgresql+asyncpg://afriground:afriground_dev_password@localhost:5433/afriground"
+Run from apps/api (credentials come from the gitignored repo-root `.env`:
+    $env:AFRIGROUND_SIM_URL=$env:DATABASE_URL   # or set both in .env
     & .venv\Scripts\python.exe scripts\agent_sim.py
 """
 import asyncio
 import json
-import os
 import uuid
 from datetime import datetime, timedelta, timezone
 
@@ -25,11 +24,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 import services.hooks  # noqa: F401  (registers publish hooks)
+from scripts._env import database_url
 
-URL = os.environ.get(
-    "AFRIGROUND_SIM_URL",
-    "postgresql+asyncpg://afriground:afriground_dev_password@localhost:5433/afriground",
-)
+URL = database_url("AFRIGROUND_SIM_URL")
 
 AGENT_ID = "sim-edge-01"
 

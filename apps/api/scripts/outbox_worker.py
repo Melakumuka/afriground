@@ -3,29 +3,26 @@ Orchestration runtime dispatcher — polls the outbox, publishes due events, and
 (in simulate mode) drives the observation job lifecycle. Single implementation
 shared with the Celery beat task (tasks.py::drain_outbox).
 
-Run from apps/api:
-    $env:AFRIGROUND_WORKER_URL="postgresql+asyncpg://afriground:afriground_dev_password@localhost:5433/afriground"
+Run from apps/api (credentials come from the gitignored repo-root `.env`:
+    $env:AFRIGROUND_WORKER_URL=$env:DATABASE_URL   # or set both in .env
     & .venv\Scripts\python.exe scripts\outbox_worker.py --poll-interval 2
 """
 import argparse
 import asyncio
 import logging
-import os
 import signal
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 import services.hooks  # noqa: F401  (registers publish hooks)
+from scripts._env import database_url
 from services.orchestration_runtime import drain, process_observation_events
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger("outbox_worker")
 
-URL = os.environ.get(
-    "AFRIGROUND_WORKER_URL",
-    "postgresql+asyncpg://afriground:afriground_dev_password@localhost:5433/afriground",
-)
+URL = database_url("AFRIGROUND_WORKER_URL")
 
 _stop = asyncio.Event()
 

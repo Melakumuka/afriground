@@ -10,7 +10,9 @@ class Settings(BaseSettings):
     
     # Database
     database_url: str
-    test_database_url: str = "postgresql+asyncpg://afriground:afriground_dev_password@localhost:5433/afriground_test"
+    # Credentials come from the env (AFRIGROUND_TEST_DATABASE_URL / DATABASE_URL);
+    # the default is a passwordless localhost URL only.
+    test_database_url: str = "postgresql+asyncpg://localhost:5433/afriground_test"
     
     # Supabase Auth
     supabase_url: str

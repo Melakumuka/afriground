@@ -4,6 +4,7 @@ import uuid
 from datetime import datetime, timezone
 
 import pytest_asyncio
+from dotenv import load_dotenv
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
@@ -12,9 +13,12 @@ from models.core import Organization, Role, User
 from models.tenancy import Permission, RolePermission
 from services.tenancy import TenantContext
 
-TEST_URL = os.environ.get(
-    "AFRIGROUND_TEST_DATABASE_URL",
-    "postgresql+asyncpg://afriground:afriground_dev_password@localhost:5433/afriground_test",
+load_dotenv(os.path.join(os.path.dirname(__file__), "../../.env"))
+
+TEST_URL = (
+    os.environ.get("AFRIGROUND_TEST_DATABASE_URL")
+    or os.environ.get("DATABASE_URL")
+    or "postgresql+asyncpg://localhost:5433/afriground_test"
 )
 
 

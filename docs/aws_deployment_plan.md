@@ -59,15 +59,17 @@ Note: bucket name must be globally unique; if `afriground-terraform-state` is
 taken, change it in `terraform/main.tf` too.
 
 ### 3. Init + plan
+No secrets are stored in the repo. Export them as `TF_VAR_*` environment
+variables (or keep them in a **gitignored** `terraform/terraform.tfvars`):
 ```bash
 cd terraform
+export TF_VAR_db_password='<strong random>'      # or use a secrets manager
+export TF_VAR_secret_key='<random 32+ chars>'
+export TF_VAR_supabase_url='...'
+export TF_VAR_supabase_service_role_key='...'
+export TF_VAR_supabase_jwt_secret='...'
 terraform init
-terraform plan -out=plan.tfplan \
-  -var db_password='<strong random>' \
-  -var secret_key='<random 32+ chars>' \
-  -var supabase_url='...' \
-  -var supabase_service_role_key='...' \
-  -var supabase_jwt_secret='...'
+terraform plan -out=plan.tfplan
 ```
 Review the plan — expect ~35 resources. Confirm no accidental public DB.
 
@@ -99,7 +101,7 @@ aws ecs update-service --cluster afriground-prod --service afriground-worker --f
 ```
 
 ### 6. Deploy the web app
-Set on Vercel (project `web`, env "Production"):
+Set on Vercel (project `web`, env "Production") — never in the repo:
 ```
 AFRIGROUND_API_URL=http://<alb_dns_name>
 AFRIGROUND_SERVICE_SUB=<uuid of the provisioned service user>
@@ -113,6 +115,19 @@ Then `cd apps/web && vercel --prod`.
 - `curl http://<alb_dns>/api/v1/stations` with a service JWT → real rows
 - Web: https://<vercel-app> shows LIVE · API FEED instead of mock fallback
 - Worker: CloudWatch `/ecs/afriground-worker` shows `drain_outbox ... succeeded`
+
+## Secrets hygiene
+- **AWS credentials**: never commit. Use `~/.aws/credentials` or
+  `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` env vars (an IAM user scoped to
+  what it needs — the live deployment uses `afriground-deploy`).
+- **Local dev**: copy `.env.example` → `.env` (gitignored) and fill values;
+  `docker-compose.yml` reads every credential from `.env` via `${VAR:?}`.
+- **Terraform**: `TF_VAR_*` env vars (see above) or a gitignored `terraform.tfvars`.
+- **AWS runtime**: secrets land in SSM Parameter Store (SecureString) and are
+  injected into containers via the ECS task definitions.
+- **Vercel**: env vars set in the dashboard per environment.
+- **Rotating a leaked secret**: change the value everywhere (SSM + tfvars +
+  Vercel) and redeploy; never rewrite git history as the primary defense.
 
 ## Cost reduction options (before you burn $700/mo)
 - `db.r6g.large` multi-AZ is the dominant cost. For a demo: `db.t4g.small`
@@ -146,8 +161,14 @@ The running deployment (verified 2026-08-20) is `terraform/free/` in
 
 Total ≈ **$0/mo** within the 12-month free tier.
 
-- **API:** `http://13.231.123.242:8000` (`.env` on the host from SSM; health
-  check `/healthz`; demo service JWT from `SUPABASE_JWT_SECRET=mockjwtsecret`).
+Apply with env-driven vars (no tfvars in the repo):
+`TF_VAR_db_password=… TF_VAR_secret_key=… TF_VAR_supabase_jwt_secret=… terraform apply`
+(from `terraform/free/`; the secrets then land in SSM `/afriground/free/*`).
+
+- **API:** `http://13.231.123.242:8000` (`.env` on the host written from SSM
+  Parameter Store — `/afriground/free/*`; health check `/healthz`; demo service
+  JWT is minted by the web app from `SUPABASE_JWT_SECRET` — same value in SSM
+  and in the Vercel project env).
 - **DB:** `afriground-free-db.<...>.ap-northeast-1.rds.amazonaws.com` — 60 tables,
   alembic at head `f1a2b3c4d5e6`, PostGIS extension created, demo org/user
   seeded with the fixed IDs the web proxy's JWT sub/org expect
