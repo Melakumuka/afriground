@@ -248,9 +248,49 @@ async def seed(db):
         db, StationLicense, station_id=station.id, license_type="uplink",
         issuing_authority="ICASA", license_number="ICASA-UPLINK-2026-0001",
         country="South Africa", frequency_bands=[{"min_hz": 430_000_000, "max_hz": 440_000_000}],
-        max_power_dbm=25.0, issued_at=now - timedelta(days=60),
-        expires_at=now + timedelta(days=305), status="valid",
+        valid_until=now + timedelta(days=365 * 2),
     )
+
+    # Entoto Station
+    entoto = (
+        await db.execute(select(GroundStation).where(GroundStation.code == "ET-ENTOTO-01"))
+    ).scalar_one_or_none()
+    if not entoto:
+        tenant = TenantContext(user=admin_user, organization=demo_org, org_id=demo_org.id)
+        svc = RegulatoryAuthorizationService(db, tenant)
+        entoto = await svc.register_station(
+            code="ET-ENTOTO-01",
+            name="EMS-GRS 730 Ground Station (Entoto)",
+            country="Ethiopia",
+            latitude=9.109,
+            longitude=38.808,
+            altitude_m=3170.0,
+            operator_contact_email="ops@entoto.demo",
+        )
+        entoto.min_elevation_deg = 5.0
+        entoto.antenna_diameter_m = 7.3
+        entoto.supported_bands = ["S", "X"]
+        await db.flush()
+    else:
+        print("  station ET-ENTOTO-01 exists, skipping registration")
+
+    await get_or_create(
+        db, StationCapability, station_id=entoto.id, band="S",
+        frequency_min_hz=2_025_000_000.0, frequency_max_hz=2_300_000_000.0,
+        polarization="RHCP_LHCP", max_tx_power_dbm=87.0, tx_authorized=True,
+        gain_dbi=18.0,
+    )
+    await get_or_create(
+        db, StationCapability, station_id=entoto.id, band="X",
+        frequency_min_hz=7_900_000_000.0, frequency_max_hz=8_500_000_000.0,
+        polarization="RHCP_LHCP", tx_authorized=False, gain_dbi=33.0,
+    )
+    await get_or_create(
+        db, StationHardware, station_id=entoto.id, hardware_type="baseband",
+        model="Zodiac CORTEX HDR/CRT/DTR/ACU", serial_number="BB-ENT-001",
+        firmware_version="latest", status="operational", installed_at=now - timedelta(days=1400),
+    )
+
     await get_or_create(
         db, StationQualityScore, station_id=station.id, score=96.5,
         availability=98.2, reliability=97.1, timeliness=94.0,
