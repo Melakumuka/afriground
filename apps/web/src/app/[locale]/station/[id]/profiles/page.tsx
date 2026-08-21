@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-export default async function StationProfilesPage({ params }: { params: { id: str, locale: str } }) {
+export default async function StationProfilesPage({ params }: { params: { id: string, locale: string } }) {
   // In a real app, we would fetch from the API here
   // const res = await fetch(`${process.env.AFRIGROUND_API_URL}/api/v1/stations/${params.id}/profiles`, { ... })
   // const profiles = await res.json();

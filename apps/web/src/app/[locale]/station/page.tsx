@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { useT } from "@/lib/useT";
 import type { Agent, Station, TimeStatus } from "@/lib/api";
 
@@ -25,6 +26,7 @@ type TelemetryData = {
 };
 
 export default function StationHealthDashboard() {
+  const params = useParams();
   const { t } = useT("Station");
   const [station, setStation] = useState<Station | null>(null);
   const [agents, setAgents] = useState<Agent[] | null>(null);
