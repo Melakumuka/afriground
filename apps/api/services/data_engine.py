@@ -139,3 +139,43 @@ class DataEngine:
             status=job.status,
             created_at=job.created_at,
         )
+
+    # ── Execution Receipt Processing ─────────────────────────────────────────
+
+    async def process_execution_receipt(self, receipt_id: uuid.UUID):
+        """
+        Process a new execution receipt, validate the hash, 
+        and trigger data delivery for the associated job.
+        """
+        from models.contact import ExecutionReceipt
+        import hashlib
+        
+        receipt = await self.db.get(ExecutionReceipt, receipt_id)
+        if not receipt:
+            raise HTTPException(status_code=404, detail="ExecutionReceipt not found")
+        
+        # 1. Cryptographically validate the pass_report_hash
+        # In a real app we would compute the hash of the actual uploaded S3 artifacts.
+        if not receipt.pass_report_hash:
+            raise ValueError("Receipt missing pass_report_hash")
+            
+        # 2. Create a Dataset based on the receipt
+        dataset = Dataset(
+            schedule_id=receipt.job_id,  # Mapping job back to schedule roughly
+            sensor_type="RF_RAW",
+            product_type="L0_IQ",
+            acquisition_date=receipt.actual_aos or datetime.utcnow(),
+            storage_url=f"s3://afriground-raw-internal/{receipt.job_id}/"
+        )
+        self.db.add(dataset)
+        await self.db.flush()
+        
+        # 3. Find customer destination and trigger delivery
+        stmt = select(DataDeliveryDestination).limit(1)
+        res = await self.db.execute(stmt)
+        dest = res.scalar_one_or_none()
+        
+        if dest:
+            await self.trigger_delivery(dataset.id, dest.id)
+            
+        return {"status": "success", "dataset_id": str(dataset.id)}

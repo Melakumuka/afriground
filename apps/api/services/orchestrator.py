@@ -97,6 +97,7 @@ class ObservationOrchestrator:
         mission_profile_id: uuid.UUID,
         priority: int = 5,
         tx_requested: bool = False,
+        station_operation_profile_id: Optional[uuid.UUID] = None,
     ) -> ObservationJob:
         contact = await self.db.get(ScheduledContact, scheduled_contact_id)
         if not contact or contact.org_id != self.tenant.org_id:
@@ -120,6 +121,7 @@ class ObservationOrchestrator:
             org_id=self.tenant.org_id,
             scheduled_contact_id=scheduled_contact_id,
             mission_profile_id=mission_profile_id,
+            station_operation_profile_id=station_operation_profile_id,
             status="DRAFT",
             priority=priority,
             tx_requested=tx_requested,
@@ -197,6 +199,12 @@ class ObservationOrchestrator:
 
     async def execute(self, job_id: uuid.UUID, actor: Optional[str] = None) -> ObservationJob:
         job = await self._get_job(job_id)
+        # Station-Led Configuration (Step 5): expensive hardware is never
+        # auto-executed — a READY StationReadinessEvent from the local engineer
+        # is mandatory before EXECUTING.
+        from services.readiness import StationReadinessService
+
+        await StationReadinessService(self.db, self.tenant).require_ready(job)
         if not job.started_at:
             job.started_at = _now()
         return await self.transition(job_id, "EXECUTING", actor=actor)

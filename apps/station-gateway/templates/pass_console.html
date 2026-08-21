@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Station Gateway - Pass Console</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <a href="/" class="text-blue-600 hover:underline mb-4 inline-block">&larr; Back to Dashboard</a>
+        <h1 class="text-3xl font-bold mb-8">Pass Console</h1>
+        
+        <div class="grid grid-cols-2 gap-8 mb-8">
+            <div class="bg-white rounded shadow p-6">
+                <h2 class="text-xl font-semibold mb-4">Observation Job</h2>
+                <p><strong>ID:</strong> <span class="font-mono text-sm">{{ job.id }}</span></p>
+                <p><strong>Status:</strong> <span class="px-2 py-1 bg-gray-200 rounded text-sm font-semibold">{{ job.status }}</span></p>
+                <p><strong>Readiness:</strong> <span class="px-2 py-1 bg-gray-200 rounded text-sm font-semibold">{{ job.readiness_status }}</span></p>
+            </div>
+            
+            <div class="bg-white rounded shadow p-6">
+                <h2 class="text-xl font-semibold mb-4">Station Operation Profile</h2>
+                {% if profile %}
+                <p><strong>Name:</strong> {{ profile.name }}</p>
+                <p><strong>Operation Mode:</strong> {{ profile.operation_mode }}</p>
+                {% else %}
+                <p class="text-gray-500">No profile assigned (or not cached locally).</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="bg-white rounded shadow p-6 border-l-4 border-red-600">
+            <h2 class="text-xl font-semibold mb-4 text-red-600">Engineer Checklist (Manual Confirmed)</h2>
+            {% if job.readiness_status == "READY" %}
+            <div class="bg-green-100 text-green-800 p-4 rounded font-medium border border-green-200">
+                Readiness confirmed! The cloud orchestrator is now cleared to transition this job to EXECUTING.
+            </div>
+            {% else %}
+            <p class="mb-4 text-gray-600">Confirm the following checks to allow cloud execution:</p>
+            <form action="/jobs/{{ job.id }}/ready" method="post" class="space-y-4">
+                <label class="flex items-center space-x-3 cursor-pointer">
+                    <input type="checkbox" name="mcs_loaded" class="form-checkbox h-5 w-5 text-red-600" required>
+                    <span class="text-gray-800 font-medium">MCS Profile Loaded and Verified</span>
+                </label>
+                <label class="flex items-center space-x-3 cursor-pointer">
+                    <input type="checkbox" name="weather_safe" class="form-checkbox h-5 w-5 text-red-600" required>
+                    <span class="text-gray-800 font-medium">Weather Limits Safe (Wind/Temp)</span>
+                </label>
+                <label class="flex items-center space-x-3 cursor-pointer">
+                    <input type="checkbox" name="rf_verified" class="form-checkbox h-5 w-5 text-red-600" required>
+                    <span class="text-gray-800 font-medium">RF Path and Hardware Verified</span>
+                </label>
+                <button type="submit" class="bg-red-600 hover:bg-red-700 transition-colors text-white font-bold py-3 px-4 rounded w-full mt-6 shadow-md">
+                    CONFIRM READY
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

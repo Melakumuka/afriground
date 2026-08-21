@@ -86,8 +86,21 @@ CERTIFICATION_TRANSITIONS: Dict[str, List[str]] = {
     "REJECTED": [],
 }
 
+# ── StationOperationProfile certification workflow ───────────────────────
+# Configure-once lifecycle: engineers set up hardware once per satellite.
+
+PROFILE_CERTIFICATION_TRANSITIONS: Dict[str, List[str]] = {
+    "CONFIGURING": ["TESTING", "SUSPENDED", "RETIRED"],
+    "TESTING": ["QUALIFICATION_PASSED", "CONFIGURING", "SUSPENDED"],
+    "QUALIFICATION_PASSED": ["CERTIFIED", "TESTING", "SUSPENDED"],
+    "CERTIFIED": ["SUSPENDED", "RETIRED"],
+    "SUSPENDED": ["CONFIGURING", "CERTIFIED", "RETIRED"],
+    "RETIRED": [],
+}
+
 
 JOB_SM = StateMachine(JOB_TRANSITIONS, name="observation job")
 RESERVATION_SM = StateMachine(RESERVATION_TRANSITIONS, name="reservation")
 CONTACT_OPPORTUNITY_SM = StateMachine(CONTACT_OPPORTUNITY_TRANSITIONS, name="contact opportunity")
 CERTIFICATION_SM = StateMachine(CERTIFICATION_TRANSITIONS, name="certification")
+PROFILE_CERT_SM = StateMachine(PROFILE_CERTIFICATION_TRANSITIONS, name="profile certification")

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Station Gateway - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">Station Gateway Console</h1>
+        
+        <div class="bg-white rounded shadow p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Station Health</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <div>ACU Status: <span class="font-mono text-green-600">{{ health.acu_status }}</span></div>
+                <div>HDR Status: <span class="font-mono text-green-600">{{ health.hdr_status }}</span></div>
+                <div>Time Sync: <span class="font-mono text-blue-600">{{ health.time_sync }}</span></div>
+                <div>Wind Speed: <span class="font-mono">{{ health.wind_speed_kmh }} km/h</span></div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">Upcoming Passes</h2>
+            <table class="w-full text-left">
+                <thead>
+                    <tr>
+                        <th class="pb-2">Job ID</th>
+                        <th class="pb-2">Status</th>
+                        <th class="pb-2">Readiness</th>
+                        <th class="pb-2">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job in jobs %}
+                    <tr class="border-t">
+                        <td class="py-2 font-mono text-sm">{{ job.id[:8] }}...</td>
+                        <td class="py-2">{{ job.status }}</td>
+                        <td class="py-2">{{ job.readiness_status }}</td>
+                        <td class="py-2"><a href="/jobs/{{ job.id }}" class="text-blue-600 hover:underline">Console</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% if not jobs %}
+            <p class="text-gray-500 mt-4">No upcoming passes.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

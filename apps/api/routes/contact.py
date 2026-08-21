@@ -176,6 +176,64 @@ async def list_jobs(
     return [_job_dict(j) for j in jobs]
 
 
+@router.get("/jobs/{job_id}")
+async def get_job_details(
+    job_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db_session),
+    tenant: TenantContext = Depends(get_tenant_context),
+):
+    from sqlalchemy import select
+    from models.contact import ExecutionReceipt
+    from models.station_twin import StationReadinessEvent
+    from fastapi import HTTPException
+
+    stmt = (
+        select(ObservationJob)
+        .where(ObservationJob.id == job_id)
+        .where(ObservationJob.org_id == tenant.org_id)
+    )
+    result = await db.execute(stmt)
+    job = result.scalar_one_or_none()
+    
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    job_dict = _job_dict(job)
+
+    # Fetch Readiness Event
+    readiness_stmt = select(StationReadinessEvent).where(StationReadinessEvent.job_id == job_id).order_by(StationReadinessEvent.created_at.desc()).limit(1)
+    readiness_result = await db.execute(readiness_stmt)
+    readiness = readiness_result.scalar_one_or_none()
+
+    if readiness:
+        job_dict["readiness"] = {
+            "status": readiness.status,
+            "confirmed_at": readiness.confirmed_at,
+            "checklist_results": readiness.checklist_results,
+            "notes": readiness.notes,
+        }
+
+    # Fetch Execution Receipt
+    # Note: Using the original execution_receipts from contact if any, or the new edge one
+    # If the edge receipt model is different, we query it. 
+    receipt_stmt = select(ExecutionReceipt).where(ExecutionReceipt.job_id == job_id).order_by(ExecutionReceipt.created_at.desc()).limit(1)
+    receipt_result = await db.execute(receipt_stmt)
+    receipt = receipt_result.scalar_one_or_none()
+
+    if receipt:
+        job_dict["receipt"] = {
+            "status": receipt.status if hasattr(receipt, 'status') else 'COMPLETED',
+            "carrier_locked": getattr(receipt, 'carrier_locked', None),
+            "symbol_locked": getattr(receipt, 'symbol_locked', None),
+            "data_volume_bytes": getattr(receipt, 'data_volume_bytes', getattr(receipt, 'received_bytes', None)),
+            "average_ebno": getattr(receipt, 'average_ebno', None),
+            "pass_report_hash": getattr(receipt, 'pass_report_hash', None),
+        }
+        
+    return job_dict
+
+
+
 @router.post("/jobs/{job_id}/transition")
 async def transition_job(
     job_id: uuid.UUID,

@@ -17,6 +17,7 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
   const navLinks = [
     { href: `/${currentLocale}/booking`, label: nav.scheduling || (isZh ? "过境调度" : "Pass Scheduling") },
     // { href: `/${currentLocale}/station`, label: nav.telemetry || (isZh ? "实时遥测" : "Live Telemetry") },
+    { href: `/${currentLocale}/commercial/quotes`, label: nav.commercial || (isZh ? "商务与计费" : "Commercial & Billing") },
     { href: `/${currentLocale}/data`, label: nav.catalog || (isZh ? "数据下传" : "Data Catalog") },
     { href: `/${currentLocale}/support`, label: nav.support || (isZh ? "SLA & 支持" : "SLA & Support") },
   ];

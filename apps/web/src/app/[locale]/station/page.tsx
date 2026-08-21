@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useT } from "@/lib/useT";
 import type { Agent, Station, TimeStatus } from "@/lib/api";
 
@@ -125,6 +126,14 @@ export default function StationHealthDashboard() {
                 {station ? `${station.country} · ${station.certification_state} · TX ${station.tx_enabled ? "ENABLED" : "DISABLED"} · ` : ""}
                 {t("subtitle", "实时射频、天线与环境遥测数据，并附带风险分析。", "Real-time RF, antenna and environmental telemetry with risk analysis.")}
               </p>
+              <div className="mt-6">
+                <Link 
+                  href={`/${params.locale}/operations/jobs/00000000-0000-0000-0000-000000000000`}
+                  className="inline-flex items-center gap-2 px-4 py-2 border border-signal text-signal hover:bg-signal hover:text-black transition-colors"
+                >
+                  {t("pass_report", "查看样本任务报告", "View Sample Pass Report")}
+                </Link>
+              </div>
             </div>
             <div
               className={`flex items-center gap-2 px-3 py-1.5 border ${

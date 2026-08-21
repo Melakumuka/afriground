@@ -13,12 +13,12 @@ from models.core import Organization, Role, User
 from models.tenancy import Permission, RolePermission
 from services.tenancy import TenantContext
 
-load_dotenv(os.path.join(os.path.dirname(__file__), "../../.env"))
+load_dotenv(os.path.join(os.path.dirname(__file__), "../.env"))
 
 TEST_URL = (
     os.environ.get("AFRIGROUND_TEST_DATABASE_URL")
     or os.environ.get("DATABASE_URL")
-    or "postgresql+asyncpg://localhost:5433/afriground_test"
+    or "postgresql+asyncpg://afriground:afriground_dev_password@localhost:5433/afriground"
 )
 
 

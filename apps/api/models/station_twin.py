@@ -142,3 +142,49 @@ class StationTelemetryReading(Base):
     telemetry_type = Column(String(50), nullable=False)  # antenna, rf, signal, weather, power, recording
     payload = Column(JSONB)
     recorded_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class StationOperationProfile(Base):
+    """Saved, certified station configuration for a specific satellite mission.
+    Station-Led Configuration: engineers configure expensive hardware (MCS, HDR,
+    ACU, RF chain) once per satellite.  Normal passes load this profile, update
+    only TLE/timing, and present a readiness checklist.
+
+    See docs/PFM730_INTEGRATION.md for payload schema reference.
+    See docs/STATION_ONBOARDING.md §2 for the configure-once workflow."""
+    __tablename__ = 'station_operation_profiles'
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    station_id = Column(UUID(as_uuid=True), ForeignKey('ground_stations.id'), nullable=False)
+    mission_profile_id = Column(UUID(as_uuid=True), ForeignKey('mission_profiles.id'), nullable=False)
+    satellite_id = Column(UUID(as_uuid=True), ForeignKey('spacecraft.id'))
+    name = Column(String(255), nullable=False)
+
+    # ── Certification lifecycle ──────────────────────────────────────────────
+    # CONFIGURING → TESTING → QUALIFICATION_PASSED → CERTIFIED → SUSPENDED / RETIRED
+    status = Column(String(50), default='CONFIGURING')
+    certification_state = Column(String(50), default='CONFIGURING')
+    certified_at = Column(DateTime(timezone=True))
+    certified_by = Column(UUID(as_uuid=True), ForeignKey('users.id'))
+    qualification_job_id = Column(UUID(as_uuid=True), ForeignKey('observation_jobs.id'))
+
+    # ── Operation mode ───────────────────────────────────────────────────────
+    # MANUAL_CONFIRMED (default for PFM730): engineer must click CONFIRM READY.
+    # SEMI_AUTOMATIC: auto-confirm if all pre-flight checks pass.
+    # AUTOMATIC: no confirmation needed (e.g. SatNOGS stations).
+    operation_mode = Column(String(50), default='MANUAL_CONFIRMED')
+
+    # ── Equipment configuration payloads (JSONB) ────────────────────────────
+    mcs_profile_payload = Column(JSONB)      # Zodiac PFM730 MCS mission/preset
+    hdr_config_payload = Column(JSONB)       # CORTEX HDR modem (IF, symbol rate, coding, frame)
+    acu_config_payload = Column(JSONB)       # ACU satellite preset (tracking, polarization, masks)
+    rf_path_payload = Column(JSONB)          # RF chain (LNB, LNA, IF, filter, polarization)
+    decoder_config_payload = Column(JSONB)   # Frame processing (VCID filter, output format)
+    safety_payload = Column(JSONB)           # Wind limits, timeout thresholds, interlock config
+
+    # ── Usage tracking ───────────────────────────────────────────────────────
+    success_rate = Column(Float)             # rolling success rate from execution receipts
+    total_passes = Column(Integer, default=0)
+    last_used_at = Column(DateTime(timezone=True))
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
