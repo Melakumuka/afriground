@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useMessages } from "next-intl";
+import { useState } from "react";
 
 export default function Navbar({ currentLocale }: { currentLocale: string }) {
   const pathname = usePathname();
@@ -31,6 +32,9 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
     router.push(newPath || `/${nextLocale}`);
   };
 
+  // Mobile menu state
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <header className="sticky top-0 z-50 w-full bg-graphite/90 backdrop-blur-xl border-b border-graphite-600/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
@@ -51,6 +55,18 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
           </div>
         </Link>
 
+        {/* Mobile Menu Button (hidden on lg+)} -->
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="lg:hidden p-2 rounded-md hover:bg-graphite-500 transition-colors"
+          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 12l2-2m0 0l7-7m7 7l2 2m0 0l7 7m7-7v2m-2 0h2"/>
+            <path d="M19 12l2 2m0 0l-7 7m-7-7l2-2m0 0l-7-7"/>
+          </svg>
+        </button>
+
         {/* Desktop Navigation Links */}
         <nav className="hidden md:flex items-center gap-1">
           {navLinks.map((link) => {
@@ -70,6 +86,35 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
             );
           })}
         </nav>
+
+        {/* Mobile Menu (overlay, shown only on mobile)} -->
+        {mobileMenuOpen && (
+          <nav className="fixed inset-0 bg-graphite/90 top-20 z-40 flex flex-col items-center gap-4 p-8 hidden md:block">
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`text-2xl font-bold text-white transition-colors ${
+                    isActive ? "text-signal" : "hover:text-signal-soft hover:bg-white/5"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+            <button
+              onClick={() => setMobileMenuOpen(false)}
+              className="absolute top-6 right-6 text-gray-400 hover:text-white"
+              aria-label="Close menu"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 6L6 18M6 6l12 12"/>
+              </svg>
+            </button>
+          </nav>
+        )}
 
         {/* Network Status & Actions */}
         <div className="flex items-center gap-4">
