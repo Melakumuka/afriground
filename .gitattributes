@@ -7,3 +7,4 @@ Dockerfile text eol=lf
 Dockerfile.worker text eol=lf
 *.md text eol=lf
 *.json text eol=lf
+graphify-out/graph.json merge=graphify
