@@ -51,6 +51,7 @@ export default function DataCatalog() {
         if (Array.isArray(data)) setDestinations(data);
       })
       .catch(() => {});
+  }, []);
 
   useEffect(() => {
     fetch("/api/platform/data/datasets")
