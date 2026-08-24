@@ -73,7 +73,7 @@ export default function ContractDashboard({ params }: { params: { contract_id: s
   if (loading) {
     return (
       <div className="min-h-screen bg-black/95 text-white/80 p-8 flex items-center justify-center">
-        <div className="animate-pulse">Loading Contract...</div>
+        <div className="animate-pulse">{t("loading_contract", "正在加载合同...", "Loading Contract...")}</div>
       </div>
     );
   }
@@ -81,7 +81,7 @@ export default function ContractDashboard({ params }: { params: { contract_id: s
   if (!contract) {
     return (
       <div className="min-h-screen bg-black/95 text-red-500 p-8 flex items-center justify-center">
-        Contract not found
+        {t("not_found", "未找到合同", "Contract not found")}
       </div>
     );
   }
@@ -108,21 +108,21 @@ export default function ContractDashboard({ params }: { params: { contract_id: s
         {/* ── Status Row ────────────────────────────────────── */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white/5 rounded-xl p-5 border border-white/10">
-            <div className="text-xs uppercase tracking-wider text-white/40 mb-2">Status</div>
+            <div className="text-xs uppercase tracking-wider text-white/40 mb-2">{t("status", "状态", "Status")}</div>
             <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-500/20 text-green-400">
               {contract.status.toUpperCase()}
             </span>
           </div>
           <div className="bg-white/5 rounded-xl p-5 border border-white/10">
-            <div className="text-xs uppercase tracking-wider text-white/40 mb-2">Pricing Tier</div>
+            <div className="text-xs uppercase tracking-wider text-white/40 mb-2">{t("pricing_tier", "定价档位", "Pricing Tier")}</div>
             <div className="text-lg font-bold text-emerald-400 capitalize">{contract.pricing_tier}</div>
           </div>
           <div className="bg-white/5 rounded-xl p-5 border border-white/10">
-            <div className="text-xs uppercase tracking-wider text-white/40 mb-2">SLA Target</div>
+            <div className="text-xs uppercase tracking-wider text-white/40 mb-2">{t("sla_target", "SLA 目标", "SLA Target")}</div>
             <div className="text-lg font-bold font-mono">{contract.sla_availability_target}%</div>
           </div>
           <div className="bg-white/5 rounded-xl p-5 border border-white/10">
-            <div className="text-xs uppercase tracking-wider text-white/40 mb-2">Days Remaining</div>
+            <div className="text-xs uppercase tracking-wider text-white/40 mb-2">{t("days_remaining", "剩余天数", "Days Remaining")}</div>
             <div className="text-lg font-bold font-mono text-emerald-400">{daysRemaining}</div>
           </div>
         </div>
@@ -136,7 +136,7 @@ export default function ContractDashboard({ params }: { params: { contract_id: s
             <div className="md:col-span-2 space-y-6">
               <div>
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-white/60">Used Capacity</span>
+                  <span className="text-white/60">{t("used_capacity", "已用容量", "Used Capacity")}</span>
                   <span className="font-mono text-emerald-400">
                     {contract.used_minutes.toLocaleString()} / {contract.reserved_capacity_minutes.toLocaleString()} min
                   </span>
@@ -153,7 +153,7 @@ export default function ContractDashboard({ params }: { params: { contract_id: s
                 </div>
                 <div className="flex justify-between text-xs text-white/30 mt-1">
                   <span>0%</span>
-                  <span>{usagePct.toFixed(1)}% consumed</span>
+                  <span>{usagePct.toFixed(1)}% {t("consumed", "已消耗", "consumed")}</span>
                   <span>100%</span>
                 </div>
               </div>
@@ -164,19 +164,19 @@ export default function ContractDashboard({ params }: { params: { contract_id: s
                   <div className="text-2xl font-bold font-mono text-emerald-400">
                     {(contract.used_minutes / 60).toFixed(0)}h
                   </div>
-                  <div className="text-xs text-white/40 mt-1">Used</div>
+                  <div className="text-xs text-white/40 mt-1">{t("used", "已用", "Used")}</div>
                 </div>
                 <div className="p-4 bg-black/30 rounded-xl border border-white/5 text-center">
                   <div className="text-2xl font-bold font-mono text-teal-400">
                     {(contract.remaining_minutes / 60).toFixed(0)}h
                   </div>
-                  <div className="text-xs text-white/40 mt-1">Remaining</div>
+                  <div className="text-xs text-white/40 mt-1">{t("remaining", "剩余", "Remaining")}</div>
                 </div>
                 <div className="p-4 bg-black/30 rounded-xl border border-white/5 text-center">
                   <div className="text-2xl font-bold font-mono text-white/80">
                     {(contract.reserved_capacity_minutes / 60).toFixed(0)}h
                   </div>
-                  <div className="text-xs text-white/40 mt-1">Total</div>
+                  <div className="text-xs text-white/40 mt-1">{t("total", "总计", "Total")}</div>
                 </div>
               </div>
             </div>
@@ -186,7 +186,7 @@ export default function ContractDashboard({ params }: { params: { contract_id: s
               <ProgressRing
                 value={contract.used_minutes}
                 max={contract.reserved_capacity_minutes}
-                label="consumed"
+                label={t("consumed", "已消耗", "consumed")}
                 color={usagePct > 85 ? "#ef4444" : usagePct > 60 ? "#eab308" : "#10b981"}
               />
             </div>
@@ -198,11 +198,11 @@ export default function ContractDashboard({ params }: { params: { contract_id: s
           <h2 className="text-xl font-bold mb-6">{t("period", "合同期", "Contract Period")}</h2>
           <div className="grid grid-cols-2 gap-6">
             <div>
-              <div className="text-xs uppercase tracking-wider text-white/40 mb-2">Start Date</div>
+              <div className="text-xs uppercase tracking-wider text-white/40 mb-2">{t("start_date", "开始日期", "Start Date")}</div>
               <div className="font-mono text-white/80">{new Date(contract.start_date).toLocaleDateString()}</div>
             </div>
             <div>
-              <div className="text-xs uppercase tracking-wider text-white/40 mb-2">End Date</div>
+              <div className="text-xs uppercase tracking-wider text-white/40 mb-2">{t("end_date", "结束日期", "End Date")}</div>
               <div className="font-mono text-white/80">{new Date(contract.end_date).toLocaleDateString()}</div>
             </div>
           </div>

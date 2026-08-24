@@ -90,7 +90,7 @@ export default function JobDetailsPage({ params }: { params: { job_id: string } 
             </h2>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-white/50 uppercase text-xs tracking-wider">Status</span>
+                <span className="text-white/50 uppercase text-xs tracking-wider">{t("status", "状态", "Status")}</span>
                 <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                   job.status === "COMPLETED" ? "bg-green-500/20 text-green-400" :
                   job.status === "EXECUTING" ? "bg-blue-500/20 text-blue-400" :
@@ -100,16 +100,16 @@ export default function JobDetailsPage({ params }: { params: { job_id: string } 
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-white/50 uppercase text-xs tracking-wider">Priority</span>
+                <span className="text-white/50 uppercase text-xs tracking-wider">{t("priority", "优先级", "Priority")}</span>
                 <span className="font-mono">{job.priority}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-white/50 uppercase text-xs tracking-wider">TX Requested</span>
-                <span className="font-mono">{job.tx_requested ? "Yes" : "No"}</span>
+                <span className="text-white/50 uppercase text-xs tracking-wider">{t("tx_requested", "请求发送（TX）", "TX Requested")}</span>
+                <span className="font-mono">{job.tx_requested ? t("yes", "是", "Yes") : t("no", "否", "No")}</span>
               </div>
               {job.started_at && (
                 <div className="flex justify-between items-center">
-                  <span className="text-white/50 uppercase text-xs tracking-wider">Started</span>
+                  <span className="text-white/50 uppercase text-xs tracking-wider">{t("started", "开始时间", "Started")}</span>
                   <span className="font-mono text-sm">{new Date(job.started_at).toLocaleString()}</span>
                 </div>
               )}
@@ -121,18 +121,18 @@ export default function JobDetailsPage({ params }: { params: { job_id: string } 
             <h2 className="text-xl font-bold mb-6 text-white/90 flex items-center justify-between">
               {t("readiness", "Pre-flight Readiness", "PRE-FLIGHT READINESS")}
               {job.readiness?.status === "READY" && (
-                <span className="text-green-400 text-sm px-2 py-1 bg-green-400/10 rounded-full">CONFIRMED</span>
+                <span className="text-green-400 text-sm px-2 py-1 bg-green-400/10 rounded-full">{t("confirmed", "已确认", "CONFIRMED")}</span>
               )}
             </h2>
             
             {!job.readiness ? (
               <div className="text-center p-8 text-white/40 border border-dashed border-white/10 rounded-xl">
-                Pending Engineer Confirmation
+                {t("pending_confirmation", "等待工程师确认", "Pending Engineer Confirmation")}
               </div>
             ) : (
               <div className="space-y-4">
                 <p className="text-sm text-white/60 mb-4">
-                  Confirmed by Station Engineer at <span className="font-mono text-white/80">{new Date(job.readiness.confirmed_at).toLocaleTimeString()}</span>
+                  {t("confirmed_by", "由地面站工程师于", "Confirmed by Station Engineer at")} <span className="font-mono text-white/80">{new Date(job.readiness.confirmed_at).toLocaleTimeString()}</span>
                 </p>
                 <div className="space-y-2">
                   {job.readiness.checklist_results ? (
@@ -145,11 +145,11 @@ export default function JobDetailsPage({ params }: { params: { job_id: string } 
                   ) : (
                     <>
                       <div className="flex justify-between items-center p-3 bg-black/40 rounded-lg">
-                        <span className="text-sm text-white/80">Hardware Profile Loaded</span>
+                        <span className="text-sm text-white/80">{t("profile_loaded", "硬件配置已加载", "Hardware Profile Loaded")}</span>
                         <span>✅</span>
                       </div>
                       <div className="flex justify-between items-center p-3 bg-black/40 rounded-lg">
-                        <span className="text-sm text-white/80">RF Path Verified</span>
+                        <span className="text-sm text-white/80">{t("rf_verified", "射频路径已验证", "RF Path Verified")}</span>
                         <span>✅</span>
                       </div>
                     </>
@@ -168,30 +168,30 @@ export default function JobDetailsPage({ params }: { params: { job_id: string } 
                 <h2 className="text-2xl font-bold text-white mb-2">
                   {t("receipt", "Execution Receipt", "EXECUTION RECEIPT")}
                 </h2>
-                <p className="text-indigo-200/60 text-sm">Post-pass telemetry and artifact verification</p>
+                <p className="text-indigo-200/60 text-sm">{t("telemetry_note", "过境后遥测与产物验证", "Post-pass telemetry and artifact verification")}</p>
               </div>
               <button className="px-6 py-2 bg-indigo-500 hover:bg-indigo-400 transition-colors rounded-full text-sm font-semibold text-white shadow-[0_0_20px_rgba(99,102,241,0.3)]">
-                Download .raw IQ
+                {t("download_raw", "下载 .raw IQ", "Download .raw IQ")}
               </button>
             </div>
             
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <div className="p-4 bg-black/30 rounded-xl border border-white/5">
-                <div className="text-xs uppercase tracking-wider text-white/50 mb-2">Carrier Lock</div>
-                <div className="text-lg font-mono text-indigo-400">{job.receipt.carrier_locked ? "LOCKED" : "UNLOCKED"}</div>
+                <div className="text-xs uppercase tracking-wider text-white/50 mb-2">{t("carrier_lock", "载波锁定", "Carrier Lock")}</div>
+                <div className="text-lg font-mono text-indigo-400">{job.receipt.carrier_locked ? t("locked", "已锁定", "LOCKED") : t("unlocked", "未锁定", "UNLOCKED")}</div>
               </div>
               <div className="p-4 bg-black/30 rounded-xl border border-white/5">
-                <div className="text-xs uppercase tracking-wider text-white/50 mb-2">Avg Eb/No</div>
+                <div className="text-xs uppercase tracking-wider text-white/50 mb-2">{t("avg_ebno", "平均 Eb/N0", "Avg Eb/No")}</div>
                 <div className="text-lg font-mono text-indigo-400">{job.receipt.average_ebno ? `${job.receipt.average_ebno.toFixed(2)} dB` : "N/A"}</div>
               </div>
               <div className="p-4 bg-black/30 rounded-xl border border-white/5">
-                <div className="text-xs uppercase tracking-wider text-white/50 mb-2">Data Volume</div>
+                <div className="text-xs uppercase tracking-wider text-white/50 mb-2">{t("data_volume", "数据量", "Data Volume")}</div>
                 <div className="text-lg font-mono text-indigo-400">
                   {job.receipt.data_volume_bytes ? `${(job.receipt.data_volume_bytes / 1024 / 1024).toFixed(1)} MB` : "0 MB"}
                 </div>
               </div>
               <div className="p-4 bg-black/30 rounded-xl border border-white/5">
-                <div className="text-xs uppercase tracking-wider text-white/50 mb-2">Report Hash</div>
+                <div className="text-xs uppercase tracking-wider text-white/50 mb-2">{t("report_hash", "报告哈希", "Report Hash")}</div>
                 <div className="text-sm font-mono text-indigo-400 truncate" title={job.receipt.pass_report_hash || ""}>
                   {job.receipt.pass_report_hash ? job.receipt.pass_report_hash.substring(0, 12) + "..." : "UNVERIFIED"}
                 </div>

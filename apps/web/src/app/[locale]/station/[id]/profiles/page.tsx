@@ -1,8 +1,11 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 
 export default async function StationProfilesPage({ params }: { params: { id: string, locale: string } }) {
+  const t = await getTranslations({ locale: params.locale, namespace: "StationProfiles" });
+
   // In a real app, we would fetch from the API here
   // const res = await fetch(`${process.env.AFRIGROUND_API_URL}/api/v1/stations/${params.id}/profiles`, { ... })
   // const profiles = await res.json();
@@ -14,16 +17,16 @@ export default async function StationProfilesPage({ params }: { params: { id: st
     <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Station Operation Profiles</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t("title")}</h1>
           <p className="mt-2 text-sm text-gray-700">
-            Manage the hardware presets for this station.
+            {t("subtitle")}
           </p>
         </div>
         <Link
           href={`/${params.locale}/station/${params.id}/profiles/new`}
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none"
         >
-          Add Profile
+          {t("new_profile")}
         </Link>
       </div>
 
@@ -35,7 +38,7 @@ export default async function StationProfilesPage({ params }: { params: { id: st
                 <div>
                   <p className="text-sm font-medium text-indigo-600 truncate">{profile.name}</p>
                   <p className="mt-1 text-sm text-gray-500">
-                    Satellite: {profile.satellite_id}
+                    {t("name")}: {profile.satellite_id}
                   </p>
                 </div>
                 <div className="flex items-center">
@@ -48,7 +51,7 @@ export default async function StationProfilesPage({ params }: { params: { id: st
           ))}
           {profiles.length === 0 && (
             <li className="px-4 py-4 sm:px-6 text-sm text-gray-500 text-center">
-              No profiles found. Create one to support automated passes.
+              {t("no_profiles")}
             </li>
           )}
         </ul>

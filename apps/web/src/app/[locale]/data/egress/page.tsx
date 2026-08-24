@@ -51,11 +51,11 @@ export default function DataEgressConfig() {
         fetchDestinations();
       } else {
         const errorData = await res.json();
-        setErrorMsg(errorData.detail || "Failed to validate or save destination");
+        setErrorMsg(errorData.detail || t("validate_fail", "验证或保存目标失败", "Failed to validate or save destination"));
       }
     } catch (e) {
       console.error(e);
-      setErrorMsg("Network error. Could not connect to API.");
+      setErrorMsg(t("network_error", "网络错误。无法连接 API。", "Network error. Could not connect to API."));
     }
     setLoading(false);
   };
@@ -99,7 +99,7 @@ export default function DataEgressConfig() {
           </h2>
 
           <div className="bg-yellow-500/10 border-l-4 border-yellow-500 p-4 mb-6 text-sm text-yellow-200/90">
-            <strong>Security Notice:</strong> Do not provide Root account keys. Ensure your Access Key is restricted by IAM to <code>PutObject</code> (Write-Only) permissions for the designated bucket. All credentials are symmetrically encrypted at rest.
+            <strong>{t("security_notice", "安全提示：请勿提供根账户密钥。请确保您的访问密钥已通过 IAM 限制为仅对指定存储桶具有 PutObject（只写）权限。所有凭据均已在存储时对称加密。", "Security Notice: Do not provide Root account keys. Ensure your Access Key is restricted by IAM to PutObject (Write-Only) permissions for the designated bucket. All credentials are symmetrically encrypted at rest.")}</strong>
           </div>
 
           <div className="console-panel p-6 sm:p-8 space-y-6">

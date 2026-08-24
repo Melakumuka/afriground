@@ -99,7 +99,7 @@ export default function CommercialQuotesPage() {
           <div className="lg:col-span-2 space-y-6">
             {/* Pricing Tier */}
             <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
-              <label className="text-xs uppercase tracking-wider text-white/50 block mb-4">Pricing Tier</label>
+              <label className="text-xs uppercase tracking-wider text-white/50 block mb-4">{t("pricing_tier", "定价档位", "Pricing Tier")}</label>
               <div className="space-y-2">
                 {PRICING_TIERS.map((p) => (
                   <button
@@ -116,7 +116,7 @@ export default function CommercialQuotesPage() {
                       <span className="font-mono text-indigo-400">${p.perMin}/min</span>
                     </div>
                     {p.setup > 0 && (
-                      <span className="text-xs text-white/40 mt-1 block">+ ${p.setup} setup fee</span>
+                      <span className="text-xs text-white/40 mt-1 block">+ ${p.setup} {t("setup_fee", "一次性设置费", "setup fee")}</span>
                     )}
                   </button>
                 ))}
@@ -125,10 +125,10 @@ export default function CommercialQuotesPage() {
 
             {/* Pass Config */}
             <div className="bg-white/5 rounded-2xl p-6 border border-white/10 space-y-5">
-              <label className="text-xs uppercase tracking-wider text-white/50 block">Pass Configuration</label>
+              <label className="text-xs uppercase tracking-wider text-white/50 block">{t("pass_config", "过境配置", "Pass Configuration")}</label>
               <div>
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-white/60">Duration per pass</span>
+                  <span className="text-white/60">{t("duration_per_pass", "每次过境时长", "Duration per pass")}</span>
                   <span className="font-mono text-indigo-400">{passDurationMin} min</span>
                 </div>
                 <input
@@ -139,7 +139,7 @@ export default function CommercialQuotesPage() {
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-white/60">Number of passes</span>
+                  <span className="text-white/60">{t("num_passes", "过境次数", "Number of passes")}</span>
                   <span className="font-mono text-indigo-400">{passCount}</span>
                 </div>
                 <input
@@ -150,7 +150,7 @@ export default function CommercialQuotesPage() {
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-white/60">Priority Level</span>
+                  <span className="text-white/60">{t("priority_level", "优先级", "Priority Level")}</span>
                   <span className="font-mono text-indigo-400">{priority}</span>
                 </div>
                 <input
@@ -166,7 +166,7 @@ export default function CommercialQuotesPage() {
               disabled={loading}
               className="w-full py-3 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 rounded-xl font-semibold text-white transition-all shadow-[0_0_30px_rgba(99,102,241,0.25)] disabled:opacity-50"
             >
-              {loading ? "Calculating..." : t("generate", "生成报价", "Generate Quote")}
+              {loading ? t("calculate", "正在计算...", "Calculating...") : t("generate", "生成报价", "Generate Quote")}
             </button>
           </div>
 
@@ -176,14 +176,14 @@ export default function CommercialQuotesPage() {
               <div className="bg-white/5 rounded-2xl p-12 border border-dashed border-white/10 flex flex-col items-center justify-center h-full text-center">
                 <div className="text-6xl mb-6 opacity-30">📋</div>
                 <p className="text-white/40 text-lg">{t("no_quote", "还没有报价", "No quote generated yet")}</p>
-                <p className="text-white/25 text-sm mt-2">Configure your passes and click Generate</p>
+                <p className="text-white/25 text-sm mt-2">{t("configure_hint", "配置您的过境后点击生成", "Configure your passes and click Generate")}</p>
               </div>
             ) : (
               <div className="bg-gradient-to-br from-indigo-500/5 to-purple-500/5 rounded-2xl border border-indigo-500/20 overflow-hidden">
                 {/* Quote Header */}
                 <div className="p-6 border-b border-white/10 flex justify-between items-center">
                   <div>
-                    <h3 className="text-lg font-bold">Quote</h3>
+                    <h3 className="text-lg font-bold">{t("quote", "报价", "Quote")}</h3>
                     <p className="text-xs font-mono text-white/40 mt-1">{quote.id}</p>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
@@ -214,7 +214,7 @@ export default function CommercialQuotesPage() {
 
                 {/* Total */}
                 <div className="px-6 py-5 border-t border-white/10 bg-black/20 flex justify-between items-center">
-                  <span className="text-lg font-bold">Total</span>
+                  <span className="text-lg font-bold">{t("total", "总计", "Total")}</span>
                   <span className="text-2xl font-bold font-mono text-indigo-400">
                     ${quote.total_amount.toFixed(2)}
                   </span>
@@ -234,8 +234,8 @@ export default function CommercialQuotesPage() {
 
                 {accepted && (
                   <div className="p-6 border-t border-white/10 bg-green-500/5 text-center">
-                    <p className="text-green-400 font-semibold">✅ Quote Accepted — Bookings Reserved</p>
-                    <p className="text-green-400/60 text-sm mt-1">Your passes have been locked in.</p>
+                    <p className="text-green-400 font-semibold">✅ {t("accepted", "报价已接受 —— 已保留预订", "Quote Accepted — Bookings Reserved")}</p>
+                    <p className="text-green-400/60 text-sm mt-1">{t("locked_in", "您的过境已锁定。", "Your passes have been locked in.")}</p>
                   </div>
                 )}
               </div>
