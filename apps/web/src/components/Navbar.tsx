@@ -89,7 +89,7 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
 
         {/* Mobile Menu (overlay, shown only on mobile)} -->
         {mobileMenuOpen && (
-          <nav className="fixed inset-0 bg-graphite/90 top-20 z-40 flex flex-col items-center gap-4 p-8 hidden md:block">
+          <nav className="fixed inset-0 bg-graphite/90 top-20 z-40 flex flex-col items-center gap-4 p-8 block md:hidden">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
