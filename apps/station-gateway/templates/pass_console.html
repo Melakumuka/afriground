@@ -1,60 +1,246 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Station Gateway - Pass Console</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 p-8">
-    <div class="max-w-4xl mx-auto">
-        <a href="/" class="text-blue-600 hover:underline mb-4 inline-block">&larr; Back to Dashboard</a>
-        <h1 class="text-3xl font-bold mb-8">Pass Console</h1>
-        
-        <div class="grid grid-cols-2 gap-8 mb-8">
-            <div class="bg-white rounded shadow p-6">
-                <h2 class="text-xl font-semibold mb-4">Observation Job</h2>
-                <p><strong>ID:</strong> <span class="font-mono text-sm">{{ job.id }}</span></p>
-                <p><strong>Status:</strong> <span class="px-2 py-1 bg-gray-200 rounded text-sm font-semibold">{{ job.status }}</span></p>
-                <p><strong>Readiness:</strong> <span class="px-2 py-1 bg-gray-200 rounded text-sm font-semibold">{{ job.readiness_status }}</span></p>
+{% extends "base.html" %}
+
+{% block title %}Pass Console — {{ job.id[:8] }}{% endblock %}
+
+{% block content %}
+<!-- Back link -->
+<a href="/" class="inline-flex items-center gap-2 text-steel-2 hover:text-white transition-colors mb-6 text-sm">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    Back to Dashboard
+</a>
+
+<div class="mb-8">
+    <h1 class="text-3xl font-display font-bold mb-1">Pass Console</h1>
+    <p class="text-steel-2">Job <span class="font-mono text-signal">{{ job.id[:12] }}…</span></p>
+</div>
+
+<!-- Top Info Row -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+
+    <!-- Job Details -->
+    <div class="bg-graphite-600 border border-graphite-500 p-6">
+        <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-signal" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            Observation Job
+        </h2>
+        <div class="space-y-3">
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-steel-2">Job ID</span>
+                <span class="font-mono text-sm">{{ job.id }}</span>
             </div>
-            
-            <div class="bg-white rounded shadow p-6">
-                <h2 class="text-xl font-semibold mb-4">Station Operation Profile</h2>
-                {% if profile %}
-                <p><strong>Name:</strong> {{ profile.name }}</p>
-                <p><strong>Operation Mode:</strong> {{ profile.operation_mode }}</p>
+            <div class="flex justify-between items-center border-t border-graphite-500 pt-3">
+                <span class="text-sm text-steel-2">Status</span>
+                {% if job.status == "EXECUTING" %}
+                <span class="px-3 py-1 text-xs font-bold bg-green-500/20 text-green-soft border border-green-500/30">{{ job.status }}</span>
+                {% elif job.status in ("DISPATCHED", "QUEUED", "ACKNOWLEDGED") %}
+                <span class="px-3 py-1 text-xs font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">{{ job.status }}</span>
+                {% elif job.status in ("FAILED", "CANCELLED") %}
+                <span class="px-3 py-1 text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30">{{ job.status }}</span>
+                {% elif job.status == "COMPLETED" %}
+                <span class="px-3 py-1 text-xs font-bold bg-green-500/20 text-green-soft border border-green-500/30">{{ job.status }}</span>
                 {% else %}
-                <p class="text-gray-500">No profile assigned (or not cached locally).</p>
+                <span class="px-3 py-1 text-xs font-bold bg-graphite-400/30 text-steel-2 border border-graphite-400/30">{{ job.status }}</span>
                 {% endif %}
             </div>
-        </div>
-
-        <div class="bg-white rounded shadow p-6 border-l-4 border-red-600">
-            <h2 class="text-xl font-semibold mb-4 text-red-600">Engineer Checklist (Manual Confirmed)</h2>
-            {% if job.readiness_status == "READY" %}
-            <div class="bg-green-100 text-green-800 p-4 rounded font-medium border border-green-200">
-                Readiness confirmed! The cloud orchestrator is now cleared to transition this job to EXECUTING.
+            <div class="flex justify-between items-center border-t border-graphite-500 pt-3">
+                <span class="text-sm text-steel-2">Readiness</span>
+                {% if job.readiness_status == "READY" %}
+                <span class="px-3 py-1 text-xs font-bold bg-green-500/20 text-green-soft border border-green-500/30">CONFIRMED</span>
+                {% else %}
+                <span class="px-3 py-1 text-xs font-bold bg-signal/20 text-signal border border-signal/30">{{ job.readiness_status or "PENDING" }}</span>
+                {% endif %}
             </div>
-            {% else %}
-            <p class="mb-4 text-gray-600">Confirm the following checks to allow cloud execution:</p>
-            <form action="/jobs/{{ job.id }}/ready" method="post" class="space-y-4">
-                <label class="flex items-center space-x-3 cursor-pointer">
-                    <input type="checkbox" name="mcs_loaded" class="form-checkbox h-5 w-5 text-red-600" required>
-                    <span class="text-gray-800 font-medium">MCS Profile Loaded and Verified</span>
-                </label>
-                <label class="flex items-center space-x-3 cursor-pointer">
-                    <input type="checkbox" name="weather_safe" class="form-checkbox h-5 w-5 text-red-600" required>
-                    <span class="text-gray-800 font-medium">Weather Limits Safe (Wind/Temp)</span>
-                </label>
-                <label class="flex items-center space-x-3 cursor-pointer">
-                    <input type="checkbox" name="rf_verified" class="form-checkbox h-5 w-5 text-red-600" required>
-                    <span class="text-gray-800 font-medium">RF Path and Hardware Verified</span>
-                </label>
-                <button type="submit" class="bg-red-600 hover:bg-red-700 transition-colors text-white font-bold py-3 px-4 rounded w-full mt-6 shadow-md">
-                    CONFIRM READY
-                </button>
-            </form>
-            {% endif %}
+            <div class="flex justify-between items-center border-t border-graphite-500 pt-3">
+                <span class="text-sm text-steel-2">TX Requested</span>
+                {% if job.tx_requested %}
+                <span class="px-3 py-1 text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30">YES — UPLINK</span>
+                {% else %}
+                <span class="px-3 py-1 text-xs font-bold bg-graphite-400/30 text-steel-2 border border-graphite-400/30">NO — RX ONLY</span>
+                {% endif %}
+            </div>
+            <div class="flex justify-between items-center border-t border-graphite-500 pt-3">
+                <span class="text-sm text-steel-2">Priority</span>
+                <span class="font-mono text-sm">P{{ job.priority }}</span>
+            </div>
         </div>
     </div>
-</body>
-</html>
+
+    <!-- Station Operation Profile -->
+    <div class="bg-graphite-600 border border-graphite-500 p-6">
+        <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-signal" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Station Operation Profile
+        </h2>
+        {% if profile %}
+        <div class="space-y-3">
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-steel-2">Profile Name</span>
+                <span class="font-semibold">{{ profile.name }}</span>
+            </div>
+            <div class="flex justify-between items-center border-t border-graphite-500 pt-3">
+                <span class="text-sm text-steel-2">Operation Mode</span>
+                <span class="font-mono text-sm">{{ profile.operation_mode or "DEFAULT" }}</span>
+            </div>
+            <div class="flex justify-between items-center border-t border-graphite-500 pt-3">
+                <span class="text-sm text-steel-2">Satellite</span>
+                <span class="font-mono text-sm">{{ profile.satellite_id[:12] if profile.satellite_id else "—" }}…</span>
+            </div>
+            <div class="flex justify-between items-center border-t border-graphite-500 pt-3">
+                <span class="text-sm text-steel-2">Profile ID</span>
+                <span class="font-mono text-xs text-steel-2">{{ profile.id[:12] }}…</span>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-8 text-steel-2">
+            <svg class="w-10 h-10 mx-auto mb-3 text-graphite-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+            <p class="font-medium">No profile assigned</p>
+            <p class="text-sm mt-1">This job has no cached StationOperationProfile.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Engineer Checklist -->
+<div class="bg-graphite-600 border-2 {% if job.readiness_status == 'READY' %}border-green-500/50{% else %}border-red-500/50{% endif %} p-6 mb-8">
+    <h2 class="text-xl font-bold mb-2 flex items-center gap-3">
+        {% if job.readiness_status == "READY" %}
+        <svg class="w-6 h-6 text-green-soft" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span class="text-green-soft">Readiness Confirmed</span>
+        {% else %}
+        <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        <span class="text-red-400">Engineer Checklist — Manual Confirmation Required</span>
+        {% endif %}
+    </h2>
+
+    {% if job.readiness_status == "READY" %}
+    <div class="bg-green-500/10 border border-green-500/30 p-5 mt-4">
+        <p class="text-green-soft font-medium">
+            ✅ All checklist items have been confirmed. The Cloud Orchestrator is now cleared to transition this job to <span class="font-mono font-bold">EXECUTING</span>.
+        </p>
+    </div>
+    {% else %}
+    <p class="text-steel-2 mb-6 mt-2">You must confirm each item below before the cloud will allow this pass to execute. This is a safety interlock.</p>
+    
+    <form action="/jobs/{{ job.id }}/ready" method="post">
+        <div class="space-y-3 mb-8">
+            <label class="flex items-center gap-4 p-4 bg-graphite-500/50 border border-graphite-500 hover:border-signal/40 transition-colors cursor-pointer group">
+                <input type="checkbox" name="mcs_loaded" required class="w-5 h-5 rounded border-2 border-graphite-400 text-signal focus:ring-signal bg-graphite accent-yellow-400">
+                <div>
+                    <div class="font-semibold group-hover:text-signal transition-colors">MCS Profile Loaded & Verified</div>
+                    <div class="text-xs text-steel-2 mt-0.5">The correct Zodiac/CORTEX preset has been loaded in the local Mission Control Software</div>
+                </div>
+            </label>
+
+            <label class="flex items-center gap-4 p-4 bg-graphite-500/50 border border-graphite-500 hover:border-signal/40 transition-colors cursor-pointer group">
+                <input type="checkbox" name="hdr_configured" required class="w-5 h-5 rounded border-2 border-graphite-400 text-signal focus:ring-signal bg-graphite accent-yellow-400">
+                <div>
+                    <div class="font-semibold group-hover:text-signal transition-colors">HDR Modem Configured</div>
+                    <div class="text-xs text-steel-2 mt-0.5">High Data Rate modem is set to correct modulation, symbol rate, and FEC coding</div>
+                </div>
+            </label>
+
+            <label class="flex items-center gap-4 p-4 bg-graphite-500/50 border border-graphite-500 hover:border-signal/40 transition-colors cursor-pointer group">
+                <input type="checkbox" name="acu_tle_updated" required class="w-5 h-5 rounded border-2 border-graphite-400 text-signal focus:ring-signal bg-graphite accent-yellow-400">
+                <div>
+                    <div class="font-semibold group-hover:text-signal transition-colors">ACU TLE Updated</div>
+                    <div class="text-xs text-steel-2 mt-0.5">Antenna Control Unit has the latest Two-Line Element set loaded for accurate tracking</div>
+                </div>
+            </label>
+
+            <label class="flex items-center gap-4 p-4 bg-graphite-500/50 border border-graphite-500 hover:border-signal/40 transition-colors cursor-pointer group">
+                <input type="checkbox" name="rf_verified" required class="w-5 h-5 rounded border-2 border-graphite-400 text-signal focus:ring-signal bg-graphite accent-yellow-400">
+                <div>
+                    <div class="font-semibold group-hover:text-signal transition-colors">RF Path & Hardware Verified</div>
+                    <div class="text-xs text-steel-2 mt-0.5">Correct waveguide path, LNA, and polarization switch position confirmed</div>
+                </div>
+            </label>
+
+            <label class="flex items-center gap-4 p-4 bg-graphite-500/50 border border-graphite-500 hover:border-signal/40 transition-colors cursor-pointer group">
+                <input type="checkbox" name="weather_safe" required class="w-5 h-5 rounded border-2 border-graphite-400 text-signal focus:ring-signal bg-graphite accent-yellow-400">
+                <div>
+                    <div class="font-semibold group-hover:text-signal transition-colors">Weather & Environment Safe</div>
+                    <div class="text-xs text-steel-2 mt-0.5">Wind below limit, no lightning in vicinity, temperature within equipment specs</div>
+                </div>
+            </label>
+        </div>
+
+        <button type="submit" id="btn-confirm-ready"
+            class="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-black text-lg tracking-wider transition-colors shadow-lg shadow-red-900/30 disabled:opacity-40 disabled:cursor-not-allowed"
+            disabled>
+            CONFIRM READY
+        </button>
+        <p class="text-xs text-steel-2 mt-2 text-center">All 5 checklist items must be checked to enable this button.</p>
+    </form>
+    {% endif %}
+</div>
+
+<!-- Emergency Abort -->
+{% if job.status in ("EXECUTING", "PREPARING") %}
+<div class="bg-graphite-600 border-2 border-red-600 p-6 mb-8">
+    <h2 class="text-xl font-bold text-red-400 mb-3 flex items-center gap-3">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+        Emergency Controls
+    </h2>
+    <p class="text-steel-2 mb-4">Use only in case of equipment fault, unexpected wind gust, RF interference, or safety hazard. This action is <strong class="text-white">local-first</strong> and does not require cloud connectivity.</p>
+    <form action="/jobs/{{ job.id }}/abort" method="post" onsubmit="return confirm('⚠️ EMERGENCY ABORT — This will immediately stop all recording, kill TX, and stow the antenna. Are you sure?');">
+        <button type="submit" class="w-full py-4 bg-red-700 hover:bg-red-800 text-white font-black text-lg tracking-wider transition-colors border-2 border-red-500 shadow-lg shadow-red-900/50">
+            ⚠️ EMERGENCY ABORT — KILL RF & STOW
+        </button>
+    </form>
+</div>
+{% endif %}
+
+<!-- Post-Pass Receipt (shown if job is COMPLETED) -->
+{% if job.status == "COMPLETED" and receipt %}
+<div class="bg-graphite-600 border border-graphite-500 p-6">
+    <h2 class="text-xl font-bold mb-5 flex items-center gap-3">
+        <svg class="w-5 h-5 text-green-soft" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Execution Receipt
+    </h2>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-graphite-500 p-4 border border-graphite-400">
+            <div class="text-xs text-steel-2 uppercase tracking-wider mb-1">Avg Eb/N0</div>
+            <div class="text-2xl font-mono font-bold text-green-soft">{{ receipt.average_ebno }} dB</div>
+        </div>
+        <div class="bg-graphite-500 p-4 border border-graphite-400">
+            <div class="text-xs text-steel-2 uppercase tracking-wider mb-1">Max Track Error</div>
+            <div class="text-2xl font-mono font-bold">{{ receipt.tracking_error_summary.max_az }}°</div>
+        </div>
+        <div class="bg-graphite-500 p-4 border border-graphite-400">
+            <div class="text-xs text-steel-2 uppercase tracking-wider mb-1">Data Volume</div>
+            <div class="text-2xl font-mono font-bold text-signal">{{ (receipt.data_volume_bytes / 1048576) | round(1) }} MB</div>
+        </div>
+        <div class="bg-graphite-500 p-4 border border-graphite-400">
+            <div class="text-xs text-steel-2 uppercase tracking-wider mb-1">Frames</div>
+            <div class="text-2xl font-mono font-bold">{{ receipt.frame_count }}</div>
+        </div>
+    </div>
+    <div class="mt-4 p-3 bg-graphite-500 border border-graphite-400">
+        <span class="text-xs text-steel-2">Report Hash:</span>
+        <span class="font-mono text-xs text-signal ml-2">{{ receipt.pass_report_hash }}</span>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Enable CONFIRM READY button only when all checkboxes are checked
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    const confirmBtn = document.getElementById('btn-confirm-ready');
+    
+    if (checkboxes.length > 0 && confirmBtn) {
+        function updateButton() {
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            confirmBtn.disabled = !allChecked;
+            if (allChecked) {
+                confirmBtn.classList.add('animate-pulse');
+            } else {
+                confirmBtn.classList.remove('animate-pulse');
+            }
+        }
+        checkboxes.forEach(cb => cb.addEventListener('change', updateButton));
+    }
+</script>
+{% endblock %}

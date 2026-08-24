@@ -1,49 +1,181 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Station Gateway - Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 p-8">
-    <div class="max-w-4xl mx-auto">
-        <h1 class="text-3xl font-bold mb-8">Station Gateway Console</h1>
-        
-        <div class="bg-white rounded shadow p-6 mb-8">
-            <h2 class="text-xl font-semibold mb-4">Station Health</h2>
-            <div class="grid grid-cols-2 gap-4">
-                <div>ACU Status: <span class="font-mono text-green-600">{{ health.acu_status }}</span></div>
-                <div>HDR Status: <span class="font-mono text-green-600">{{ health.hdr_status }}</span></div>
-                <div>Time Sync: <span class="font-mono text-blue-600">{{ health.time_sync }}</span></div>
-                <div>Wind Speed: <span class="font-mono">{{ health.wind_speed_kmh }} km/h</span></div>
-            </div>
-        </div>
+{% extends "base.html" %}
 
-        <div class="bg-white rounded shadow p-6">
-            <h2 class="text-xl font-semibold mb-4">Upcoming Passes</h2>
-            <table class="w-full text-left">
-                <thead>
-                    <tr>
-                        <th class="pb-2">Job ID</th>
-                        <th class="pb-2">Status</th>
-                        <th class="pb-2">Readiness</th>
-                        <th class="pb-2">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for job in jobs %}
-                    <tr class="border-t">
-                        <td class="py-2 font-mono text-sm">{{ job.id[:8] }}...</td>
-                        <td class="py-2">{{ job.status }}</td>
-                        <td class="py-2">{{ job.readiness_status }}</td>
-                        <td class="py-2"><a href="/jobs/{{ job.id }}" class="text-blue-600 hover:underline">Console</a></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% if not jobs %}
-            <p class="text-gray-500 mt-4">No upcoming passes.</p>
-            {% endif %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-display font-bold mb-1">Station Dashboard</h1>
+    <p class="text-steel-2">Real-time station health, environment, and upcoming pass queue.</p>
+</div>
+
+<!-- Health Cards Row -->
+<div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+    <!-- ACU -->
+    <div class="bg-graphite-600 border border-graphite-500 p-5">
+        <div class="text-xs text-steel-2 font-medium uppercase tracking-wider mb-2">ACU Status</div>
+        {% if health.acu_status == "READY" %}
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-green-soft pulse-glow"></span>
+            <span class="font-mono text-green-soft font-semibold text-lg">{{ health.acu_status }}</span>
         </div>
+        {% else %}
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-red-500"></span>
+            <span class="font-mono text-red-400 font-semibold text-lg">{{ health.acu_status }}</span>
+        </div>
+        {% endif %}
     </div>
-</body>
-</html>
+
+    <!-- HDR Modem -->
+    <div class="bg-graphite-600 border border-graphite-500 p-5">
+        <div class="text-xs text-steel-2 font-medium uppercase tracking-wider mb-2">HDR Modem</div>
+        {% if health.hdr_status == "LOCKED" %}
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-green-soft pulse-glow"></span>
+            <span class="font-mono text-green-soft font-semibold text-lg">{{ health.hdr_status }}</span>
+        </div>
+        {% else %}
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+            <span class="font-mono text-yellow-400 font-semibold text-lg">{{ health.hdr_status }}</span>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Time Sync -->
+    <div class="bg-graphite-600 border border-graphite-500 p-5">
+        <div class="text-xs text-steel-2 font-medium uppercase tracking-wider mb-2">Time Sync</div>
+        {% if health.time_sync == "SYNCED" %}
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-green-soft"></span>
+            <span class="font-mono text-green-soft font-semibold text-lg">{{ health.time_sync }}</span>
+        </div>
+        {% else %}
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-red-500 blink-warning"></span>
+            <span class="font-mono text-red-400 font-semibold text-lg">DRIFT</span>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Wind Speed -->
+    <div class="bg-graphite-600 border border-graphite-500 p-5">
+        <div class="text-xs text-steel-2 font-medium uppercase tracking-wider mb-2">Wind Speed</div>
+        {% set wind = health.wind_speed_kmh | default(0) %}
+        {% if wind < 40 %}
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-green-soft"></span>
+            <span class="font-mono text-green-soft font-semibold text-lg">{{ wind }} km/h</span>
+        </div>
+        <div class="text-xs text-steel-2 mt-1">Safe (&lt;40 km/h)</div>
+        {% elif wind < 55 %}
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-yellow-500 blink-warning"></span>
+            <span class="font-mono text-yellow-400 font-semibold text-lg">{{ wind }} km/h</span>
+        </div>
+        <div class="text-xs text-yellow-400 mt-1">Warning</div>
+        {% else %}
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-red-500 blink-warning"></span>
+            <span class="font-mono text-red-400 font-semibold text-lg">{{ wind }} km/h</span>
+        </div>
+        <div class="text-xs text-red-400 mt-1">DANGER — Stow antenna</div>
+        {% endif %}
+    </div>
+
+    <!-- Weather Safe -->
+    <div class="bg-graphite-600 border border-graphite-500 p-5">
+        <div class="text-xs text-steel-2 font-medium uppercase tracking-wider mb-2">Weather</div>
+        {% if health.weather_safe %}
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-green-soft"></span>
+            <span class="font-mono text-green-soft font-semibold text-lg">SAFE</span>
+        </div>
+        {% else %}
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-red-500 blink-warning"></span>
+            <span class="font-mono text-red-400 font-semibold text-lg">UNSAFE</span>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Upcoming Passes -->
+<div class="bg-graphite-600 border border-graphite-500 p-6">
+    <h2 class="text-xl font-bold mb-5 flex items-center gap-3">
+        <svg class="w-5 h-5 text-signal" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Upcoming Passes
+    </h2>
+
+    {% if jobs %}
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead>
+                <tr class="text-xs uppercase text-steel-2 tracking-wider border-b border-graphite-500">
+                    <th class="pb-3 pr-4">Job ID</th>
+                    <th class="pb-3 pr-4">Status</th>
+                    <th class="pb-3 pr-4">Readiness</th>
+                    <th class="pb-3 pr-4">TX</th>
+                    <th class="pb-3 pr-4">Priority</th>
+                    <th class="pb-3">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for job in jobs %}
+                <tr class="border-b border-graphite-500/50 hover:bg-graphite-500/30 transition-colors">
+                    <td class="py-4 pr-4 font-mono text-sm text-signal">{{ job.id[:8] }}…</td>
+                    <td class="py-4 pr-4">
+                        {% if job.status in ("EXECUTING",) %}
+                        <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold bg-green-500/20 text-green-soft border border-green-500/30">{{ job.status }}</span>
+                        {% elif job.status in ("DISPATCHED", "QUEUED") %}
+                        <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-500/30">{{ job.status }}</span>
+                        {% elif job.status in ("FAILED", "CANCELLED") %}
+                        <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold bg-red-500/20 text-red-400 border border-red-500/30">{{ job.status }}</span>
+                        {% else %}
+                        <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold bg-graphite-400/30 text-steel-2 border border-graphite-400/30">{{ job.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="py-4 pr-4">
+                        {% if job.readiness_status == "READY" %}
+                        <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold bg-green-500/20 text-green-soft border border-green-500/30">READY</span>
+                        {% elif job.readiness_status == "PENDING" %}
+                        <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold bg-signal/20 text-signal border border-signal/30">PENDING</span>
+                        {% else %}
+                        <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold bg-graphite-400/30 text-steel-2 border border-graphite-400/30">{{ job.readiness_status or "—" }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="py-4 pr-4">
+                        {% if job.tx_requested %}
+                        <span class="text-xs font-mono text-red-400 font-semibold">TX ON</span>
+                        {% else %}
+                        <span class="text-xs font-mono text-steel-2">RX only</span>
+                        {% endif %}
+                    </td>
+                    <td class="py-4 pr-4 font-mono text-sm">P{{ job.priority }}</td>
+                    <td class="py-4">
+                        <a href="/jobs/{{ job.id }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-signal/10 text-signal border border-signal/30 text-sm font-semibold hover:bg-signal/20 transition-colors">
+                            Console →
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="text-center py-12 text-steel-2">
+        <svg class="w-12 h-12 mx-auto mb-4 text-graphite-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+        <p class="font-medium">No upcoming passes assigned.</p>
+        <p class="text-sm mt-1">The Edge Agent is polling the cloud for new jobs.</p>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Auto-refresh dashboard every 10 seconds
+    setTimeout(() => location.reload(), 10000);
+</script>
+{% endblock %}

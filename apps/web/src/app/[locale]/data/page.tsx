@@ -42,6 +42,15 @@ export default function DataCatalog() {
   const [source, setSource] = useState<"mock" | "api">("mock");
   const [deliveryTarget, setDeliveryTarget] = useState("");
   const [isDelivering, setIsDelivering] = useState<string | null>(null);
+  const [destinations, setDestinations] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch("/api/platform/data/destinations")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (Array.isArray(data)) setDestinations(data);
+      })
+      .catch(() => {});
 
   useEffect(() => {
     fetch("/api/platform/data/datasets")
@@ -101,11 +110,14 @@ export default function DataCatalog() {
           <select
             value={deliveryTarget}
             onChange={(e) => setDeliveryTarget(e.target.value)}
-            className="w-full sm:w-96 px-4 py-3 bg-graphite border border-graphite-600 text-ink rounded-sm focus:border-signal/70 focus:outline-none"
+            className="w-full sm:w-96 px-4 py-3 bg-graphite border border-graphite-600 text-white rounded-sm focus:border-signal/70 focus:outline-none"
           >
             <option value="">{t("select_dest", "选择交付目的地...", "Select Delivery Destination...")}</option>
-            <option value="s3">AWS S3 (s3://my-org-bucket)</option>
-            <option value="gcp">Google Cloud Storage (gs://my-org-data)</option>
+            {destinations.map((dest) => (
+              <option key={dest.id} value={dest.id}>
+                {dest.type.toUpperCase()} ({dest.id.slice(0, 8)})
+              </option>
+            ))}
           </select>
         </div>
 

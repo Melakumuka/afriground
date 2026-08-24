@@ -27,3 +27,13 @@ class StationGatewayAdapter(ABC):
     @abstractmethod
     async def collect_pass_artifacts(self) -> dict:
         pass
+
+    @abstractmethod
+    async def emergency_stow(self) -> bool:
+        """Command the antenna to immediately stow to safe position."""
+        pass
+
+    @abstractmethod
+    async def kill_tx(self) -> bool:
+        """Immediately kill all RF transmissions."""
+        pass

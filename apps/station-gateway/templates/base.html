@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Station Gateway{% endblock %} — AfriGround Edge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        graphite: { DEFAULT: '#15171A', 400: '#4a4f57', 500: '#2c3038', 600: '#1e2127' },
+                        signal: { DEFAULT: '#E8C547', soft: '#F0D060' },
+                        steel: { 2: '#9CA3AF' },
+                        green: { soft: '#22c55e' },
+                    },
+                    fontFamily: {
+                        display: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 8px rgba(34,197,94,0.4); } 50% { box-shadow: 0 0 20px rgba(34,197,94,0.7); } }
+        .pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+        @keyframes blink-warning { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .blink-warning { animation: blink-warning 1s ease-in-out infinite; }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-graphite text-white min-h-screen">
+
+    <!-- Top Bar -->
+    <header class="sticky top-0 z-50 bg-graphite-600/95 backdrop-blur-lg border-b border-graphite-500/60">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <!-- Brand -->
+            <a href="/" class="flex items-center gap-3 group">
+                <div class="w-9 h-9 bg-signal flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <path d="M2.5 19.5a12 12 0 0 1 19 0" stroke="#15171A" stroke-width="1.6" stroke-linecap="round"/>
+                        <path d="M12 19.5V7M12 7l-3.4 3.6M12 7l3.4 3.6M12 4v3" stroke="#15171A" stroke-width="1.6" stroke-linecap="round"/>
+                        <circle cx="12" cy="19.5" r="1.3" fill="#15171A"/>
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-lg font-extrabold tracking-tight text-white font-display">
+                        Afri<span class="text-signal">Ground</span>
+                    </span>
+                    <span class="text-xs text-steel-2 ml-2 font-mono">EDGE CONSOLE</span>
+                </div>
+            </a>
+
+            <!-- Right Side -->
+            <div class="flex items-center gap-4">
+                <!-- Cloud Sync Status -->
+                <div class="flex items-center gap-2 px-3 py-1.5 border border-graphite-500 text-xs">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-soft opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-green-soft"></span>
+                    </span>
+                    <span class="font-mono text-green-soft font-semibold">CLOUD SYNC</span>
+                </div>
+
+                <!-- Station ID -->
+                <div class="px-3 py-1.5 border border-graphite-500 text-xs font-mono text-steel-2">
+                    {{ station_id[:12] if station_id else "UNKNOWN" }}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

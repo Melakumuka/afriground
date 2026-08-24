@@ -39,6 +39,15 @@ async def list_datasets(
 
 # ── Delivery Destinations ────────────────────────────────────────────────────
 
+@router.get("/destinations", response_model=List[DeliveryDestinationResponse])
+async def list_destinations(
+    db: AsyncSession = Depends(get_db),
+    user: dict = Depends(get_current_user),
+):
+    engine = DataEngine(db)
+    org_id = uuid.UUID(user.get("org_id", "00000000-0000-0000-0000-000000000000"))
+    return await engine.list_destinations(org_id)
+
 @router.post("/destinations", response_model=DeliveryDestinationResponse)
 async def add_destination(
     req: DeliveryDestinationRequest,

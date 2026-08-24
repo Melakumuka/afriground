@@ -18,6 +18,7 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
     { href: `/${currentLocale}/booking`, label: nav.scheduling || (isZh ? "过境调度" : "Pass Scheduling") },
     { href: `/${currentLocale}/commercial/quotes`, label: nav.commercial || (isZh ? "商务与计费" : "Commercial & Billing") },
     { href: `/${currentLocale}/data`, label: nav.catalog || (isZh ? "数据下传" : "Data Catalog") },
+    { href: `/${currentLocale}/data/egress`, label: nav.egress || (isZh ? "数据出口配置" : "Egress Config") },
     { href: `/${currentLocale}/missions/new`, label: nav.missions_new || (isZh ? "卫星注册" : "Register Satellite") },
     { href: `/${currentLocale}/station/new`, label: nav.station_new || (isZh ? "地面站注册" : "Register Station") },
     { href: `/${currentLocale}/support`, label: nav.support || (isZh ? "SLA & 支持" : "SLA & Support") },

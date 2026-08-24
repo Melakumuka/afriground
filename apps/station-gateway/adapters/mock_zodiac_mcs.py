@@ -46,3 +46,11 @@ class MockZodiacMCSAdapter(StationGatewayAdapter):
             "artifact_manifest_hash": "mock_manifest_hash_1c2d",
             "weather_summary": {"wind_speed": 15, "temperature": 22, "humidity": 45}
         }
+
+    async def emergency_stow(self) -> bool:
+        logger.critical("[MOCK ACU] 🚨 EMERGENCY STOW — Antenna moving to safe position!")
+        return True
+
+    async def kill_tx(self) -> bool:
+        logger.critical("[MOCK RF] 🚨 TX KILL — All transmissions terminated immediately!")
+        return True

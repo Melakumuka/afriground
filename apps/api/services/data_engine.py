@@ -10,6 +10,7 @@ from fastapi import HTTPException
 from pydantic import BaseModel
 
 from models.data import Dataset, DataDeliveryDestination, DataDeliveryJob
+from core.crypto import encrypt_dict
 
 
 # ── Schemas ──────────────────────────────────────────────────────────────────
@@ -27,7 +28,7 @@ class DatasetResponse(BaseModel):
 
 class DeliveryDestinationRequest(BaseModel):
     org_id: uuid.UUID
-    type: str  # s3, gcs, webhook, api
+    type: str  # s3, gcs, huawei_obs, baidu_bos, alibaba_oss, azure_blob, webhook, api
     config: dict
 
 class DeliveryDestinationResponse(BaseModel):
@@ -86,15 +87,76 @@ class DataEngine:
 
     # ── Delivery Destinations ────────────────────────────────────────────────
 
+    async def list_destinations(self, org_id: uuid.UUID) -> List[DeliveryDestinationResponse]:
+        """List active delivery destinations for an organization."""
+        stmt = select(DataDeliveryDestination).where(
+            DataDeliveryDestination.org_id == org_id,
+            DataDeliveryDestination.is_active == True
+        ).order_by(DataDeliveryDestination.type)
+        result = await self.db.execute(stmt)
+        dests = result.scalars().all()
+        return [
+            DeliveryDestinationResponse(
+                id=d.id, org_id=d.org_id, type=d.type, is_active=d.is_active
+            ) for d in dests
+        ]
+
+    async def _preflight_check(self, dest_type: str, config: dict):
+        """Validate credentials against the cloud provider before saving."""
+        if dest_type in ["s3", "huawei_obs", "baidu_bos", "alibaba_oss"]:
+            try:
+                import boto3
+                from botocore.exceptions import ClientError
+                import logging
+                
+                # Boto3 client initialization with custom endpoint if needed
+                client_kwargs = {
+                    "aws_access_key_id": config.get("access_key"),
+                    "aws_secret_access_key": config.get("secret_key"),
+                }
+                
+                if dest_type == "s3":
+                    client_kwargs["region_name"] = config.get("region", "us-east-1")
+                else:
+                    endpoint = config.get("endpoint", "")
+                    if endpoint and not endpoint.startswith("http"):
+                        endpoint = f"https://{endpoint}"
+                    client_kwargs["endpoint_url"] = endpoint
+                    
+                s3 = boto3.client("s3", **client_kwargs)
+                bucket = config.get("bucket")
+                
+                if not bucket:
+                    raise HTTPException(status_code=400, detail="Bucket name is required")
+                
+                # Pre-flight check: attempt to head the bucket to verify access
+                # In reality, we'd want to test PutObject, but HeadBucket tests basic auth.
+                s3.head_bucket(Bucket=bucket)
+            except Exception as e:
+                import logging
+                logging.error(f"Pre-flight check failed for {dest_type}: {e}")
+                raise HTTPException(status_code=400, detail=f"Credential validation failed: {str(e)}")
+                
+        elif dest_type in ["gcs", "azure_blob"]:
+            # Mock pre-flight for providers without SDK installed in this env
+            pass
+        return True
+
     async def add_destination(self, req: DeliveryDestinationRequest) -> DeliveryDestinationResponse:
-        """Register a new customer delivery destination (S3, GCS, Webhook)."""
-        if req.type not in ["s3", "gcs", "webhook", "api"]:
+        """Register a new customer delivery destination."""
+        if req.type not in ["s3", "gcs", "huawei_obs", "baidu_bos", "alibaba_oss", "azure_blob", "webhook", "api"]:
             raise HTTPException(status_code=400, detail="Invalid destination type")
+
+        # 1. Pre-flight check
+        await self._preflight_check(req.type, req.config)
+
+        # 2. Encrypt the sensitive configuration payload at rest
+        encrypted_config = {"encrypted_payload": encrypt_dict(req.config)}
 
         dest = DataDeliveryDestination(
             org_id=req.org_id,
             type=req.type,
-            config=req.config,
+            config=encrypted_config,
             is_active=True,
         )
         self.db.add(dest)
