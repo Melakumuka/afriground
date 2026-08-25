@@ -1,9 +1,9 @@
 {
   ".opencode/opencode.json": {
-    "mtime": 1787589489.8862565,
-    "seen": 1787589672.084518,
-    "ast_hash": "f2ae21510d07365eb2bce8159272c7a0",
-    "semantic_hash": "f2ae21510d07365eb2bce8159272c7a0"
+    "mtime": 1787661665.6606393,
+    "seen": 1787663382.0498574,
+    "ast_hash": "1efe24ecf938911d4f23e4b1c6ec91f7",
+    "semantic_hash": ""
   },
   ".opencode/plugins/graphify.js": {
     "mtime": 1787589489.8847466,
@@ -450,10 +450,10 @@
     "semantic_hash": "58ef4383bea981b3893547bcfef41a2e"
   },
   "apps/api/services/orchestrator.py": {
-    "mtime": 1787262564.1528547,
-    "seen": 1787589672.084518,
-    "ast_hash": "6c757d781e54277d778d816b4d0a7e6b",
-    "semantic_hash": "6c757d781e54277d778d816b4d0a7e6b"
+    "mtime": 1787663202.053825,
+    "seen": 1787663382.0498574,
+    "ast_hash": "2d7686c6f3c837fb9f8de922f71968c0",
+    "semantic_hash": ""
   },
   "apps/api/services/outbox.py": {
     "mtime": 1787152640.5322895,
@@ -654,16 +654,16 @@
     "semantic_hash": "0440bafb9b3be865ad398e2248df0034"
   },
   "apps/station-gateway/adapters/base_adapter.py": {
-    "mtime": 1787476931.9228408,
-    "seen": 1787589672.084518,
-    "ast_hash": "9a4ce6a4e26853d1f8db98577df9bfe0",
-    "semantic_hash": "9a4ce6a4e26853d1f8db98577df9bfe0"
+    "mtime": 1787629074.9784632,
+    "seen": 1787663382.0498574,
+    "ast_hash": "583524f0e5cab5436f8c35660d8be8bc",
+    "semantic_hash": ""
   },
   "apps/station-gateway/adapters/mock_zodiac_mcs.py": {
-    "mtime": 1787476944.9361906,
-    "seen": 1787589672.084518,
-    "ast_hash": "bfb4a7a7cad6d66bb41662647ef37bd0",
-    "semantic_hash": "bfb4a7a7cad6d66bb41662647ef37bd0"
+    "mtime": 1787629099.4741035,
+    "seen": 1787663382.0498574,
+    "ast_hash": "03b68b06f5ea69405569161c102cd592",
+    "semantic_hash": ""
   },
   "apps/station-gateway/cloud_client.py": {
     "mtime": 1787300275.7412825,
@@ -672,16 +672,16 @@
     "semantic_hash": "982d0f8898dc752f0813d55cf290a35a"
   },
   "apps/station-gateway/config.py": {
-    "mtime": 1787297934.9507456,
-    "seen": 1787589672.084518,
-    "ast_hash": "faa4fb2ef644371906d105607755e978",
-    "semantic_hash": "faa4fb2ef644371906d105607755e978"
+    "mtime": 1787629054.6074874,
+    "seen": 1787663382.0498574,
+    "ast_hash": "42a61b93a61ca6016263d56f7bf841f2",
+    "semantic_hash": ""
   },
   "apps/station-gateway/local_db.py": {
-    "mtime": 1787299805.5706954,
-    "seen": 1787589672.084518,
-    "ast_hash": "4c04a1bb61aed8b0c4b94d2c434e40bf",
-    "semantic_hash": "4c04a1bb61aed8b0c4b94d2c434e40bf"
+    "mtime": 1787629023.6596248,
+    "seen": 1787663382.0498574,
+    "ast_hash": "ce2f0455feb54fd33bad02616a68ad82",
+    "semantic_hash": ""
   },
   "apps/station-gateway/main.py": {
     "mtime": 1787300297.0144906,
@@ -690,10 +690,10 @@
     "semantic_hash": "e53508d4f9f0cabf6dfb310b29daad04"
   },
   "apps/station-gateway/routes/operator.py": {
-    "mtime": 1787477045.0837708,
-    "seen": 1787589672.084518,
-    "ast_hash": "49808d101bc8fca593f872022eb56d66",
-    "semantic_hash": "49808d101bc8fca593f872022eb56d66"
+    "mtime": 1787663111.3100698,
+    "seen": 1787663382.0498574,
+    "ast_hash": "2efc12d3a86a15d111817d0e11bdfe07",
+    "semantic_hash": ""
   },
   "apps/station-gateway/run.sh": {
     "mtime": 1787300299.2195692,
@@ -1123,44 +1123,44 @@
   },
   "apps/api/scripts/init_db.sql": {
     "mtime": 1786594508.6770668,
-    "seen": 1787591254.2515824,
-    "ast_hash": "",
+    "seen": 1787663382.0498574,
+    "ast_hash": "1fc88c7681a01d0e93bb5cfbc1a94b87",
     "semantic_hash": ""
   },
   "terraform/free/.terraform.lock.hcl": {
     "mtime": 1787228974.513251,
-    "seen": 1787591254.2515824,
-    "ast_hash": "",
+    "seen": 1787663382.0498574,
+    "ast_hash": "2cccdf2fe39ecc02780ee21010f6b93c",
     "semantic_hash": ""
   },
   "terraform/free/main.tf": {
     "mtime": 1787237295.4591906,
-    "seen": 1787591254.2515824,
-    "ast_hash": "",
+    "seen": 1787663382.0498574,
+    "ast_hash": "804977c86d68f20b618f597bfd2ab9e9",
     "semantic_hash": ""
   },
   "terraform/free/variables.tf": {
     "mtime": 1787228843.6167428,
-    "seen": 1787591254.2515824,
-    "ast_hash": "",
+    "seen": 1787663382.0498574,
+    "ast_hash": "09f48099d1da7863956dd6844f5228f2",
     "semantic_hash": ""
   },
   "terraform/main.tf": {
     "mtime": 1787228939.3494155,
-    "seen": 1787591254.2515824,
-    "ast_hash": "",
+    "seen": 1787663382.0498574,
+    "ast_hash": "8222c86865c29b3766d843ff8804558e",
     "semantic_hash": ""
   },
   "terraform/outputs.tf": {
     "mtime": 1787222579.394256,
-    "seen": 1787591254.2515824,
-    "ast_hash": "",
+    "seen": 1787663382.0498574,
+    "ast_hash": "009206e6e7ea40aef3795379b9ba4be7",
     "semantic_hash": ""
   },
   "terraform/variables.tf": {
     "mtime": 1787222573.5737488,
-    "seen": 1787591254.2515824,
-    "ast_hash": "",
+    "seen": 1787663382.0498574,
+    "ast_hash": "a4659e0cba842ca42d09ab8c3db1647b",
     "semantic_hash": ""
   },
   ".agents/skills/graphify/SKILL.md": {
@@ -1290,21 +1290,21 @@
     "semantic_hash": ""
   },
   "apps/station-gateway/templates/base.html": {
-    "mtime": 1787476755.220414,
-    "seen": 1787591254.2515824,
-    "ast_hash": "c6bfa7626c3b77a8518c05343f824cf2",
+    "mtime": 1787593488.7192776,
+    "seen": 1787663382.0498574,
+    "ast_hash": "4ff3f8966bc479297073504536657f90",
     "semantic_hash": ""
   },
   "apps/station-gateway/templates/dashboard.html": {
-    "mtime": 1787476794.832422,
-    "seen": 1787591254.2515824,
-    "ast_hash": "230fc50353728cde1f50c833895c1caf",
+    "mtime": 1787628913.9889183,
+    "seen": 1787663382.0498574,
+    "ast_hash": "9c13d9bfd9e0d4c43a1d9de0339eedc9",
     "semantic_hash": ""
   },
   "apps/station-gateway/templates/pass_console.html": {
-    "mtime": 1787476866.2259583,
-    "seen": 1787591254.2515824,
-    "ast_hash": "88b411d1814488e831a405b27c7e9bfd",
+    "mtime": 1787628805.604591,
+    "seen": 1787663382.0498574,
+    "ast_hash": "4e485c8b55d771b53fa04969c7848aa6",
     "semantic_hash": ""
   },
   "apps/web/AGENTS.md": {
@@ -1503,6 +1503,30 @@
     "mtime": 1786594833.1256387,
     "seen": 1787591254.2515824,
     "ast_hash": "a2760511c65806022ad20adf74370ff3",
+    "semantic_hash": ""
+  },
+  "apps/station-gateway/services/iso_observer.py": {
+    "mtime": 1787663021.5211737,
+    "seen": 1787663382.0498574,
+    "ast_hash": "461e6d786c1b81a9c1418e7eafd52a94",
+    "semantic_hash": ""
+  },
+  "apps/station-gateway/services/readiness_service.py": {
+    "mtime": 1787663046.243401,
+    "seen": 1787663382.0498574,
+    "ast_hash": "18b6d7a7598567029fe38308432da07d",
+    "semantic_hash": ""
+  },
+  "apps/station-gateway/templates/audit.html": {
+    "mtime": 1787628948.0441036,
+    "seen": 1787663382.0498574,
+    "ast_hash": "f2d973f3d269d4c1838d2a4bae20b561",
+    "semantic_hash": ""
+  },
+  "apps/station-gateway/templates/firewall.html": {
+    "mtime": 1787628974.5084925,
+    "seen": 1787663382.0498574,
+    "ast_hash": "d56d1881a936dd63015e3eb4a856bf52",
     "semantic_hash": ""
   }
 }
