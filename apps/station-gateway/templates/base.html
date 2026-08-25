@@ -36,6 +36,33 @@
 </head>
 <body class="bg-graphite text-white min-h-screen">
 
+    <!-- Isolated Observer Profile Banner — Safran Pro 730 SX -->
+    <div class="bg-amber-500/10 border-b border-amber-500/40">
+        <div class="max-w-7xl mx-auto px-6 py-2 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3 min-w-0">
+                <svg class="w-5 h-5 text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.48 0L3.16 16.25A2 2 0 005 19z"/></svg>
+                <div class="text-xs leading-tight min-w-0">
+                    <div class="font-bold text-amber-400 uppercase tracking-wider">Isolated Observer Profile — Safran Pro 730 SX</div>
+                    <div class="text-steel-2 truncate">
+                        Passive reader only. Outbound Ports 3001/4001/4003 to the Safran subnet are blocked at the Windows Firewall.
+                        Zone: External Cloud <span class="font-mono text-amber-300">→</span> AfriGround Gateway (this PC) <span class="font-mono text-amber-300">→</span> Safran Hardware (read-only).
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 flex-shrink-0">
+                {% set fw = firewall_posture or {'ok': None, 'missing': [], 'wrong_direction': []} %}
+                {% if fw.ok is none %}
+                <span class="px-2 py-1 text-xs font-mono font-semibold bg-graphite-500/40 text-steel-2 border border-graphite-400">FIREWALL: UNCHECKED</span>
+                {% elif fw.ok %}
+                <span class="px-2 py-1 text-xs font-mono font-semibold bg-green-500/20 text-green-soft border border-green-500/30">FIREWALL: OK</span>
+                {% else %}
+                <span class="px-2 py-1 text-xs font-mono font-semibold bg-red-500/20 text-red-400 border border-red-500/30 blink-warning">FIREWALL: DRIFT</span>
+                {% endif %}
+                <a href="/local/firewall" class="text-xs font-semibold text-amber-400 hover:text-amber-300 underline">Verify</a>
+            </div>
+        </div>
+    </div>
+
     <!-- Top Bar -->
     <header class="sticky top-0 z-50 bg-graphite-600/95 backdrop-blur-lg border-b border-graphite-500/60">
         <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">

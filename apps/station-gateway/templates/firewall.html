@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Firewall Verification — Safran Edge{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-display font-bold mb-1">Firewall Verification</h1>
+    <p class="text-steel-2">Confirms the local Windows Firewall rules from <span class="font-mono text-signal">docs/setup-gateway-firewall.ps1</span> are in place and oriented correctly.</p>
+</div>
+
+<div class="bg-graphite-600 border border-graphite-500 p-6 mb-8">
+    <div class="flex items-center justify-between gap-4 mb-5">
+        <div>
+            <div class="text-xs uppercase tracking-wider text-steel-2 mb-1">Overall Posture</div>
+            {% if posture.ok %}
+            <div class="flex items-center gap-3">
+                <span class="w-4 h-4 rounded-full bg-green-soft pulse-glow"></span>
+                <span class="font-mono text-2xl font-bold text-green-soft">OK</span>
+            </div>
+            <div class="text-xs text-steel-2 mt-1">All expected firewall rules present and oriented correctly.</div>
+            {% else %}
+            <div class="flex items-center gap-3">
+                <span class="w-4 h-4 rounded-full bg-red-500 blink-warning"></span>
+                <span class="font-mono text-2xl font-bold text-red-400">DRIFT</span>
+            </div>
+            <div class="text-xs text-red-400 mt-1">One or more expected rules are missing or oriented incorrectly.</div>
+            {% endif %}
+        </div>
+        <form method="post" action="/local/firewall/verify">
+            <button type="submit" class="px-5 py-2 bg-signal/10 text-signal border border-signal/30 text-sm font-semibold hover:bg-signal/20 transition-colors">Re-run Verification</button>
+        </form>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div class="bg-graphite-500 p-4 border border-graphite-400">
+            <div class="text-xs uppercase tracking-wider text-steel-2 mb-1">Rules OK</div>
+            <div class="font-mono text-2xl font-bold text-green-soft">{{ posture.rules_ok }}/{{ posture.rules_total }}</div>
+        </div>
+        <div class="bg-graphite-500 p-4 border border-graphite-400">
+            <div class="text-xs uppercase tracking-wider text-steel-2 mb-1">Missing</div>
+            <div class="font-mono text-2xl font-bold {% if posture.missing %}text-red-400{% else %}text-steel-2{% endif %}">{{ posture.missing|length }}</div>
+        </div>
+        <div class="bg-graphite-500 p-4 border border-graphite-400">
+            <div class="text-xs uppercase tracking-wider text-steel-2 mb-1">Wrong Direction</div>
+            <div class="font-mono text-2xl font-bold {% if posture.wrong_direction %}text-yellow-400{% else %}text-steel-2{% endif %}">{{ posture.wrong_direction|length }}</div>
+        </div>
+    </div>
+</div>
+
+<h2 class="text-xl font-bold mb-4">Rule Inventory</h2>
+<div class="bg-graphite-600 border border-graphite-500 overflow-x-auto">
+    <table class="w-full text-left">
+        <thead>
+            <tr class="text-xs uppercase text-steel-2 tracking-wider border-b border-graphite-500">
+                <th class="px-5 py-3">Rule</th>
+                <th class="px-5 py-3">Direction</th>
+                <th class="px-5 py-3">Action</th>
+                <th class="px-5 py-3">Remote Port</th>
+                <th class="px-5 py-3">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in posture.rules %}
+            <tr class="border-b border-graphite-500/50">
+                <td class="px-5 py-3 font-mono text-xs">{{ r.name }}</td>
+                <td class="px-5 py-3 font-mono text-xs">{{ r.direction }}</td>
+                <td class="px-5 py-3 font-mono text-xs">{{ r.action }}</td>
+                <td class="px-5 py-3 font-mono text-xs">{{ r.remote_port or "any" }}</td>
+                <td class="px-5 py-3">
+                    {% if r.expected_action and r.action != r.expected_action %}
+                    <span class="text-xs font-mono text-yellow-400">WRONG ({{ r.expected_action }} expected)</span>
+                    {% elif not r.present %}
+                    <span class="text-xs font-mono text-red-400">MISSING</span>
+                    {% elif not r.enabled %}
+                    <span class="text-xs font-mono text-red-400">DISABLED</span>
+                    {% else %}
+                    <span class="text-xs font-mono text-green-soft">OK</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="mt-8 text-center">
+    <a href="/" class="inline-flex items-center gap-2 px-5 py-2 bg-signal/10 text-signal border border-signal/30 text-sm font-semibold hover:bg-signal/20 transition-colors">← Back to Dashboard</a>
+</div>
+
+{% endblock %}

@@ -204,7 +204,15 @@ class ObservationOrchestrator:
         # is mandatory before EXECUTING.
         from services.readiness import StationReadinessService
 
-        await StationReadinessService(self.db, self.tenant).require_ready(job)
+        event = await StationReadinessService(self.db, self.tenant).require_ready(job)
+        
+        # Check for TX redundancy SPOF
+        if job.tx_requested and event and event.checklist_results.get("crt_redundancy") == "spof":
+            raise HTTPException(
+                status_code=409, 
+                detail="S-Band TX SPOF active. Cannot execute TX job."
+            )
+            
         if not job.started_at:
             job.started_at = _now()
         return await self.transition(job_id, "EXECUTING", actor=actor)

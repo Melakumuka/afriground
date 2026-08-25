@@ -4,20 +4,40 @@
 
 {% block content %}
 <div class="mb-8">
-    <h1 class="text-3xl font-display font-bold mb-1">Station Dashboard</h1>
+    <h1 class="text-3xl font-display font-bold mb-1">Station Dashboard — Safran Pro 730 SX</h1>
     <p class="text-steel-2">Real-time station health, environment, and upcoming pass queue.</p>
 </div>
 
-<!-- Health Cards Row -->
-<div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+<!-- Health Cards Row (6 Safran-specific cards) -->
+<div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+
+    <!-- MCS Link (PC Saphir, 192.168.0.100) -->
+    <div class="bg-graphite-600 border border-graphite-500 p-5">
+        <div class="text-xs text-steel-2 font-medium uppercase tracking-wider mb-2">MCS Link (PC Saphir)</div>
+        {% if health.mcs_link_up %}
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-green-soft pulse-glow"></span>
+            <span class="font-mono text-green-soft font-semibold text-lg">RM 4000 OK</span>
+        </div>
+        <div class="text-xs text-steel-2 mt-1 font-mono">192.168.0.100 · {{ health.mcs_last_packet_age_s or 0 }}s ago</div>
+        {% else %}
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-red-500"></span>
+            <span class="font-mono text-red-400 font-semibold text-lg">NO LINK</span>
+        </div>
+        <div class="text-xs text-red-400 mt-1">PC Saphir unreachable</div>
+        {% endif %}
+    </div>
+
     <!-- ACU -->
     <div class="bg-graphite-600 border border-graphite-500 p-5">
-        <div class="text-xs text-steel-2 font-medium uppercase tracking-wider mb-2">ACU Status</div>
+        <div class="text-xs text-steel-2 font-medium uppercase tracking-wider mb-2">ACU</div>
         {% if health.acu_status == "READY" %}
         <div class="flex items-center gap-2">
             <span class="w-3 h-3 rounded-full bg-green-soft pulse-glow"></span>
             <span class="font-mono text-green-soft font-semibold text-lg">{{ health.acu_status }}</span>
         </div>
+        <div class="text-xs text-steel-2 mt-1 font-mono">mode: {{ health.acu_mode or "ephemeris" }} · mask: {{ health.elevation_mask_deg or 5 }}°</div>
         {% else %}
         <div class="flex items-center gap-2">
             <span class="w-3 h-3 rounded-full bg-red-500"></span>
@@ -26,76 +46,173 @@
         {% endif %}
     </div>
 
-    <!-- HDR Modem -->
+    <!-- HDR/CRT — SPOF-aware -->
     <div class="bg-graphite-600 border border-graphite-500 p-5">
-        <div class="text-xs text-steel-2 font-medium uppercase tracking-wider mb-2">HDR Modem</div>
-        {% if health.hdr_status == "LOCKED" %}
+        <div class="text-xs text-steel-2 font-medium uppercase tracking-wider mb-2">HDR / CRT</div>
+        {% set crt = health.crt_redundancy or {} %}
+        {% if crt.state == "nominal" %}
         <div class="flex items-center gap-2">
             <span class="w-3 h-3 rounded-full bg-green-soft pulse-glow"></span>
-            <span class="font-mono text-green-soft font-semibold text-lg">{{ health.hdr_status }}</span>
+            <span class="font-mono text-green-soft font-semibold text-lg">NOMINAL</span>
         </div>
+        <div class="text-xs text-steel-2 mt-1 font-mono">CRT {{ crt.serial or "19019" }} · hot-standby</div>
+        {% elif crt.state == "spare" %}
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-yellow-500 blink-warning"></span>
+            <span class="font-mono text-yellow-400 font-semibold text-lg">SPARE</span>
+        </div>
+        <div class="text-xs text-yellow-400 mt-1">No S-Band TX #2 redundancy</div>
+        {% elif crt.state == "spof" %}
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-red-500 blink-warning"></span>
+            <span class="font-mono text-red-400 font-semibold text-lg">SPOF</span>
+        </div>
+        <div class="text-xs text-red-400 mt-1 font-bold">S-Band TX disabled by Gateway</div>
         {% else %}
         <div class="flex items-center gap-2">
             <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
-            <span class="font-mono text-yellow-400 font-semibold text-lg">{{ health.hdr_status }}</span>
+            <span class="font-mono text-yellow-400 font-semibold text-lg">{{ health.hdr_status or "UNKNOWN" }}</span>
         </div>
+        {% endif %}
+    </div>
+
+    <!-- Disk (D: on PC Saphir) -->
+    <div class="bg-graphite-600 border border-graphite-500 p-5">
+        <div class="text-xs text-steel-2 font-medium uppercase tracking-wider mb-2">Disk (D:)</div>
+        {% set disk = health.disk_usage_percent or 0 %}
+        {% if disk >= 80 %}
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-red-500 blink-warning"></span>
+            <span class="font-mono text-red-400 font-semibold text-lg">{{ "%.0f"|format(disk) }}%</span>
+        </div>
+        <div class="text-xs text-red-400 mt-1">Safran threshold exceeded — readiness rejected</div>
+        {% elif disk >= 75 %}
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-yellow-500 blink-warning"></span>
+            <span class="font-mono text-yellow-400 font-semibold text-lg">{{ "%.0f"|format(disk) }}%</span>
+        </div>
+        <div class="text-xs text-yellow-400 mt-1">Warning — approaching purge threshold</div>
+        {% else %}
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-green-soft"></span>
+            <span class="font-mono text-green-soft font-semibold text-lg">{{ "%.0f"|format(disk) }}%</span>
+        </div>
+        <div class="text-xs text-steel-2 mt-1">PC Saphir D: (100 GB)</div>
+        {% endif %}
+    </div>
+
+    <!-- Active Satellites (MMI limit 12) -->
+    <div class="bg-graphite-600 border border-graphite-500 p-5">
+        <div class="text-xs text-steel-2 font-medium uppercase tracking-wider mb-2">Active Satellites</div>
+        {% set ac = health.active_satellite_count or 0 %}
+        {% if ac >= 12 %}
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-red-500 blink-warning"></span>
+            <span class="font-mono text-red-400 font-semibold text-lg">{{ ac }} / 12</span>
+        </div>
+        <div class="text-xs text-red-400 mt-1">MMI responsiveness limit exceeded</div>
+        {% elif ac >= 10 %}
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-yellow-500 blink-warning"></span>
+            <span class="font-mono text-yellow-400 font-semibold text-lg">{{ ac }} / 12</span>
+        </div>
+        <div class="text-xs text-yellow-400 mt-1">Approaching Safran MMI limit</div>
+        {% else %}
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-green-soft"></span>
+            <span class="font-mono text-green-soft font-semibold text-lg">{{ ac }} / 12</span>
+        </div>
+        <div class="text-xs text-steel-2 mt-1">Safran MMI limit</div>
+        {% endif %}
+    </div>
+
+    <!-- Cloud Link / Firewall Posture -->
+    <div class="bg-graphite-600 border border-graphite-500 p-5">
+        <div class="text-xs text-steel-2 font-medium uppercase tracking-wider mb-2">Cloud & Firewall</div>
+        {% if firewall_posture and firewall_posture.ok %}
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-green-soft pulse-glow"></span>
+            <span class="font-mono text-green-soft font-semibold text-lg">OK</span>
+        </div>
+        <div class="text-xs text-steel-2 mt-1 font-mono">mTLS 443 · {{ firewall_posture.rules_ok }}/{{ firewall_posture.rules_total }} rules</div>
+        {% elif firewall_posture and firewall_posture.ok == false %}
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-red-500 blink-warning"></span>
+            <span class="font-mono text-red-400 font-semibold text-lg">DRIFT</span>
+        </div>
+        <div class="text-xs text-red-400 mt-1">Verify firewall posture</div>
+        {% else %}
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-graphite-400"></span>
+            <span class="font-mono text-steel-2 font-semibold text-lg">UNCHECKED</span>
+        </div>
+        <div class="text-xs text-steel-2 mt-1">Run firewall verify</div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Secondary row: weather + time sync + wind (kept compact) -->
+<div class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+
+    <!-- Wind -->
+    <div class="bg-graphite-600 border border-graphite-500 p-5">
+        <div class="text-xs text-steel-2 font-medium uppercase tracking-wider mb-2">Wind</div>
+        {% set wind = health.wind_speed_kmh | default(0) %}
+        {% if wind < wind_safe_threshold %}
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-green-soft"></span>
+            <span class="font-mono text-green-soft font-semibold text-lg">{{ "%.1f"|format(wind) }} km/h</span>
+        </div>
+        <div class="text-xs text-steel-2 mt-1">Safe (< {{ wind_safe_threshold }} km/h)</div>
+        {% elif wind < wind_warning_threshold %}
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-yellow-500 blink-warning"></span>
+            <span class="font-mono text-yellow-400 font-semibold text-lg">{{ "%.1f"|format(wind) }} km/h</span>
+        </div>
+        <div class="text-xs text-yellow-400 mt-1">Warning</div>
+        {% else %}
+        <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-red-500 blink-warning"></span>
+            <span class="font-mono text-red-400 font-semibold text-lg">{{ "%.1f"|format(wind) }} km/h</span>
+        </div>
+        <div class="text-xs text-red-400 mt-1">DANGER — ACU will auto-stow</div>
         {% endif %}
     </div>
 
     <!-- Time Sync -->
     <div class="bg-graphite-600 border border-graphite-500 p-5">
         <div class="text-xs text-steel-2 font-medium uppercase tracking-wider mb-2">Time Sync</div>
-        {% if health.time_sync == "SYNCED" %}
+        {% set off = health.clock_offset_ms or 0 %}
+        {% if health.time_sync == "SYNCED" and off|abs < 250 %}
         <div class="flex items-center gap-2">
             <span class="w-3 h-3 rounded-full bg-green-soft"></span>
-            <span class="font-mono text-green-soft font-semibold text-lg">{{ health.time_sync }}</span>
+            <span class="font-mono text-green-soft font-semibold text-lg">SYNCED</span>
         </div>
+        <div class="text-xs text-steel-2 mt-1 font-mono">offset: {{ "%.1f"|format(off) }} ms</div>
         {% else %}
         <div class="flex items-center gap-2">
             <span class="w-3 h-3 rounded-full bg-red-500 blink-warning"></span>
             <span class="font-mono text-red-400 font-semibold text-lg">DRIFT</span>
         </div>
+        <div class="text-xs text-red-400 mt-1 font-mono">offset: {{ "%.1f"|format(off) }} ms</div>
         {% endif %}
     </div>
 
-    <!-- Wind Speed -->
+    <!-- LCB Status -->
     <div class="bg-graphite-600 border border-graphite-500 p-5">
-        <div class="text-xs text-steel-2 font-medium uppercase tracking-wider mb-2">Wind Speed</div>
-        {% set wind = health.wind_speed_kmh | default(0) %}
-        {% if wind < 40 %}
-        <div class="flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-green-soft"></span>
-            <span class="font-mono text-green-soft font-semibold text-lg">{{ wind }} km/h</span>
-        </div>
-        <div class="text-xs text-steel-2 mt-1">Safe (&lt;40 km/h)</div>
-        {% elif wind < 55 %}
-        <div class="flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-yellow-500 blink-warning"></span>
-            <span class="font-mono text-yellow-400 font-semibold text-lg">{{ wind }} km/h</span>
-        </div>
-        <div class="text-xs text-yellow-400 mt-1">Warning</div>
-        {% else %}
+        <div class="text-xs text-steel-2 font-medium uppercase tracking-wider mb-2">LCB Local Mode</div>
+        {% if health.lcb_engaged %}
         <div class="flex items-center gap-2">
             <span class="w-3 h-3 rounded-full bg-red-500 blink-warning"></span>
-            <span class="font-mono text-red-400 font-semibold text-lg">{{ wind }} km/h</span>
+            <span class="font-mono text-red-400 font-semibold text-lg">ENGAGED</span>
         </div>
-        <div class="text-xs text-red-400 mt-1">DANGER — Stow antenna</div>
-        {% endif %}
-    </div>
-
-    <!-- Weather Safe -->
-    <div class="bg-graphite-600 border border-graphite-500 p-5">
-        <div class="text-xs text-steel-2 font-medium uppercase tracking-wider mb-2">Weather</div>
-        {% if health.weather_safe %}
-        <div class="flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-green-soft"></span>
-            <span class="font-mono text-green-soft font-semibold text-lg">SAFE</span>
-        </div>
+        <div class="text-xs text-red-400 mt-1">All software commands rejected</div>
         {% else %}
         <div class="flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-red-500 blink-warning"></span>
-            <span class="font-mono text-red-400 font-semibold text-lg">UNSAFE</span>
+            <span class="w-3 h-3 rounded-full bg-green-soft"></span>
+            <span class="font-mono text-green-soft font-semibold text-lg">FREE</span>
         </div>
+        <div class="text-xs text-steel-2 mt-1">Hand-paddle disconnected</div>
         {% endif %}
     </div>
 </div>
@@ -116,6 +233,7 @@
                     <th class="pb-3 pr-4">Status</th>
                     <th class="pb-3 pr-4">Readiness</th>
                     <th class="pb-3 pr-4">TX</th>
+                    <th class="pb-3 pr-4">CRT</th>
                     <th class="pb-3 pr-4">Priority</th>
                     <th class="pb-3">Action</th>
                 </tr>
@@ -127,7 +245,7 @@
                     <td class="py-4 pr-4">
                         {% if job.status in ("EXECUTING",) %}
                         <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold bg-green-500/20 text-green-soft border border-green-500/30">{{ job.status }}</span>
-                        {% elif job.status in ("DISPATCHED", "QUEUED") %}
+                        {% elif job.status in ("DISPATCHED", "QUEUED", "ACKNOWLEDGED", "PREPARING") %}
                         <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-500/30">{{ job.status }}</span>
                         {% elif job.status in ("FAILED", "CANCELLED") %}
                         <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold bg-red-500/20 text-red-400 border border-red-500/30">{{ job.status }}</span>
@@ -138,10 +256,10 @@
                     <td class="py-4 pr-4">
                         {% if job.readiness_status == "READY" %}
                         <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold bg-green-500/20 text-green-soft border border-green-500/30">READY</span>
-                        {% elif job.readiness_status == "PENDING" %}
-                        <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold bg-signal/20 text-signal border border-signal/30">PENDING</span>
+                        {% elif job.readiness_status == "NOT_READY" %}
+                        <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold bg-red-500/20 text-red-400 border border-red-500/30">NOT READY</span>
                         {% else %}
-                        <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold bg-graphite-400/30 text-steel-2 border border-graphite-400/30">{{ job.readiness_status or "—" }}</span>
+                        <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold bg-signal/20 text-signal border border-signal/30">PENDING</span>
                         {% endif %}
                     </td>
                     <td class="py-4 pr-4">
@@ -149,6 +267,16 @@
                         <span class="text-xs font-mono text-red-400 font-semibold">TX ON</span>
                         {% else %}
                         <span class="text-xs font-mono text-steel-2">RX only</span>
+                        {% endif %}
+                    </td>
+                    <td class="py-4 pr-4">
+                        {% set jcrt = job.crt_redundancy or health.crt_redundancy %}
+                        {% if jcrt and jcrt.state == "spof" %}
+                        <span class="text-xs font-mono text-red-400 font-bold">SPOF</span>
+                        {% elif jcrt and jcrt.state == "spare" %}
+                        <span class="text-xs font-mono text-yellow-400">SPARE</span>
+                        {% else %}
+                        <span class="text-xs font-mono text-steel-2">OK</span>
                         {% endif %}
                     </td>
                     <td class="py-4 pr-4 font-mono text-sm">P{{ job.priority }}</td>
@@ -175,7 +303,7 @@
 
 {% block extra_scripts %}
 <script>
-    // Auto-refresh dashboard every 10 seconds
+    // Auto-refresh dashboard every 10 seconds (DISPATCHED jobs get a partial poll too).
     setTimeout(() => location.reload(), 10000);
 </script>
 {% endblock %}

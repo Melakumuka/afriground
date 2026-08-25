@@ -10,7 +10,7 @@
 </a>
 
 <div class="mb-8">
-    <h1 class="text-3xl font-display font-bold mb-1">Pass Console</h1>
+    <h1 class="text-3xl font-display font-bold mb-1">Pass Console — Safran Pro 730 SX</h1>
     <p class="text-steel-2">Job <span class="font-mono text-signal">{{ job.id[:12] }}…</span></p>
 </div>
 
@@ -31,23 +31,23 @@
             <div class="flex justify-between items-center border-t border-graphite-500 pt-3">
                 <span class="text-sm text-steel-2">Status</span>
                 {% if job.status == "EXECUTING" %}
-                <span class="px-3 py-1 text-xs font-bold bg-green-500/20 text-green-soft border border-green-500/30">{{ job.status }}</span>
-                {% elif job.status in ("DISPATCHED", "QUEUED", "ACKNOWLEDGED") %}
-                <span class="px-3 py-1 text-xs font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">{{ job.status }}</span>
+                <span class="px-3 py-1 text-xs font-bold bg-green-500/20 text-green-soft border border-green-500/30" id="job-status-badge">{{ job.status }}</span>
+                {% elif job.status in ("DISPATCHED", "QUEUED", "ACKNOWLEDGED", "PREPARING") %}
+                <span class="px-3 py-1 text-xs font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30" id="job-status-badge">{{ job.status }}</span>
                 {% elif job.status in ("FAILED", "CANCELLED") %}
-                <span class="px-3 py-1 text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30">{{ job.status }}</span>
+                <span class="px-3 py-1 text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30" id="job-status-badge">{{ job.status }}</span>
                 {% elif job.status == "COMPLETED" %}
-                <span class="px-3 py-1 text-xs font-bold bg-green-500/20 text-green-soft border border-green-500/30">{{ job.status }}</span>
+                <span class="px-3 py-1 text-xs font-bold bg-green-500/20 text-green-soft border border-green-500/30" id="job-status-badge">{{ job.status }}</span>
                 {% else %}
-                <span class="px-3 py-1 text-xs font-bold bg-graphite-400/30 text-steel-2 border border-graphite-400/30">{{ job.status }}</span>
+                <span class="px-3 py-1 text-xs font-bold bg-graphite-400/30 text-steel-2 border border-graphite-400/30" id="job-status-badge">{{ job.status }}</span>
                 {% endif %}
             </div>
             <div class="flex justify-between items-center border-t border-graphite-500 pt-3">
                 <span class="text-sm text-steel-2">Readiness</span>
                 {% if job.readiness_status == "READY" %}
-                <span class="px-3 py-1 text-xs font-bold bg-green-500/20 text-green-soft border border-green-500/30">CONFIRMED</span>
+                <span class="px-3 py-1 text-xs font-bold bg-green-500/20 text-green-soft border border-green-500/30" id="job-readiness-badge">CONFIRMED</span>
                 {% else %}
-                <span class="px-3 py-1 text-xs font-bold bg-signal/20 text-signal border border-signal/30">{{ job.readiness_status or "PENDING" }}</span>
+                <span class="px-3 py-1 text-xs font-bold bg-signal/20 text-signal border border-signal/30" id="job-readiness-badge">{{ job.readiness_status or "PENDING" }}</span>
                 {% endif %}
             </div>
             <div class="flex justify-between items-center border-t border-graphite-500 pt-3">
@@ -68,7 +68,7 @@
     <!-- Station Operation Profile -->
     <div class="bg-graphite-600 border border-graphite-500 p-6">
         <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
-            <svg class="w-5 h-5 text-signal" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <svg class="w-5 h-5 text-signal" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 001.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             Station Operation Profile
         </h2>
         {% if profile %}
@@ -78,12 +78,23 @@
                 <span class="font-semibold">{{ profile.name }}</span>
             </div>
             <div class="flex justify-between items-center border-t border-graphite-500 pt-3">
+                <span class="text-sm text-steel-2">Profile Status</span>
+                {% set pstat = profile.status or profile.certification_state or "UNKNOWN" %}
+                {% if pstat == "CERTIFIED" %}
+                <span class="px-2 py-0.5 text-xs font-bold bg-green-500/20 text-green-soft border border-green-500/30">{{ pstat }}</span>
+                {% elif pstat == "SUSPENDED" %}
+                <span class="px-2 py-0.5 text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30">{{ pstat }}</span>
+                {% else %}
+                <span class="px-2 py-0.5 text-xs font-bold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">{{ pstat }}</span>
+                {% endif %}
+            </div>
+            <div class="flex justify-between items-center border-t border-graphite-500 pt-3">
                 <span class="text-sm text-steel-2">Operation Mode</span>
                 <span class="font-mono text-sm">{{ profile.operation_mode or "DEFAULT" }}</span>
             </div>
             <div class="flex justify-between items-center border-t border-graphite-500 pt-3">
-                <span class="text-sm text-steel-2">Satellite</span>
-                <span class="font-mono text-sm">{{ profile.satellite_id[:12] if profile.satellite_id else "—" }}…</span>
+                <span class="text-sm text-steel-2">Mission</span>
+                <span class="font-mono text-sm">{{ (profile.mcs_profile_payload or {}).mission_name if profile.mcs_profile_payload else "—" }}</span>
             </div>
             <div class="flex justify-between items-center border-t border-graphite-500 pt-3">
                 <span class="text-sm text-steel-2">Profile ID</span>
@@ -100,95 +111,256 @@
     </div>
 </div>
 
-<!-- Engineer Checklist -->
-<div class="bg-graphite-600 border-2 {% if job.readiness_status == 'READY' %}border-green-500/50{% else %}border-red-500/50{% endif %} p-6 mb-8">
+<!-- TX banner (only when TX requested) -->
+{% if job.tx_requested %}
+<div class="bg-red-500/10 border-2 border-red-500/50 p-5 mb-8">
+    <h2 class="text-lg font-bold text-red-400 mb-3 flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        TX REQUESTED — UPLINK WILL BE ARMED
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+        <div>
+            <div class="text-xs text-steel-2 uppercase tracking-wider mb-1">CRT Redundancy</div>
+            <div id="crt-redundancy-badge">
+                {% set crt = (crt_redundancy or {}) %}
+                {% if crt.state == "nominal" %}
+                <span class="px-2 py-1 text-xs font-bold bg-green-500/20 text-green-soft border border-green-500/30">NOMINAL (S/N 19019)</span>
+                {% elif crt.state == "spare" %}
+                <span class="px-2 py-1 text-xs font-bold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 blink-warning">SPARE IN USE — NO S-BAND TX #2 REDUNDANCY</span>
+                {% elif crt.state == "spof" %}
+                <span class="px-2 py-1 text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30 blink-warning">S-BAND TX SPOF — TX WILL BE DISABLED</span>
+                {% else %}
+                <span class="px-2 py-1 text-xs font-bold bg-graphite-400/30 text-steel-2 border border-graphite-400/30">UNKNOWN</span>
+                {% endif %}
+            </div>
+        </div>
+        <div>
+            <div class="text-xs text-steel-2 uppercase tracking-wider mb-1">HPA Radiation Mask</div>
+            <div>
+                <span class="font-mono text-sm">Armed, mute below 5°</span>
+                <div class="text-xs text-steel-2 mt-0.5">Safran S-band HPA auto-mutes below the elevation mask</div>
+            </div>
+        </div>
+        <div>
+            <div class="text-xs text-steel-2 uppercase tracking-wider mb-1">Planned Min Elevation</div>
+            <div>
+                <span class="font-mono text-sm">{{ "%.1f"|format(planned_min_elevation_deg or 0.0) }}°</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Engineer Checklist — Safran Pro 730 Specific (12 items) -->
+<div class="bg-graphite-600 border-2 {% if job.readiness_status == 'READY' %}border-green-500/50{% else %}border-amber-500/50{% endif %} p-6 mb-8" id="checklist-card">
     <h2 class="text-xl font-bold mb-2 flex items-center gap-3">
         {% if job.readiness_status == "READY" %}
         <svg class="w-6 h-6 text-green-soft" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        <span class="text-green-soft">Readiness Confirmed</span>
+        <span class="text-green-soft">Engineer Checklist — Confirmed</span>
         {% else %}
-        <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-        <span class="text-red-400">Engineer Checklist — Manual Confirmation Required</span>
+        <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        <span class="text-amber-400">Engineer Checklist — 12 Manual Confirmations Required</span>
         {% endif %}
     </h2>
 
     {% if job.readiness_status == "READY" %}
     <div class="bg-green-500/10 border border-green-500/30 p-5 mt-4">
         <p class="text-green-soft font-medium">
-            ✅ All checklist items have been confirmed. The Cloud Orchestrator is now cleared to transition this job to <span class="font-mono font-bold">EXECUTING</span>.
+            ✅ All 12 checklist items have been confirmed. The Cloud Orchestrator is cleared to transition this job to <span class="font-mono font-bold">EXECUTING</span>.
         </p>
     </div>
     {% else %}
-    <p class="text-steel-2 mb-6 mt-2">You must confirm each item below before the cloud will allow this pass to execute. This is a safety interlock.</p>
-    
-    <form action="/jobs/{{ job.id }}/ready" method="post">
-        <div class="space-y-3 mb-8">
-            <label class="flex items-center gap-4 p-4 bg-graphite-500/50 border border-graphite-500 hover:border-signal/40 transition-colors cursor-pointer group">
-                <input type="checkbox" name="mcs_loaded" required class="w-5 h-5 rounded border-2 border-graphite-400 text-signal focus:ring-signal bg-graphite accent-yellow-400">
-                <div>
-                    <div class="font-semibold group-hover:text-signal transition-colors">MCS Profile Loaded & Verified</div>
-                    <div class="text-xs text-steel-2 mt-0.5">The correct Zodiac/CORTEX preset has been loaded in the local Mission Control Software</div>
+    <p class="text-steel-2 mb-6 mt-2">Confirm each item below. This is a Safran Pro 730 SX site-specific safety interlock — the cloud will not auto-execute until every box is checked. Hard rejects (LCB engaged, SPOF CRT for a TX job, profile not CERTIFIED) disable the <span class="font-mono font-bold">CONFIRM READY</span> button.</p>
+
+    <form action="/jobs/{{ job.id }}/ready" method="post" id="checklist-form">
+        <div class="space-y-3 mb-6">
+
+            <label class="checklist-row flex items-start gap-4 p-4 bg-graphite-500/50 border border-graphite-500 hover:border-signal/40 transition-colors cursor-pointer group" data-key="mcs_ta_xml_synced">
+                <input type="checkbox" name="mcs_ta_xml_synced" required class="mt-1 w-5 h-5 rounded border-2 border-graphite-400 text-signal focus:ring-signal bg-graphite accent-yellow-400">
+                <div class="flex-1">
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="font-semibold group-hover:text-signal transition-colors">1. MCS activity table (TA.xml) pulled via FTP</span>
+                        <span class="text-xs font-mono text-steel-2">C:\Program Files\copSSH\home\racc\TaInfo\TA.xml</span>
+                    </div>
+                    <div class="text-xs text-steel-2 mt-0.5">Verify the latest schedule was synced from PC Saphir (192.168.0.100).</div>
                 </div>
             </label>
 
-            <label class="flex items-center gap-4 p-4 bg-graphite-500/50 border border-graphite-500 hover:border-signal/40 transition-colors cursor-pointer group">
-                <input type="checkbox" name="hdr_configured" required class="w-5 h-5 rounded border-2 border-graphite-400 text-signal focus:ring-signal bg-graphite accent-yellow-400">
-                <div>
-                    <div class="font-semibold group-hover:text-signal transition-colors">HDR Modem Configured</div>
-                    <div class="text-xs text-steel-2 mt-0.5">High Data Rate modem is set to correct modulation, symbol rate, and FEC coding</div>
+            <label class="checklist-row flex items-start gap-4 p-4 bg-graphite-500/50 border border-graphite-500 hover:border-signal/40 transition-colors cursor-pointer group" data-key="rm_port_4000_stream">
+                <input type="checkbox" name="rm_port_4000_stream" required class="mt-1 w-5 h-5 rounded border-2 border-graphite-400 text-signal focus:ring-signal bg-graphite accent-yellow-400">
+                <div class="flex-1">
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="font-semibold group-hover:text-signal transition-colors">2. RM Port 4000 stream is live from PC Saphir</span>
+                        <span class="text-xs font-mono text-steel-2">192.168.0.100:4000</span>
+                    </div>
+                    <div class="text-xs text-steel-2 mt-0.5">Up to 5 read-only clients — passive Az/El, lock indicators, Eb/N0.</div>
                 </div>
             </label>
 
-            <label class="flex items-center gap-4 p-4 bg-graphite-500/50 border border-graphite-500 hover:border-signal/40 transition-colors cursor-pointer group">
-                <input type="checkbox" name="acu_tle_updated" required class="w-5 h-5 rounded border-2 border-graphite-400 text-signal focus:ring-signal bg-graphite accent-yellow-400">
-                <div>
-                    <div class="font-semibold group-hover:text-signal transition-colors">ACU TLE Updated</div>
-                    <div class="text-xs text-steel-2 mt-0.5">Antenna Control Unit has the latest Two-Line Element set loaded for accurate tracking</div>
+            <label class="checklist-row flex items-start gap-4 p-4 bg-graphite-500/50 border border-graphite-500 hover:border-signal/40 transition-colors cursor-pointer group" data-key="lcb_not_engaged" id="row-lcb-not-engaged">
+                <input type="checkbox" name="lcb_not_engaged" required id="cb-lcb-not-engaged" class="mt-1 w-5 h-5 rounded border-2 border-graphite-400 text-signal focus:ring-signal bg-graphite accent-yellow-400">
+                <div class="flex-1">
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="font-semibold group-hover:text-signal transition-colors">3. LCB Local Mode is NOT engaged</span>
+                        <span class="text-xs font-mono text-steel-2">ACU Pedestal</span>
+                    </div>
+                    <div class="text-xs text-steel-2 mt-0.5">Hand-paddle disconnected. LCB engagement forces Local Mode and rejects all software commands — the Gateway cannot override.</div>
                 </div>
             </label>
 
-            <label class="flex items-center gap-4 p-4 bg-graphite-500/50 border border-graphite-500 hover:border-signal/40 transition-colors cursor-pointer group">
-                <input type="checkbox" name="rf_verified" required class="w-5 h-5 rounded border-2 border-graphite-400 text-signal focus:ring-signal bg-graphite accent-yellow-400">
-                <div>
-                    <div class="font-semibold group-hover:text-signal transition-colors">RF Path & Hardware Verified</div>
-                    <div class="text-xs text-steel-2 mt-0.5">Correct waveguide path, LNA, and polarization switch position confirmed</div>
+            <label class="checklist-row flex items-start gap-4 p-4 bg-graphite-500/50 border border-graphite-500 hover:border-signal/40 transition-colors cursor-pointer group" data-key="hpa_radiation_mask_armed">
+                <input type="checkbox" name="hpa_radiation_mask_armed" required class="mt-1 w-5 h-5 rounded border-2 border-graphite-400 text-signal focus:ring-signal bg-graphite accent-yellow-400">
+                <div class="flex-1">
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="font-semibold group-hover:text-signal transition-colors">4. HPA Radiation Mask armed (5° elevation)</span>
+                        <span class="text-xs font-mono text-steel-2">S-band HPA</span>
+                    </div>
+                    <div class="text-xs text-steel-2 mt-0.5">TX must auto-mute below the authorized emission mask elevation. Verify mask ≤ 5°.</div>
                 </div>
             </label>
 
-            <label class="flex items-center gap-4 p-4 bg-graphite-500/50 border border-graphite-500 hover:border-signal/40 transition-colors cursor-pointer group">
-                <input type="checkbox" name="weather_safe" required class="w-5 h-5 rounded border-2 border-graphite-400 text-signal focus:ring-signal bg-graphite accent-yellow-400">
-                <div>
-                    <div class="font-semibold group-hover:text-signal transition-colors">Weather & Environment Safe</div>
-                    <div class="text-xs text-steel-2 mt-0.5">Wind below limit, no lightning in vicinity, temperature within equipment specs</div>
+            <label class="checklist-row flex items-start gap-4 p-4 bg-graphite-500/50 border border-graphite-500 hover:border-signal/40 transition-colors cursor-pointer group" data-key="stow_pins_free">
+                <input type="checkbox" name="stow_pins_free" required class="mt-1 w-5 h-5 rounded border-2 border-graphite-400 text-signal focus:ring-signal bg-graphite accent-yellow-400">
+                <div class="flex-1">
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="font-semibold group-hover:text-signal transition-colors">5. Stow Pin Interlocks are FREE (not engaged)</span>
+                        <span class="text-xs font-mono text-steel-2">Elev/Az Pedestal</span>
+                    </div>
+                    <div class="text-xs text-steel-2 mt-0.5">Physical pins removed from ACU. Gateway can poll but cannot bypass mechanical lock.</div>
                 </div>
             </label>
+
+            <label class="checklist-row flex items-start gap-4 p-4 bg-graphite-500/50 border border-graphite-500 hover:border-signal/40 transition-colors cursor-pointer group" data-key="acu_tle_in_window">
+                <input type="checkbox" name="acu_tle_in_window" required class="mt-1 w-5 h-5 rounded border-2 border-graphite-400 text-signal focus:ring-signal bg-graphite accent-yellow-400">
+                <div class="flex-1">
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="font-semibold group-hover:text-signal transition-colors">6. ACU TLE / Ephemeris updated for AOS/LOS window</span>
+                        <span class="text-xs font-mono text-steel-2">TLE Epoch</span>
+                    </div>
+                    <div class="text-xs text-steel-2 mt-0.5">Verify the ACU is using the latest TLE inside its validity window.</div>
+                </div>
+            </label>
+
+            <label class="checklist-row flex items-start gap-4 p-4 bg-graphite-500/50 border border-graphite-500 hover:border-signal/40 transition-colors cursor-pointer group" data-key="rise_angle_ok">
+                <input type="checkbox" name="rise_angle_ok" required class="mt-1 w-5 h-5 rounded border-2 border-graphite-400 text-signal focus:ring-signal bg-graphite accent-yellow-400">
+                <div class="flex-1">
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="font-semibold group-hover:text-signal transition-colors">7. Rise Angle ≥ ACU minimum elevation</span>
+                        <span class="text-xs font-mono text-steel-2">{{ "%.2f"|format(rise_angle_deg or 0.0) }}° ≥ {{ "%.2f"|format(acu_min_elevation_deg or 0.0) }}°</span>
+                    </div>
+                    <div class="text-xs text-steel-2 mt-0.5">Prevents premature signal acquisition attempts and telemetry loss.</div>
+                </div>
+            </label>
+
+            <label class="checklist-row flex items-start gap-4 p-4 bg-graphite-500/50 border border-graphite-500 hover:border-signal/40 transition-colors cursor-pointer group" data-key="interpass_gap_ok">
+                <input type="checkbox" name="interpass_gap_ok" required class="mt-1 w-5 h-5 rounded border-2 border-graphite-400 text-signal focus:ring-signal bg-graphite accent-yellow-400">
+                <div class="flex-1">
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="font-semibold group-hover:text-signal transition-colors">8. Interpass gap respected (PcmSrv.GestionTA.InterPassage)</span>
+                        <span class="text-xs font-mono text-steel-2">{{ "%.1f"|format(interpass_gap_seconds or 0.0) }}s</span>
+                    </div>
+                    <div class="text-xs text-steel-2 mt-0.5">No same-priority pass within the minimum interpass window.</div>
+                </div>
+            </label>
+
+            <label class="checklist-row flex items-start gap-4 p-4 bg-graphite-500/50 border border-graphite-500 hover:border-signal/40 transition-colors cursor-pointer group" data-key="wind_weather_safe">
+                <input type="checkbox" name="wind_weather_safe" required class="mt-1 w-5 h-5 rounded border-2 border-graphite-400 text-signal focus:ring-signal bg-graphite accent-yellow-400">
+                <div class="flex-1">
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="font-semibold group-hover:text-signal transition-colors">9. Wind below station threshold & weather safe</span>
+                        <span class="text-xs font-mono text-steel-2">{{ "%.1f"|format(wind_speed_kmh or 0.0) }} km/h</span>
+                    </div>
+                    <div class="text-xs text-steel-2 mt-0.5">Below station-configured stow threshold; no lightning in vicinity.</div>
+                </div>
+            </label>
+
+            <label class="checklist-row flex items-start gap-4 p-4 bg-graphite-500/50 border border-graphite-500 hover:border-signal/40 transition-colors cursor-pointer group" data-key="time_sync_ok">
+                <input type="checkbox" name="time_sync_ok" required class="mt-1 w-5 h-5 rounded border-2 border-graphite-400 text-signal focus:ring-signal bg-graphite accent-yellow-400">
+                <div class="flex-1">
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="font-semibold group-hover:text-signal transition-colors">10. Time sync (GPS/NTP) within ±250 ms</span>
+                        <span class="text-xs font-mono text-steel-2">clock_offset: {{ "%.1f"|format(clock_offset_ms or 0.0) }} ms</span>
+                    </div>
+                    <div class="text-xs text-steel-2 mt-0.5">GPS-disciplined reference required for accurate AOS/LOS and CCSDS timestamps.</div>
+                </div>
+            </label>
+
+            <label class="checklist-row flex items-start gap-4 p-4 bg-graphite-500/50 border border-graphite-500 hover:border-signal/40 transition-colors cursor-pointer group" data-key="rf_path_unmodified">
+                <input type="checkbox" name="rf_path_unmodified" required class="mt-1 w-5 h-5 rounded border-2 border-graphite-400 text-signal focus:ring-signal bg-graphite accent-yellow-400">
+                <div class="flex-1">
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="font-semibold group-hover:text-signal transition-colors">11. RF path verified — Safran cabling unmodified</span>
+                        <span class="text-xs font-mono text-steel-2">IF 720 / 70 MHz</span>
+                    </div>
+                    <div class="text-xs text-steel-2 mt-0.5">No custom splitters or routing. EMC/RF integrity per Safran blueprints preserved.</div>
+                </div>
+            </label>
+
+            <label class="checklist-row flex items-start gap-4 p-4 bg-graphite-500/50 border border-graphite-500 hover:border-signal/40 transition-colors cursor-pointer group" data-key="profile_certified">
+                <input type="checkbox" name="profile_certified" required id="cb-profile-certified" class="mt-1 w-5 h-5 rounded border-2 border-graphite-400 text-signal focus:ring-signal bg-graphite accent-yellow-400">
+                <div class="flex-1">
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="font-semibold group-hover:text-signal transition-colors">12. StationOperationProfile is in CERTIFIED status</span>
+                        <span class="text-xs font-mono text-steel-2">{{ profile.status if profile else "MISSING" }}</span>
+                    </div>
+                    <div class="text-xs text-steel-2 mt-0.5">Hard reject if profile is CONFIGURING, TESTING, or SUSPENDED.</div>
+                </div>
+            </label>
+
+            {% if job.tx_requested %}
+            <label class="checklist-row flex items-start gap-4 p-4 bg-red-500/10 border border-red-500/40 hover:border-red-500/60 transition-colors cursor-pointer group" data-key="tx_redundancy_ack">
+                <input type="checkbox" name="tx_redundancy_ack" required id="cb-tx-redundancy-ack" class="mt-1 w-5 h-5 rounded border-2 border-graphite-400 text-signal focus:ring-signal bg-graphite accent-yellow-400">
+                <div class="flex-1">
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="font-semibold text-red-300 group-hover:text-red-200 transition-colors">13. TX redundancy & radiation mask acknowledged</span>
+                        <span class="text-xs font-mono text-red-300">TX REQUESTED</span>
+                    </div>
+                    <div class="text-xs text-steel-2 mt-0.5">I confirm TX will only fire if CRT redundancy is intact (not in SPOF) AND elevation ≥ 5° radiation mask.</div>
+                </div>
+            </label>
+            {% endif %}
         </div>
 
+        {% if hard_block_reason %}
+        <div class="mb-4 p-4 bg-red-500/10 border border-red-500/40 text-sm">
+            <div class="font-bold text-red-400 mb-1">Hard block — CONFIRM READY disabled</div>
+            <div class="text-red-200">{{ hard_block_reason }}</div>
+        </div>
+        {% endif %}
+
         <button type="submit" id="btn-confirm-ready"
-            class="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-black text-lg tracking-wider transition-colors shadow-lg shadow-red-900/30 disabled:opacity-40 disabled:cursor-not-allowed"
+            class="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-black text-lg tracking-wider transition-colors shadow-lg shadow-red-900/30 disabled:opacity-40 disabled:cursor-not-allowed disabled:bg-graphite-500"
             disabled>
             CONFIRM READY
         </button>
-        <p class="text-xs text-steel-2 mt-2 text-center">All 5 checklist items must be checked to enable this button.</p>
+        <p class="text-xs text-steel-2 mt-2 text-center" id="checklist-help">
+            All 12 checklist items must be checked to enable this button.
+            {% if job.tx_requested %}The TX-redundancy item (13) is also required.{% endif %}
+        </p>
     </form>
     {% endif %}
 </div>
 
-<!-- Emergency Abort -->
-{% if job.status in ("EXECUTING", "PREPARING") %}
-<div class="bg-graphite-600 border-2 border-red-600 p-6 mb-8">
-    <h2 class="text-xl font-bold text-red-400 mb-3 flex items-center gap-3">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
-        Emergency Controls
+<!-- Passive LCB / E-Stop Notice (replaces the dangerous EMERGENCY ABORT button) -->
+<div class="bg-graphite-600 border-2 border-amber-500/50 p-6 mb-8">
+    <h2 class="text-xl font-bold text-amber-400 mb-3 flex items-center gap-3">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        No Active Commands — Local Action Required in an Emergency
     </h2>
-    <p class="text-steel-2 mb-4">Use only in case of equipment fault, unexpected wind gust, RF interference, or safety hazard. This action is <strong class="text-white">local-first</strong> and does not require cloud connectivity.</p>
-    <form action="/jobs/{{ job.id }}/abort" method="post" onsubmit="return confirm('⚠️ EMERGENCY ABORT — This will immediately stop all recording, kill TX, and stow the antenna. Are you sure?');">
-        <button type="submit" class="w-full py-4 bg-red-700 hover:bg-red-800 text-white font-black text-lg tracking-wider transition-colors border-2 border-red-500 shadow-lg shadow-red-900/50">
-            ⚠️ EMERGENCY ABORT — KILL RF & STOW
+    <p class="text-steel-2 mb-4">This Gateway is a passive observer. It cannot command the antenna or the HPA. In an emergency:</p>
+    <ul class="list-disc list-inside text-sm space-y-1 text-steel-2 mb-5">
+        <li>Engage the <strong class="text-white">LCB hand-paddle</strong> on the pedestal — forces Local Mode, rejects all software commands.</li>
+        <li>Press the <strong class="text-white">physical E-Stop</strong> on the ADU front panel (cuts 400 V servo line power).</li>
+        <li><strong class="text-white">ACU auto-stows</strong> when wind limit is exceeded.</li>
+        <li><strong class="text-white">HPA mask</strong> automatically mutes TX below the 5° elevation mask.</li>
+        <li>Never use <strong class="text-white">"Limit Inhibition"</strong> (Inhib B2/B3) — crossing the B3 end-stops trips safety relays and risks pedestal damage.</li>
+    </ul>
+    <form action="/jobs/{{ job.id }}/local-action-ack" method="post">
+        <button type="submit" class="w-full py-3 bg-graphite-500 hover:bg-graphite-400 text-white font-bold tracking-wider transition-colors border border-graphite-400">
+            I Acknowledge — Local Action Procedure Reviewed
         </button>
     </form>
 </div>
-{% endif %}
 
 <!-- Post-Pass Receipt (shown if job is COMPLETED) -->
 {% if job.status == "COMPLETED" and receipt %}
@@ -226,21 +398,74 @@
 
 {% block extra_scripts %}
 <script>
-    // Enable CONFIRM READY button only when all checkboxes are checked
-    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-    const confirmBtn = document.getElementById('btn-confirm-ready');
-    
-    if (checkboxes.length > 0 && confirmBtn) {
+    (function () {
+        const form = document.getElementById('checklist-form');
+        if (!form) return;  // already READY
+
+        const confirmBtn = document.getElementById('btn-confirm-ready');
+        const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+        const hardBlockReason = {{ (hard_block_reason or '') | tojson }};
+        const hasHardBlock = Boolean(hardBlockReason && hardBlockReason.length);
+
         function updateButton() {
             const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-            confirmBtn.disabled = !allChecked;
-            if (allChecked) {
-                confirmBtn.classList.add('animate-pulse');
-            } else {
-                confirmBtn.classList.remove('animate-pulse');
-            }
+            const enabled = allChecked && !hasHardBlock;
+            confirmBtn.disabled = !enabled;
+            confirmBtn.classList.toggle('animate-pulse', enabled);
         }
+
         checkboxes.forEach(cb => cb.addEventListener('change', updateButton));
-    }
+        updateButton();
+    })();
 </script>
+
+{% if job.status in ("DISPATCHED", "ACKNOWLEDGED", "PREPARING") %}
+<script>
+    // Partial polling — no full reload while engineer is interacting.
+    (function () {
+        const statusBadge = document.getElementById('job-status-badge');
+        const readinessBadge = document.getElementById('job-readiness-badge');
+        const checklistCard = document.getElementById('checklist-card');
+        const POLL_MS = 5000;
+        async function poll() {
+            try {
+                const resp = await fetch(`/jobs/{{ job.id }}/status.json`, { headers: { 'Accept': 'application/json' } });
+                if (!resp.ok) return;
+                const data = await resp.json();
+                if (statusBadge && data.status) statusBadge.textContent = data.status;
+                if (readinessBadge && data.readiness_status) {
+                    readinessBadge.textContent = data.readiness_status === 'READY' ? 'CONFIRMED' : data.readiness_status;
+                }
+                if (data.readiness_status === 'READY' && checklistCard) {
+                    // Full reload only when state advances to READY (so engineer sees confirmation screen).
+                    location.reload();
+                }
+            } catch (e) { /* ignore */ }
+        }
+        setInterval(poll, POLL_MS);
+    })();
+</script>
+{% endif %}
+
+{% if job.status == "EXECUTING" %}
+<script>
+    // EXECUTING — poll only, never full reload.
+    (function () {
+        const POLL_MS = 3000;
+        async function poll() {
+            try {
+                const resp = await fetch(`/jobs/{{ job.id }}/status.json`, { headers: { 'Accept': 'application/json' } });
+                if (!resp.ok) return;
+                const data = await resp.json();
+                const sb = document.getElementById('job-status-badge');
+                if (sb && data.status) sb.textContent = data.status;
+                if (data.status === 'COMPLETED' || data.status === 'FAILED' || data.status === 'CANCELLED') {
+                    location.reload();
+                }
+            } catch (e) { /* ignore */ }
+        }
+        setInterval(poll, POLL_MS);
+    })();
+</script>
+{% endif %}
 {% endblock %}

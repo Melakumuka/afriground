@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Local Audit — Safran Edge{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-display font-bold mb-1">Local Audit Trail</h1>
+    <p class="text-steel-2">Local-first audit log of firewall posture, LCB engagement, and CRT redundancy events. Stored on this Gateway only.</p>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Firewall Audit -->
+    <div class="bg-graphite-600 border border-graphite-500 p-5">
+        <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-signal" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            Firewall Posture ({{ firewall_logs|length }})
+        </h2>
+        {% if firewall_logs %}
+        <div class="space-y-2 max-h-96 overflow-y-auto">
+            {% for log in firewall_logs %}
+            <div class="p-3 bg-graphite-500/50 border border-graphite-500 text-xs">
+                <div class="flex justify-between">
+                    <span class="font-mono">{{ log.ts }}</span>
+                    <span class="{% if log.enabled %}text-green-soft{% else %}text-red-400{% endif %}">{% if log.enabled %}OK{% else %}DRIFT{% endif %}</span>
+                </div>
+                <div class="font-semibold mt-1">{{ log.rule_name }}</div>
+                <div class="text-steel-2 mt-0.5">present={{ log.present }} · expected={{ log.expected_action }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-sm text-steel-2">No firewall audits recorded yet.</p>
+        {% endif %}
+    </div>
+
+    <!-- LCB Engagement -->
+    <div class="bg-graphite-600 border border-graphite-500 p-5">
+        <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-signal" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            LCB Engagement ({{ lcb_logs|length }})
+        </h2>
+        {% if lcb_logs %}
+        <div class="space-y-2 max-h-96 overflow-y-auto">
+            {% for log in lcb_logs %}
+            <div class="p-3 bg-graphite-500/50 border border-graphite-500 text-xs">
+                <div class="flex justify-between">
+                    <span class="font-mono">{{ log.ts }}</span>
+                    <span class="{% if log.lcb_state %}text-red-400{% else %}text-green-soft{% endif %}">{% if log.lcb_state %}ENGAGED{% else %}FREE{% endif %}</span>
+                </div>
+                <div class="font-semibold mt-1 truncate">job: {{ log.job_id[:12] }}…</div>
+                <div class="text-steel-2 mt-0.5">source: {{ log.source }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-sm text-steel-2">No LCB engagement events recorded.</p>
+        {% endif %}
+    </div>
+
+    <!-- CRT Redundancy -->
+    <div class="bg-graphite-600 border border-graphite-500 p-5">
+        <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-signal" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            CRT Redundancy ({{ crt_logs|length }})
+        </h2>
+        {% if crt_logs %}
+        <div class="space-y-2 max-h-96 overflow-y-auto">
+            {% for log in crt_logs %}
+            <div class="p-3 bg-graphite-500/50 border border-graphite-500 text-xs">
+                <div class="flex justify-between">
+                    <span class="font-mono">{{ log.ts }}</span>
+                    <span class="{% if log.spof_declared %}text-red-400 font-bold{% elif log.spare_present %}text-yellow-400{% else %}text-green-soft{% endif %}">
+                        {% if log.spof_declared %}SPOF{% elif log.spare_present %}SPARE{% else %}NOMINAL{% endif %}
+                    </span>
+                </div>
+                <div class="font-semibold mt-1">nominal={{ log.nominal_present }} · spare={{ log.spare_present }}</div>
+                <div class="text-steel-2 mt-0.5">TX S-band: {% if log.spof_declared %}disabled{% else %}permitted{% endif %}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-sm text-steel-2">No CRT redundancy events recorded.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="mt-8 text-center">
+    <a href="/" class="inline-flex items-center gap-2 px-5 py-2 bg-signal/10 text-signal border border-signal/30 text-sm font-semibold hover:bg-signal/20 transition-colors">
+        ← Back to Dashboard
+    </a>
+</div>
+
+{% endblock %}
