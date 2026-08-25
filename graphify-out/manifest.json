@@ -948,10 +948,10 @@
     "semantic_hash": "75f043288fb2ed4a3bc0ca5d9eb3efe9"
   },
   "apps/web/src/components/Navbar.tsx": {
-    "mtime": 1787554151.275616,
-    "seen": 1787589672.084518,
-    "ast_hash": "84ac3251348fe79f72f8a549a473ed37",
-    "semantic_hash": "84ac3251348fe79f72f8a549a473ed37"
+    "mtime": 1787663795.4037218,
+    "seen": 1787663811.7471135,
+    "ast_hash": "17314cca3cc71505d6dd2ecc595fc427",
+    "semantic_hash": ""
   },
   "apps/web/src/components/PassSimulatorWidget.tsx": {
     "mtime": 1787246985.8453863,

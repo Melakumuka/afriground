@@ -58,7 +58,7 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
         {/* Mobile Menu Button (hidden on md+) */}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden p-2 rounded-md hover:bg-graphite-500 transition-colors"
+          className="xl:hidden p-2 rounded-md hover:bg-graphite-500 transition-colors"
           aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -68,7 +68,7 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
         </button>
 
         {/* Desktop Navigation Links */}
-        <nav className="hidden md:flex items-center gap-1">
+        <nav className="hidden xl:flex items-center gap-1">
           {navLinks.map((link) => {
             const isActive = pathname === link.href;
             return (
@@ -89,7 +89,7 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
 
         {/* Mobile Menu (overlay, shown only on mobile) */}
         {mobileMenuOpen && (
-          <nav className="fixed inset-0 bg-graphite/90 top-20 z-40 flex flex-col items-center gap-4 p-8 block md:hidden">
+          <nav className="fixed inset-0 bg-graphite/90 top-20 z-40 flex flex-col items-center gap-4 p-8 xl:hidden">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
