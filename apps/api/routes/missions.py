@@ -83,6 +83,15 @@ async def create_profile(
     return await MissionService(db, tenant).create_profile(req)
 
 
+@router.get("/{mission_id}/profiles", response_model=list[MissionProfileResponse])
+async def list_profiles(
+    mission_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db_session),
+    tenant: TenantContext = Depends(get_tenant_context),
+):
+    return await MissionService(db, tenant).list_profiles(mission_id)
+
+
 @router.post("/rf-profiles", response_model=RFProfileResponse)
 async def create_rf_profile(
     req: RFProfileCreate,

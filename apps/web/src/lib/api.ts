@@ -79,7 +79,17 @@ export type Mission = {
   end_date: string | null;
 };
 
+export type MissionProfile = {
+  id: string;
+  mission_id: string;
+  name: string;
+  version: string;
+  is_active: boolean;
+};
+
 export type Station = {
+// ...
+
   id: string;
   name: string;
   code: string;
@@ -177,6 +187,10 @@ export function fetchMissions(): Promise<Mission[] | null> {
   return apiGet<Mission[]>("/api/v1/missions");
 }
 
+export function fetchMissionProfiles(missionId: string): Promise<MissionProfile[] | null> {
+  return apiGet<MissionProfile[]>(`/api/v1/missions/${missionId}/profiles`);
+}
+
 export function fetchStations(): Promise<Station[] | null> {
   return apiGet<Station[]>("/api/v1/stations");
 }
@@ -213,4 +227,75 @@ export function createSupportTicket(body: {
   description: string;
 }): Promise<SupportTicket | null> {
   return apiPost<SupportTicket>("/api/v1/support/tickets", body);
+}
+
+// ── Contact Planning ────────────────────────────────────────────────────────
+
+export type VisibilityOpportunity = {
+  id: string;
+  spacecraft_id: string;
+  station_id: string;
+  aos: string;
+  los: string;
+  max_elevation_deg: number;
+  duration_seconds: number;
+  status: string;
+};
+
+export type ContactOpportunity = {
+  id: string;
+  visibility_opportunity_id: string;
+  mission_profile_id: string;
+  required_band: string;
+  estimated_duration_seconds: number;
+  opportunity_score: number;
+  status: string;
+};
+
+export type Reservation = {
+  id: string;
+  contact_opportunity_id: string;
+  customer_org_id: string;
+  spacecraft_id: string;
+  status: string;
+  expires_at: string;
+};
+
+export function generateVisibility(body: {
+  spacecraft_id: string;
+  station_ids: string;
+  start?: string;
+  end?: string;
+}): Promise<VisibilityOpportunity[] | null> {
+  const params = new URLSearchParams();
+  params.append("spacecraft_id", body.spacecraft_id);
+  params.append("station_ids", body.station_ids);
+  if (body.start) params.append("start", body.start);
+  if (body.end) params.append("end", body.end);
+  return apiPost<VisibilityOpportunity[]>(`/api/v1/contact/visibility?${params.toString()}`, {});
+}
+
+export function createContactOpportunities(body: {
+  visibility_ids: string[];
+  mission_profile_id: string;
+}): Promise<ContactOpportunity[] | null> {
+  const params = new URLSearchParams();
+  body.visibility_ids.forEach((id) => params.append("visibility_ids", id));
+  params.append("mission_profile_id", body.mission_profile_id);
+  return apiPost<ContactOpportunity[]>(`/api/v1/contact/opportunities?${params.toString()}`, {});
+}
+
+export function createReservation(body: {
+  contact_opportunity_id: string;
+  spacecraft_id: string;
+  mission_id: string;
+}): Promise<Reservation | null> {
+  const orgId = serviceOrgId();
+  if (!orgId) return Promise.resolve(null);
+  const params = new URLSearchParams();
+  params.append("contact_opportunity_id", body.contact_opportunity_id);
+  params.append("customer_org_id", orgId);
+  params.append("spacecraft_id", body.spacecraft_id);
+  params.append("mission_id", body.mission_id);
+  return apiPost<Reservation>(`/api/v1/contact/reservations?${params.toString()}`, {});
 }

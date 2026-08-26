@@ -253,6 +253,18 @@ class MissionService:
             version=profile.version, is_active=profile.is_active,
         )
 
+    async def list_profiles(self, mission_id: uuid.UUID) -> List[MissionProfileResponse]:
+        await self._get_mission(mission_id)
+        stmt = select(MissionProfile).where(MissionProfile.mission_id == mission_id)
+        rows = (await self.db.execute(stmt)).scalars().all()
+        return [
+            MissionProfileResponse(
+                id=p.id, mission_id=p.mission_id, name=p.name,
+                version=p.version, is_active=p.is_active,
+            )
+            for p in rows
+        ]
+
     async def create_rf_profile(self, req: RFProfileCreate) -> RFProfileResponse:
         profile = await self.db.get(MissionProfile, req.mission_profile_id)
         if not profile:
