@@ -948,9 +948,9 @@
     "semantic_hash": "75f043288fb2ed4a3bc0ca5d9eb3efe9"
   },
   "apps/web/src/components/Navbar.tsx": {
-    "mtime": 1787663795.4037218,
-    "seen": 1787663811.7471135,
-    "ast_hash": "17314cca3cc71505d6dd2ecc595fc427",
+    "mtime": 1787664171.342357,
+    "seen": 1787664185.0009372,
+    "ast_hash": "be6745c3e04a6abc58043e14ee4b6844",
     "semantic_hash": ""
   },
   "apps/web/src/components/PassSimulatorWidget.tsx": {

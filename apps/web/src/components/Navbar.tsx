@@ -40,7 +40,7 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         
         {/* Brand Logo */}
-        <Link href={`/${currentLocale}`} className="flex items-center gap-3 group">
+        <Link href={`/${currentLocale}`} className="flex items-center gap-3 group z-50">
           <div className="w-10 h-10 bg-signal flex items-center justify-center group-hover:scale-105 transition-transform">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M2.5 19.5a12 12 0 0 1 19 0" stroke="#15171A" strokeWidth="1.6" strokeLinecap="round" />
@@ -55,19 +55,7 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
           </div>
         </Link>
 
-        {/* Mobile Menu Button (hidden on md+) */}
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="xl:hidden p-2 rounded-md hover:bg-graphite-500 transition-colors"
-          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 12l2-2m0 0l7-7m7 7l2 2m0 0l7 7m7-7v2m-2 0h2"/>
-            <path d="M19 12l2 2m0 0l-7 7m-7-7l2-2m0 0l-7-7"/>
-          </svg>
-        </button>
-
-        {/* Desktop Navigation Links */}
+        {/* Desktop Navigation Links (Visible on xl+) */}
         <nav className="hidden xl:flex items-center gap-1">
           {navLinks.map((link) => {
             const isActive = pathname === link.href;
@@ -75,7 +63,7 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`px-4 py-2 text-sm font-medium transition-all ${
+                className={`px-4 py-2 text-sm font-medium transition-all rounded-md ${
                   isActive
                     ? "bg-signal/10 text-signal-soft border border-signal/30"
                     : "text-steel-2 hover:text-white hover:bg-white/5"
@@ -87,39 +75,9 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
           })}
         </nav>
 
-        {/* Mobile Menu (overlay, shown only on mobile) */}
-        {mobileMenuOpen && (
-          <nav className="fixed inset-0 bg-graphite/90 top-20 z-40 flex flex-col items-center gap-4 p-8 xl:hidden">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`text-2xl font-bold text-white transition-colors ${
-                    isActive ? "text-signal" : "hover:text-signal-soft hover:bg-white/5"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
-            <button
-              onClick={() => setMobileMenuOpen(false)}
-              className="absolute top-6 right-6 text-gray-400 hover:text-white"
-              aria-label="Close menu"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 6L6 18M6 6l12 12"/>
-              </svg>
-            </button>
-          </nav>
-        )}
-
-        {/* Network Status & Actions */}
-        <div className="flex items-center gap-4">
-          {/* Live Node Pill */}
-          <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 border border-graphite-600 text-xs text-steel-2">
+        {/* Desktop Network Status & Actions (Visible on xl+) */}
+        <div className="hidden xl:flex items-center gap-4">
+          <div className="flex items-center gap-2 px-3 py-1.5 border border-graphite-600 text-xs text-steel-2">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-soft opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-green-soft"></span>
@@ -129,25 +87,80 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
             </span>
           </div>
 
-          {/* Language Switcher */}
           <button
             onClick={toggleLocale}
-            className="px-3 py-1.5 border border-graphite-600 text-steel-2 hover:text-white hover:border-graphite-500 text-xs font-mono tracking-wider transition-all cursor-pointer"
+            className="px-3 py-1.5 border border-graphite-600 text-steel-2 hover:text-white hover:border-graphite-500 text-xs font-mono tracking-wider transition-all cursor-pointer rounded-md"
             title={isZh ? "切换语言" : "Switch Language"}
           >
             {currentLocale.toUpperCase()}
           </button>
 
-          {/* Primary CTA */}
           <Link
             href={`/${currentLocale}/booking`}
-            className="px-4 py-2 bg-signal hover:bg-signal-soft text-graphite text-sm font-semibold shadow-lg shadow-black/30 transition-all hover:scale-105 active:scale-95"
+            className="px-4 py-2 bg-signal hover:bg-signal-soft text-graphite text-sm font-semibold shadow-lg shadow-black/30 transition-all hover:scale-105 active:scale-95 rounded-md"
           >
             {nav.schedule_pass || (isZh ? "预订过境" : "Schedule a Pass")}
           </Link>
         </div>
 
+        {/* Mobile Hamburger Button (Visible below xl) */}
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="xl:hidden p-2 text-steel-2 hover:text-white z-50 focus:outline-none"
+          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+        >
+          {mobileMenuOpen ? (
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+          ) : (
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 12h18M3 6h18M3 18h18"/>
+            </svg>
+          )}
+        </button>
+
       </div>
+
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-40 bg-graphite/95 backdrop-blur-md pt-24 px-6 pb-6 overflow-y-auto xl:hidden flex flex-col">
+          <nav className="flex flex-col gap-4">
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`text-xl font-semibold transition-colors pb-3 border-b border-graphite-600 ${
+                    isActive ? "text-signal" : "text-steel-2 hover:text-white"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </nav>
+          
+          <div className="mt-8 flex flex-col gap-4">
+            <button
+              onClick={() => { toggleLocale(); setMobileMenuOpen(false); }}
+              className="w-full py-3 border border-graphite-600 text-steel-2 hover:text-white hover:bg-graphite-600 font-mono tracking-wider transition-all rounded-md"
+            >
+              LANGUAGE: {currentLocale.toUpperCase() === 'EN' ? 'ZH' : 'EN'}
+            </button>
+
+            <Link
+              href={`/${currentLocale}/booking`}
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full py-3 bg-signal hover:bg-signal-soft text-graphite font-bold text-center transition-all rounded-md"
+            >
+              {nav.schedule_pass || (isZh ? "预订过境" : "Schedule a Pass")}
+            </Link>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
