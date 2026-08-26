@@ -397,7 +397,7 @@ export default function BookingWizard() {
                   <div className="space-y-3">
                     {passes.map((p, i) => (
                       <button
-                        key={`${p.aosIso}-${i}`}
+                        key={`${p.aos}-${i}`}
                         onClick={() => setSelectedPassIndex(i)}
                         className={`w-full p-5 border text-left transition-colors ${
                           selectedPassIndex === i
@@ -455,7 +455,7 @@ export default function BookingWizard() {
             )}
 
             {/* STEP 3 · QUOTE & BOOK */}
-            {step === 3 && quote && selectedPassIndex !== null && passes && (
+            {step === 3 && quote && selectedPassIndex !== null && passes && selectedMission && (
               <div className="space-y-8">
                 <span className="mono-label text-signal-soft">{t("review_quote", "查看并申请报价", "REVIEW & REQUEST QUOTE")}</span>
 
