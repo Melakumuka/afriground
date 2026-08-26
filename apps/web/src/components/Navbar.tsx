@@ -8,7 +8,7 @@ import { useState } from "react";
 export default function Navbar({ currentLocale }: { currentLocale: string }) {
   const pathname = usePathname();
   const router = useRouter();
-  
+
   // Access raw messages object safely to prevent next-intl dev console error logging
   const messages = useMessages() as Record<string, Record<string, string>>;
   const nav = messages?.Navigation || {};
@@ -16,13 +16,50 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
   const isZh = currentLocale === "zh";
 
   const navLinks = [
-    { href: `/${currentLocale}/booking`, label: nav.scheduling || (isZh ? "过境调度" : "Pass Scheduling") },
-    { href: `/${currentLocale}/commercial/quotes`, label: nav.commercial || (isZh ? "商务与计费" : "Commercial & Billing") },
-    { href: `/${currentLocale}/data`, label: nav.catalog || (isZh ? "数据下传" : "Data Catalog") },
-    { href: `/${currentLocale}/data/egress`, label: nav.egress || (isZh ? "数据出口配置" : "Egress Config") },
-    { href: `/${currentLocale}/missions/new`, label: nav.missions_new || (isZh ? "卫星注册" : "Register Satellite") },
-    { href: `/${currentLocale}/station/new`, label: nav.station_new || (isZh ? "地面站注册" : "Register Station") },
-    { href: `/${currentLocale}/support`, label: nav.support || (isZh ? "SLA & 支持" : "SLA & Support") },
+    {
+      href: `/${currentLocale}`,
+      label: nav.dashboard || (isZh ? "控制台" : "Dashboard"),
+    },
+    {
+      href: `/${currentLocale}/network`,
+      label: nav.network || (isZh ? "地面站网络" : "Ground Station Network"),
+    },
+    {
+      href: `/${currentLocale}/booking`,
+      label: nav.scheduling || (isZh ? "过境调度" : "Pass Scheduling"),
+    },
+    {
+      href: `/${currentLocale}/telemetry`,
+      label: nav.telemetry || (isZh ? "实时遥测" : "Live Telemetry"),
+    },
+    {
+      href: `/${currentLocale}/satellites`,
+      label: nav.satellites || (isZh ? "卫星管理" : "Satellites"),
+    },
+    {
+      href: `/${currentLocale}/missions/new`,
+      label: nav.missions_new || (isZh ? "卫星注册" : "Register Satellite"),
+    },
+    {
+      href: `/${currentLocale}/station/new`,
+      label: nav.station_new || (isZh ? "地面站注册" : "Register Station"),
+    },
+    {
+      href: `/${currentLocale}/data`,
+      label: nav.catalog || (isZh ? "数据下传" : "Data Catalog"),
+    },
+    {
+      href: `/${currentLocale}/data/egress`,
+      label: nav.egress || (isZh ? "数据出口配置" : "Egress Config"),
+    },
+    {
+      href: `/${currentLocale}/commercial/quotes`,
+      label: nav.commercial || (isZh ? "商务与计费" : "Commercial & Billing"),
+    },
+    {
+      href: `/${currentLocale}/support`,
+      label: nav.support || (isZh ? "SLA & 支持" : "SLA & Support"),
+    },
   ];
 
   // Helper to switch locale
@@ -38,13 +75,31 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
   return (
     <header className="sticky top-0 z-50 w-full bg-graphite/90 backdrop-blur-xl border-b border-graphite-600/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-        
         {/* Brand Logo */}
-        <Link href={`/${currentLocale}`} className="flex items-center gap-3 group z-50">
+        <Link
+          href={`/${currentLocale}`}
+          className="flex items-center gap-3 group z-50"
+        >
           <div className="w-10 h-10 bg-signal flex items-center justify-center group-hover:scale-105 transition-transform">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M2.5 19.5a12 12 0 0 1 19 0" stroke="#15171A" strokeWidth="1.6" strokeLinecap="round" />
-              <path d="M12 19.5V7M12 7l-3.4 3.6M12 7l3.4 3.6M12 4v3" stroke="#15171A" strokeWidth="1.6" strokeLinecap="round" />
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M2.5 19.5a12 12 0 0 1 19 0"
+                stroke="#15171A"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+              />
+              <path
+                d="M12 19.5V7M12 7l-3.4 3.6M12 7l3.4 3.6M12 4v3"
+                stroke="#15171A"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+              />
               <circle cx="12" cy="19.5" r="1.3" fill="#15171A" />
             </svg>
           </div>
@@ -83,7 +138,8 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-green-soft"></span>
             </span>
             <span className="font-mono text-green-soft font-semibold">
-              {nav.nodes_online || (isZh ? "14/14 网络节点在线" : "14/14 Network Nodes Online")}
+              {nav.nodes_online ||
+                (isZh ? "14/14 网络节点在线" : "14/14 Network Nodes Online")}
             </span>
           </div>
 
@@ -110,16 +166,33 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
           aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
         >
           {mobileMenuOpen ? (
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 6L6 18M6 6l12 12"/>
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           ) : (
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 12h18M3 6h18M3 18h18"/>
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M3 12h18M3 6h18M3 18h18" />
             </svg>
           )}
         </button>
-
       </div>
 
       {/* Mobile Menu Overlay */}
@@ -133,8 +206,10 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`text-xl font-semibold transition-colors pb-3 border-b border-graphite-600 ${
-                    isActive ? "text-signal" : "text-steel-2 hover:text-white"
+                  className={`block text-xl font-semibold transition-colors pb-3 border-b border-graphite-600 ${
+                    isActive
+                      ? "text-signal"
+                      : "text-white hover:text-signal-soft"
                   }`}
                 >
                   {link.label}
@@ -142,13 +217,16 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
               );
             })}
           </nav>
-          
+
           <div className="mt-8 flex flex-col gap-4">
             <button
-              onClick={() => { toggleLocale(); setMobileMenuOpen(false); }}
+              onClick={() => {
+                toggleLocale();
+                setMobileMenuOpen(false);
+              }}
               className="w-full py-3 border border-graphite-600 text-steel-2 hover:text-white hover:bg-graphite-600 font-mono tracking-wider transition-all rounded-md"
             >
-              LANGUAGE: {currentLocale.toUpperCase() === 'EN' ? 'ZH' : 'EN'}
+              LANGUAGE: {currentLocale.toUpperCase() === "EN" ? "ZH" : "EN"}
             </button>
 
             <Link
