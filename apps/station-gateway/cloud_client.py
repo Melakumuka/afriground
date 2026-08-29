@@ -38,6 +38,15 @@ class CloudClient:
         resp.raise_for_status()
         return resp.json()
 
+    async def request_artifact_upload(self, job_id: str, filenames: list):
+        payload = {
+            "job_id": job_id,
+            "filenames": filenames
+        }
+        resp = await self.client.post("/artifacts/upload-request", json=payload)
+        resp.raise_for_status()
+        return resp.json()
+
     async def get_station_profiles(self):
         resp = await self.client.get(f"/stations/{self.station_id}/profiles")
         resp.raise_for_status()

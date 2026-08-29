@@ -315,7 +315,18 @@ async def submit_receipt(
         notes=req.notes,
     )
     db.add(receipt)
-    await db.commit()
+    await db.flush()
+
+    # Finalize the job status so data delivery pipelines trigger
+    from services.orchestrator import ObservationOrchestrator
+    orch = ObservationOrchestrator(db, tenant)
+    
+    # We must ensure the status is a valid terminal state (COMPLETED, FAILED, PARTIAL_SUCCESS)
+    if req.status in ["COMPLETED", "FAILED", "PARTIAL_SUCCESS"]:
+        await orch.transition(req.observation_job_id, req.status, reason="Execution receipt received from Edge Agent")
+    else:
+        await db.commit()
+
     await db.refresh(receipt)
     return {
         "id": str(receipt.id),
@@ -399,25 +410,70 @@ async def request_artifact_upload(
     db: AsyncSession = Depends(get_db_session),
     tenant: TenantContext = Depends(get_tenant_context),
 ):
-    """Edge Agent requests pre-signed S3/MinIO URLs for artifact upload."""
-    import boto3
+    """Edge Agent requests pre-signed S3/MinIO URLs for artifact upload (Phase 8.1 Smart Routing)."""
+    from models.contact import ObservationJob
+    from models.data import DataDeliveryDestination
+    from services.storage import StorageService
+    from core.crypto import decrypt_dict
     from config import settings
 
-    s3 = boto3.client(
-        "s3",
-        endpoint_url=settings.s3_endpoint_url,
-        aws_access_key_id=settings.s3_access_key,
-        aws_secret_access_key=settings.s3_secret_key,
+    # 1. Look up the job to find the customer org_id
+    job = await db.get(ObservationJob, req.job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="ObservationJob not found")
+
+    # 2. Check for active egress destinations for this org
+    stmt = select(DataDeliveryDestination).where(
+        DataDeliveryDestination.org_id == job.org_id,
+        DataDeliveryDestination.is_active == True
     )
+    result = await db.execute(stmt)
+    destinations = result.scalars().all()
 
     urls = {}
-    for filename in req.filenames:
-        key = f"artifacts/{req.job_id}/{filename}"
-        url = s3.generate_presigned_url(
-            "put_object",
-            Params={"Bucket": "afriground-raw", "Key": key},
-            ExpiresIn=3600,
-        )
-        urls[filename] = url
+    target_type = "afriground_minio"
+    used_dest_id = None
 
-    return {"job_id": str(req.job_id), "upload_urls": urls}
+    if destinations:
+        # Use the first active destination (Smart Routing)
+        dest = destinations[0]
+        # Decrypt config symmetrically
+        if "encrypted_payload" in dest.config:
+            config = decrypt_dict(dest.config["encrypted_payload"])
+        else:
+            config = dest.config
+            
+        target_type = "customer_cloud"
+        used_dest_id = str(dest.id)
+        
+        for filename in req.filenames:
+            key = f"artifacts/{req.job_id}/{filename}"
+            urls[filename] = StorageService.generate_presigned_url(
+                dest_type=dest.type,
+                config=config,
+                key=key,
+                expires_in=3600
+            )
+    else:
+        # Fallback to AfriGround MinIO
+        fallback_config = {
+            "access_key": settings.s3_access_key,
+            "secret_key": settings.s3_secret_key,
+            "endpoint": settings.s3_endpoint_url,
+            "bucket": "afriground-raw"
+        }
+        for filename in req.filenames:
+            key = f"artifacts/{req.job_id}/{filename}"
+            urls[filename] = StorageService.generate_presigned_url(
+                dest_type="s3",
+                config=fallback_config,
+                key=key,
+                expires_in=3600
+            )
+
+    return {
+        "job_id": str(req.job_id), 
+        "upload_urls": urls,
+        "target_type": target_type,
+        "destination_id": used_dest_id
+    }

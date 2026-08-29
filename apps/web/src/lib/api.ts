@@ -219,6 +219,10 @@ export function fetchDatasets(): Promise<Dataset[] | null> {
   return apiGet<Dataset[]>("/api/v1/data/datasets");
 }
 
+export function fetchDatasetDownload(jobId: string): Promise<{ ok: boolean; download_url?: string } | null> {
+  return apiGet<{ ok: boolean; download_url?: string }>(`/api/v1/data/datasets/${jobId}/download`);
+}
+
 export function createSupportTicket(body: {
   org_id: string;
   category: string;

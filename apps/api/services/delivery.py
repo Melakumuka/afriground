@@ -93,7 +93,7 @@ class DeliveryService:
         ).scalars().all()
 
         created: List[DataDeliveryJob] = []
-        for dest in destinations:
+        for i, dest in enumerate(destinations):
             existing = (
                 await self.db.execute(
                     select(DataDeliveryJob).where(
@@ -106,6 +106,12 @@ class DeliveryService:
                 created.append(existing)
                 continue
 
+            # Phase 8: Smart Routing. 
+            # The Edge Agent already uploaded the artifact directly to the primary (first) destination.
+            # We record it as delivered, but we skip emitting the "simulated delivery" event
+            # to avoid any downstream double-delivery logic.
+            is_primary_smart_route = (i == 0)
+
             job_row = DataDeliveryJob(
                 dataset_id=dataset.id,
                 destination_id=dest.id,
@@ -116,19 +122,21 @@ class DeliveryService:
             job_row.status = "delivered"
             job_row.checksum = _checksum(dataset.id, dest.id)
             job_row.retention_expires_at = _now() + timedelta(days=RETENTION_DAYS)
-            emit(
-                self.db,
-                aggregate_type="data_delivery",
-                aggregate_id=job_row.id,
-                event_type="DATA_DELIVERY.COMPLETED",
-                payload={
-                    "delivery_job_id": str(job_row.id),
-                    "dataset_id": str(dataset.id),
-                    "destination_id": str(dest.id),
-                    "checksum": job_row.checksum,
-                    "org_id": str(job.org_id) if job.org_id else None,
-                },
-            )
+            
+            if not is_primary_smart_route:
+                emit(
+                    self.db,
+                    aggregate_type="data_delivery",
+                    aggregate_id=job_row.id,
+                    event_type="DATA_DELIVERY.COMPLETED",
+                    payload={
+                        "delivery_job_id": str(job_row.id),
+                        "dataset_id": str(dataset.id),
+                        "destination_id": str(dest.id),
+                        "checksum": job_row.checksum,
+                        "org_id": str(job.org_id) if job.org_id else None,
+                    },
+                )
             created.append(job_row)
 
         if created:

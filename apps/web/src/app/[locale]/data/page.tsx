@@ -177,13 +177,33 @@ export default function DataCatalog() {
                       </span>
                     </td>
                     <td className="px-6 sm:px-8 py-4 text-right">
-                      <button
-                        onClick={() => handleDeliver(dataset.id)}
-                        disabled={!deliveryTarget || dataset.status === "DELIVERING" || isDelivering === dataset.id}
-                        className="px-4 py-2 bg-signal hover:bg-signal-soft text-graphite text-sm font-semibold rounded-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                      >
-                        {isDelivering === dataset.id ? t("pushing", "正在推送...", "Pushing...") : t("deliver", "交付", "Deliver")}
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={async () => {
+                            try {
+                              const res = await fetch(`/api/platform/data/datasets/${dataset.id}/download`);
+                              const payload = await res.json();
+                              if (payload.ok && payload.download_url) {
+                                window.location.href = payload.download_url;
+                              } else {
+                                alert(payload.error || t("download_unavailable", "此数据已直接交付到客户云端，AfriGround无权访问。", "This data was delivered directly to your cloud. AfriGround cannot access it."));
+                              }
+                            } catch (e) {
+                              alert(t("download_error", "获取下载链接失败。", "Failed to fetch download link."));
+                            }
+                          }}
+                          className="px-4 py-2 border border-steel-2 text-steel-2 hover:border-white hover:text-white text-sm font-semibold rounded-sm transition-colors"
+                        >
+                          {t("download", "下载", "Download")}
+                        </button>
+                        <button
+                          onClick={() => handleDeliver(dataset.id)}
+                          disabled={!deliveryTarget || dataset.status === "DELIVERING" || isDelivering === dataset.id}
+                          className="px-4 py-2 bg-signal hover:bg-signal-soft text-graphite text-sm font-semibold rounded-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          {isDelivering === dataset.id ? t("pushing", "正在推送...", "Pushing...") : t("deliver", "交付", "Deliver")}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

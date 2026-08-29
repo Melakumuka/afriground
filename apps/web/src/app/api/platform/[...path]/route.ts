@@ -3,6 +3,7 @@ import {
   createSupportTicket,
   fetchAgents,
   fetchDatasets,
+  fetchDatasetDownload,
   fetchMissions,
   fetchNetworkRanking,
   fetchOrchestrationMetrics,
@@ -15,12 +16,17 @@ import {
 const UUID_RE = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
 const STATION_CHILD_RE = new RegExp(`^stations/(${UUID_RE})/(time-status|agents)$`);
 const MISSION_CHILD_RE = new RegExp(`^missions/(${UUID_RE})/profiles$`);
+const DATASET_DOWNLOAD_RE = new RegExp(`^data/datasets/(${UUID_RE})/download$`);
 
 export const dynamic = "force-dynamic";
 
 type Path = string[];
 
-async function resolvePath(path: Path): Promise<Promise<unknown> | null> {
+// Returns a Promise for the data, or undefined if the path is not recognised.
+// Deliberately NOT async so the returned Promise is NOT auto-awaited —
+// the caller awaits it separately so it can distinguish "unknown path"
+// (undefined) from "backend unreachable" (Promise resolves to null).
+function resolvePath(path: Path): Promise<unknown> | undefined {
   const key = path.join("/");
   switch (key) {
     case "missions":
@@ -41,21 +47,25 @@ async function resolvePath(path: Path): Promise<Promise<unknown> | null> {
       
       const missionMatch = key.match(MISSION_CHILD_RE);
       if (missionMatch) {
-        const { fetchMissionProfiles } = await import("@/lib/api");
-        return fetchMissionProfiles(missionMatch[1]);
+        return import("@/lib/api").then((m) => m.fetchMissionProfiles(missionMatch[1]));
       }
       
-      return null;
+      const downloadMatch = key.match(DATASET_DOWNLOAD_RE);
+      if (downloadMatch) {
+        return fetchDatasetDownload(downloadMatch[1]);
+      }
+      
+      return undefined; // path not exposed
     }
   }
 }
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ path: Path }> }) {
   const { path } = await params;
-  const call = await resolvePath(path);
-  if (!call) return NextResponse.json({ ok: false, error: "Path not exposed" }, { status: 404 });
+  const call = resolvePath(path);
+  if (call === undefined) return NextResponse.json({ ok: false, error: "Path not exposed" }, { status: 404 });
   const data = await call;
-  if (data === null) return NextResponse.json({ ok: false }, { status: 503 });
+  if (data === null) return NextResponse.json({ ok: false, error: "Backend unavailable" }, { status: 503 });
   return NextResponse.json({ ok: true, data });
 }
 

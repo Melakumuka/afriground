@@ -22,6 +22,27 @@ class ExecutionService:
         # 4. Collect artifacts
         artifacts = await self.adapter.collect_pass_artifacts()
         
+        # 4.5 Upload raw IQ artifact using Smart Routing (Phase 8.2)
+        import httpx
+        try:
+            upload_req = await self.client.request_artifact_upload(str(job.id), ["raw.bin"])
+            upload_url = upload_req["upload_urls"].get("raw.bin")
+            target_type = upload_req.get("target_type", "unknown")
+            
+            if upload_url:
+                # Simulate uploading a 1MB raw IQ file via HTTP PUT
+                dummy_data = b"\x00" * 1024 * 1024
+                # In real scenario we stream from disk: httpx.put(upload_url, content=open(path, 'rb'))
+                async with httpx.AsyncClient() as http:
+                    put_resp = await http.put(upload_url, content=dummy_data, headers={"Content-Type": "application/octet-stream"})
+                    put_resp.raise_for_status()
+                artifacts["upload_target"] = target_type
+                artifacts["notes"] = f"Raw IQ uploaded successfully to {target_type}"
+            else:
+                artifacts["notes"] = "Failed to get upload URL from cloud."
+        except Exception as e:
+            artifacts["notes"] = f"Artifact upload failed: {str(e)}"
+        
         # 5. Build receipt
         receipt_payload = {
             "observation_job_id": str(job.id),
@@ -37,7 +58,7 @@ class ExecutionService:
             "weather_summary": artifacts.get("weather_summary", {}),
             "pass_report_hash": artifacts.get("pass_report_hash", ""),
             "artifact_manifest_hash": artifacts.get("artifact_manifest_hash", ""),
-            "notes": "Mock pass execution completed"
+            "notes": artifacts.get("notes", "Mock pass execution completed")
         }
         
         # 6. Post receipt to cloud
