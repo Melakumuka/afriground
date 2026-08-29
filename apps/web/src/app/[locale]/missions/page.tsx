@@ -27,8 +27,8 @@ export default function MissionsIndex({ params }: { params: Promise<{ locale: st
         const json = await res.json();
         if (!json.ok) throw new Error(json.error || "Failed to load missions");
         setMissions(json.data);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load missions");
       } finally {
         setLoading(false);
       }

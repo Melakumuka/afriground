@@ -176,7 +176,7 @@ export default function BookingWizard() {
 
       setReservationId(json.data.id);
       setStep(4);
-    } catch (e) {
+    } catch {
       alert("Booking failed. Ensure the ground station capabilities match your mission's RF profile.");
     } finally {
       setIsChecking(false);

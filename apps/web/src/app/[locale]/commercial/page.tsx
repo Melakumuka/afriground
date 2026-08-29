@@ -47,8 +47,8 @@ export default function CommercialDashboard({ params }: { params: Promise<{ loca
         
         if (contractsJson.ok) setContracts(contractsJson.data || []);
         if (violationsJson.ok) setViolations(violationsJson.data || []);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load dashboard");
       } finally {
         setLoading(false);
       }

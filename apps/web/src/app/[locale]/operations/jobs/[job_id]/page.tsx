@@ -6,7 +6,7 @@ import { useT } from "@/lib/useT";
 type ReadinessEvent = {
   status: string;
   confirmed_at: string;
-  checklist_results: any;
+  checklist_results: Record<string, unknown>;
   notes: string | null;
 };
 
@@ -48,8 +48,8 @@ export default function JobDetailsPage({ params }: { params: { job_id: string } 
           throw new Error(json.error || "Failed to load job details");
         }
         setJob(json.data);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load job details");
       } finally {
         setLoading(false);
       }

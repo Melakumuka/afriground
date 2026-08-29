@@ -76,8 +76,8 @@ export default function MissionOnboardingWizard() {
       if (!rfRes.ok) throw new Error("Failed to create RF profile (ICD)");
 
       setSuccess(true);
-    } catch (e: any) {
-      setError(e.message || t("err_unknown", "发生意外错误。", "An unexpected error occurred."));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t("err_unknown", "发生意外错误。", "An unexpected error occurred."));
     } finally {
       setIsSubmitting(false);
     }

@@ -1,6 +1,4 @@
-import { Suspense } from 'react';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 
 export default async function StationProfilesPage({ params }: { params: { id: string, locale: string } }) {

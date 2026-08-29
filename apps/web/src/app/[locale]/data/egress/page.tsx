@@ -13,24 +13,19 @@ export default function DataEgressConfig() {
   const { t } = useT("Egress");
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [provider, setProvider] = useState("s3");
-  const [config, setConfig] = useState<any>({});
+  const [config, setConfig] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const fetchDestinations = async () => {
-    try {
-      const res = await fetch("/api/platform/data/destinations");
-      if (res.ok) {
-        const data = await res.json();
-        setDestinations(Array.isArray(data) ? data : []);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   useEffect(() => {
-    fetchDestinations();
+    fetch("/api/platform/data/destinations")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (Array.isArray(data)) setDestinations(data);
+      })
+      .catch((e) => {
+        console.error(e);
+      });
   }, []);
 
   const handleAdd = async () => {
@@ -48,7 +43,11 @@ export default function DataEgressConfig() {
       });
       if (res.ok) {
         setConfig({});
-        fetchDestinations();
+        const destRes = await fetch("/api/platform/data/destinations");
+        if (destRes.ok) {
+          const data = await destRes.json();
+          if (Array.isArray(data)) setDestinations(data);
+        }
       } else {
         const errorData = await res.json();
         setErrorMsg(errorData.detail || t("validate_fail", "验证或保存目标失败", "Failed to validate or save destination"));

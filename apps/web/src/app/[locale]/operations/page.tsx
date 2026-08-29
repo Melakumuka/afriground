@@ -33,8 +33,8 @@ export default function OperationsDashboard({ params }: { params: Promise<{ loca
         const json = await res.json();
         if (!json.ok) throw new Error(json.error || "Failed to load active jobs");
         setJobs(json.data);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load active jobs");
       } finally {
         setLoading(false);
       }

@@ -36,13 +36,19 @@ function mapDataset(d: Dataset): DatasetRow {
   };
 }
 
+type EgressDestination = {
+  id: string;
+  type: string;
+  is_active?: boolean;
+};
+
 export default function DataCatalog() {
   const { t } = useT("Data");
   const [datasets, setDatasets] = useState<DatasetRow[]>(MOCK_DATASETS);
   const [source, setSource] = useState<"mock" | "api">("mock");
   const [deliveryTarget, setDeliveryTarget] = useState("");
   const [isDelivering, setIsDelivering] = useState<string | null>(null);
-  const [destinations, setDestinations] = useState<any[]>([]);
+  const [destinations, setDestinations] = useState<EgressDestination[]>([]);
 
   useEffect(() => {
     fetch("/api/platform/data/destinations")
@@ -188,7 +194,7 @@ export default function DataCatalog() {
                               } else {
                                 alert(payload.error || t("download_unavailable", "此数据已直接交付到客户云端，AfriGround无权访问。", "This data was delivered directly to your cloud. AfriGround cannot access it."));
                               }
-                            } catch (e) {
+                            } catch {
                               alert(t("download_error", "获取下载链接失败。", "Failed to fetch download link."));
                             }
                           }}

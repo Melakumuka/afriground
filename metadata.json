@@ -1,0 +1,8 @@
+{
+  "name": "AfriGround GSaaS",
+  "description": "Ground Station as a Service (GSaaS) Platform — satellite pass scheduling, digital twin telemetry, mission control and ground station management",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
