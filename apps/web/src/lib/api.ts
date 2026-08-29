@@ -249,6 +249,12 @@ export function createSupportTicket(body: {
   return apiPost<SupportTicket>("/api/v1/support/tickets", body);
 }
 
+export function fetchSupportTickets(): Promise<SupportTicket[] | null> {
+  const orgId = serviceOrgId();
+  if (!orgId) return Promise.resolve(null);
+  return apiGet<SupportTicket[]>(`/api/v1/support/tickets?org_id=${orgId}`);
+}
+
 // ── Contact Planning ────────────────────────────────────────────────────────
 
 export type VisibilityOpportunity = {
