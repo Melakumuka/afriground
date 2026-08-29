@@ -39,6 +39,18 @@ class SLAViolationResponse(BaseModel):
     violated_at: str
 
 
+@router.get("/contracts", response_model=list[dict])
+async def list_contracts(
+    db: AsyncSession = Depends(get_db_session),
+    tenant: TenantContext = Depends(get_tenant_context),
+):
+    """List contracts for the tenant."""
+    from sqlalchemy import select
+    result = await db.execute(select(Contract).where(Contract.org_id == tenant.org_id))
+    return [{"id": c.id, "org_id": c.org_id, "start_date": c.start_date, "end_date": c.end_date, "status": c.status, "service_tier": c.service_tier} for c in result.scalars().all()]
+
+
+
 @router.get("/contracts/{contract_id}/usage", response_model=ContractUsageResponse)
 async def contract_usage(
     contract_id: uuid.UUID,

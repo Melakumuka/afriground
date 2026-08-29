@@ -303,3 +303,39 @@ Phase 10 focuses on elevating the user experience of the Next.js frontend by imp
 > Which aspect of the UI enhancement would you like to prioritize first: the 3D Landing Page, or the Operations / Job Details screens?
 >
 > Approve to begin execution, or provide direction on priority.
+
+---
+
+## R. Detailed Implementation Plan for Phase 11 (Advanced Frontend Workflows)
+
+Phase 11 focuses on expanding the web portal's capabilities by providing comprehensive management interfaces that expose the remaining backend orchestration and commercial features.
+
+### Phase 11.1 — Operations Command Center (Jobs Index)
+- **Goal:** Create a centralized view for satellite operators to monitor all their active passes globally. Currently, we only have individual job detail pages (`operations/jobs/[job_id]`). We need the index page.
+- **Components:**
+  - [NEW] `apps/web/src/app/[locale]/operations/page.tsx`
+  - Implement a real-time **Kanban Board** grouped by job status (`QUEUED`, `DISPATCHED`, `EXECUTING`, `COMPLETED`, `FAILED`).
+  - Wire up a new backend API proxy `GET /api/platform/contact/jobs` to fetch all jobs for the tenant.
+
+### Phase 11.2 — Spacecraft & Missions Index
+- **Goal:** The frontend currently has a `missions/new` page, but lacks the main index page to view active spacecraft, mission profiles, and current TLE sets.
+- **Components:**
+  - [NEW] `apps/web/src/app/[locale]/missions/page.tsx`
+  - Implement a list view of the tenant's spacecraft, showing their current orbital parameters (extrapolated from TLEs).
+  - Proxy `GET /api/v1/commercial/missions` into the Next.js `route.ts`.
+
+### Phase 11.3 — Commercial & Contracts Dashboard
+- **Goal:** We have a specific contract details page (`commercial/contracts/[contract_id]`), but lack a central business dashboard for contract usage and SLA monitoring.
+- **Components:**
+  - [NEW] `apps/web/src/app/[locale]/commercial/page.tsx`
+  - Display aggregate contract usage (minutes used vs. allocated).
+  - Display a log of recent SLA Violations (fetched via `fetchSlaViolations`).
+
+## User Review Required
+> [!IMPORTANT]
+> **Phase 11 (Advanced Frontend Workflows)** has been drafted with three high-impact UI enhancements to fill out the remaining gaps in the web portal:
+> 1. **Operations Command Center** (The missing index page for active jobs/passes)
+> 2. **Missions Index** (The missing list view for active spacecraft)
+> 3. **Commercial Dashboard** (The missing index for contracts and SLA performance)
+> 
+> Please let me know which of these three you would like to build first, or simply approve to execute them in order.

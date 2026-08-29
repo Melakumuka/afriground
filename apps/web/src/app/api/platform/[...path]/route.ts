@@ -57,6 +57,23 @@ function resolvePath(path: Path): Promise<unknown> | undefined {
         return fetchDatasetDownload(downloadMatch[1]);
       }
       
+      if (key === "commercial/contracts") {
+        return import("@/lib/api").then((m) => m.fetchContracts());
+      }
+      
+      const contractUsageMatch = key.match(/^commercial\/contracts\/([0-9a-f\-]{36})\/usage$/);
+      if (contractUsageMatch) {
+        return import("@/lib/api").then((m) => m.fetchContractUsage(contractUsageMatch[1]));
+      }
+
+      if (key === "business/sla-violations") {
+        return import("@/lib/api").then((m) => m.fetchSlaViolations());
+      }
+      
+      if (key === "contact/jobs") {
+        return import("@/lib/api").then((m) => m.fetchJobs());
+      }
+
       const jobMatch = key.match(CONTACT_JOB_RE);
       if (jobMatch) {
         return import("@/lib/api").then((m) => m.fetchJobDetails(jobMatch[1]));
