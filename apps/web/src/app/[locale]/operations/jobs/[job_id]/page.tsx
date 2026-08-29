@@ -39,12 +39,15 @@ export default function JobDetailsPage({ params }: { params: { job_id: string } 
   useEffect(() => {
     async function fetchJob() {
       try {
-        const res = await fetch(`/api/v1/contact/jobs/${params.job_id}`);
+        const res = await fetch(`/api/platform/contact/jobs/${params.job_id}`);
         if (!res.ok) {
           throw new Error("Failed to load job details");
         }
-        const data = await res.json();
-        setJob(data);
+        const json = await res.json();
+        if (!json.ok) {
+          throw new Error(json.error || "Failed to load job details");
+        }
+        setJob(json.data);
       } catch (err: any) {
         setError(err.message);
       } finally {

@@ -263,10 +263,43 @@ Phase 8 completes the end-to-end data pipeline using a **smart routing** model: 
 ## P. Detailed Implementation Plan for Phase 9 (Alternative 1: Schedule Injection)
 *See `docs/ALTERNATIVE_1_SCHEDULE_INJECTION.md` for architectural details. This will be implemented after Phase 8.*
 
+---
+
+## Q. Detailed Implementation Plan for Phase 10 (Frontend UI Enhancements)
+
+Phase 10 focuses on elevating the user experience of the Next.js frontend by implementing the Cinematic Landing Page and exposing the powerful backend orchestration engine (Readiness Events, Execution Receipts) to the user via the Operations UI.
+
+### Phase 10.1 — Cinematic 3D Landing Page
+- **Goal:** Replace the static hero with a real-time, interactive 3D scene (React Three Fiber) that visualizes the "Orbital Infrastructure" narrative.
+- **Components:**
+  - Import and configure `@react-three/fiber`, `@react-three/drei`, and `postprocessing`.
+  - Create a lazy-loaded `EarthScene` component (with procedural Earth, subtle atmosphere, starfield).
+  - Add a procedural LEO Satellite and Ground Station (Entoto coordinates) model.
+  - Implement a live ground-to-satellite data link (signal beam) that activates when the satellite is above the station's horizon.
+  - Add a Technical HUD overlay showing simulated telemetry (AOS/LOS, UTC, AZ/EL).
+- **Reference:** Full details in `docs/cinematic_landing_plan_final.md`.
+
+### Phase 10.2 — Job Details & Pass Report (Operations UI)
+- **Goal:** Provide a deep-dive view into the lifecycle of an `ObservationJob`. Customers and station owners need to see pre-flight readiness and post-flight execution telemetry.
+- **Components:**
+  - Create `apps/web/src/app/[locale]/operations/jobs/[job_id]/page.tsx` (if incomplete) with three primary sections:
+    1. **Job Overview:** Basic pass metadata and orchestration state machine status.
+    2. **Pre-flight Readiness:** A card showing the Station Engineer's checklist (e.g., MCS Profile Loaded, Weather Safe) powered by `StationReadinessEvent`.
+    3. **Execution Receipt:** A post-flight card displaying telemetry (Eb/No, lock status, data volume) from the `ExecutionReceipt`.
+  - Update `apps/api/routes/operations.py` (or create it) with a `GET /api/v1/operations/jobs/{job_id}` endpoint that aggregates the job, readiness event, and receipt into a single JSON payload.
+  - Proxy this route in the Next.js `route.ts`.
+- **Reference:** Full details in `docs/FRONTEND_MISSING_FEATURES_PLAN.md`.
+
+### Phase 10.3 — Live Platform Metrics Dashboard
+- **Goal:** Ensure all charts and KPI numbers on the dashboard are wired to the backend API rather than mock data.
+- **Components:**
+  - Enhance the existing platform proxy routes to serve aggregated metrics from `CommercialEngine` and `Orchestrator`.
+  - Wire frontend dashboard components to `fetchOrchestrationMetrics` and `fetchNetworkRanking`.
+
 ## User Review Required
 > [!IMPORTANT]
-> **Phase 8 updated** with your smart routing design. The key decision point is in the API:
-> - **Operator has configured Egress (S3/GCS/Azure)** → Edge uploads IQ **directly to their cloud**. No AfriGround storage cost. No download button shown.
-> - **No Egress configured** → Edge uploads to **AfriGround MinIO**. Customer downloads via a secure link in the portal.
+> **Phase 10 (Frontend UI Enhancements)** has been outlined. It covers both the highly-visual **Cinematic 3D Landing Page** and the functional **Job Details / Pass Report** screens. 
+> 
+> Which aspect of the UI enhancement would you like to prioritize first: the 3D Landing Page, or the Operations / Job Details screens?
 >
-> Approve to begin implementation?
+> Approve to begin execution, or provide direction on priority.

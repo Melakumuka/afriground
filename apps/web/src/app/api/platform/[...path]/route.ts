@@ -26,6 +26,8 @@ type Path = string[];
 // Deliberately NOT async so the returned Promise is NOT auto-awaited —
 // the caller awaits it separately so it can distinguish "unknown path"
 // (undefined) from "backend unreachable" (Promise resolves to null).
+const CONTACT_JOB_RE = new RegExp(`^contact/jobs/(${UUID_RE})$`);
+
 function resolvePath(path: Path): Promise<unknown> | undefined {
   const key = path.join("/");
   switch (key) {
@@ -55,6 +57,11 @@ function resolvePath(path: Path): Promise<unknown> | undefined {
         return fetchDatasetDownload(downloadMatch[1]);
       }
       
+      const jobMatch = key.match(CONTACT_JOB_RE);
+      if (jobMatch) {
+        return import("@/lib/api").then((m) => m.fetchJobDetails(jobMatch[1]));
+      }
+
       return undefined; // path not exposed
     }
   }
