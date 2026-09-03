@@ -89,12 +89,25 @@ async def pass_console(request: Request, job_id: str, db: AsyncSession = Depends
     elif job.tx_requested and crt.get("state") == "spof":
         hard_block_reason = "S-Band TX SPOF is active. TX job cannot proceed."
 
+    # Firewall posture for base banner
+    fw_result = await db.execute(select(FirewallAuditLog).order_by(FirewallAuditLog.ts.desc()).limit(1))
+    latest_fw = fw_result.scalars().first()
+    if latest_fw:
+        firewall_posture = {
+            "ok": latest_fw.direction_correct and latest_fw.enabled,
+            "rules_ok": 1 if latest_fw.direction_correct and latest_fw.enabled else 0,
+            "rules_total": 1
+        }
+    else:
+        firewall_posture = None
+
     return templates.TemplateResponse("pass_console.html", {
         "request": request,
         "job": job,
         "profile": profile,
         "receipt": receipt,
         "station_id": settings.station_id,
+        "firewall_posture": firewall_posture,
         "hard_block_reason": hard_block_reason,
         "crt_redundancy": crt,
         "planned_min_elevation_deg": job.planned_min_elevation_deg or 5.0,
