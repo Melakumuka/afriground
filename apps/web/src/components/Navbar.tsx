@@ -17,10 +17,6 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
 
   const navLinks = [
     {
-      href: `/${currentLocale}`,
-      label: nav.dashboard || (isZh ? "控制台" : "Dashboard"),
-    },
-    {
       href: `/${currentLocale}/network`,
       label: nav.network || (isZh ? "地面站网络" : "Ground Station Network"),
     },
@@ -73,6 +69,7 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
+    <>
     <header className="sticky top-0 z-50 w-full bg-graphite/90 backdrop-blur-xl border-b border-graphite-600/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         {/* Brand Logo */}
@@ -194,11 +191,12 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
           )}
         </button>
       </div>
+    </header>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile overlay is a sibling of header so backdrop-filter does not clip it */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-40 bg-graphite/95 backdrop-blur-md pt-24 px-6 pb-6 overflow-y-auto xl:hidden flex flex-col">
-          <nav className="flex flex-col gap-4">
+        <div className="fixed inset-0 z-40 bg-graphite/95 backdrop-blur-md pt-24 px-6 pb-8 overflow-y-auto overscroll-contain xl:hidden">
+          <nav className="flex flex-col gap-1 max-w-lg mx-auto">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
@@ -206,7 +204,7 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`block text-xl font-semibold transition-colors pb-3 border-b border-graphite-600 ${
+                  className={`block text-lg font-semibold transition-colors py-3 border-b border-graphite-600 ${
                     isActive
                       ? "text-signal"
                       : "text-white hover:text-signal-soft"
@@ -218,7 +216,7 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
             })}
           </nav>
 
-          <div className="mt-8 flex flex-col gap-4">
+          <div className="mt-6 flex flex-col gap-4 max-w-lg mx-auto pb-8">
             <button
               onClick={() => {
                 toggleLocale();
@@ -239,6 +237,6 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
           </div>
         </div>
       )}
-    </header>
+    </>
   );
 }

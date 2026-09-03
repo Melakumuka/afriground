@@ -1,88 +1,87 @@
-# Graph Report - afriGround  (2026-09-03)
+# Graph Report - afriGround  (2026-08-26)
 
 ## Corpus Check
-- 244 files · ~198,539 words
+- 239 files · ~192,711 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2349 nodes · 5306 edges · 173 communities (145 shown, 28 thin omitted)
-- Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 450 edges (avg confidence: 0.95)
+- 2304 nodes · 5220 edges · 166 communities (136 shown, 30 thin omitted)
+- Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 443 edges (avg confidence: 0.95)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `877e5956`
+- Built from commit: `f994793c`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - edge.py
 - ObservationJob
-- routes/data.py
+- DeliveryService
 - EarthScene.tsx
 - StationService
-- write_audit_log
+- FastAPI
 - MissionService
 - OperationsEngine
 - ContactPlanningService
-- services/tenancy.py
+- simulate_edge.py
 - readiness.py
 - RegulatoryAuthorizationService
 - asyncio
-- TenantContext
+- test_api.py
 - useT
 - [locale]/page.tsx
 - test_webhooks.py
-- SLAService
-- compilerOptions
-- Base
-- api.ts
-- StationQualityScore
-- _post
-- StationGatewayAdapter
-- Config
-- celestrak.ts
-- outbox_worker.py
-- FastAPI
 - CommercialEngine
+- compilerOptions
+- booking_service.py
+- api.ts
+- telemetry.py
+- TenantContext
+- StationGatewayAdapter
+- operator.py
+- celestrak.ts
+- orchestration_runtime.py
+- api_keys.py
+- commercial.py
 - scripts
-- simulate_edge.py
+- Base
 - AntennaController
 - Implementation Plan: AfriGround GSaaS Platform (v2)
 - devDependencies
 - publish_pending
-- test_state_machine.py
 - dependencies
 - What You Must Do When Invoked
 - AfriGround — Phase 1 → 4 Walkthrough
-- test_agent.py
+- CoverageSection.tsx
 - 3. Normal Pass Workflow (Execute Many)
 - RFController
-- routes/regulatory.py
+- contract_usage
 - What You Must Do When Invoked
-- agent.py
+- test_agent.py
 - EdgeAgentService
-- hal/__init__.py
+- EdgeNodeFactory
 - ReceiverController
 - RecordingController
 - mock_controllers.py
 - interfaces.py
 - gen_agent_certs.py
 - SGP4Engine
-- EdgeNodeFactory
+- hal/__init__.py
 - 2. Station Subsystems
 - AfriGround AWS Deployment Plan (Phase 4.3)
 - web/package.json
 - layout.tsx
 - PowerController
-- station/page.tsx
+- routing.py
 - support.py
-- MockModemController
-- healthz_check
+- [...path]/route.ts
+- ObservationOrchestrator
 - IsolatedObserver
 - cinematic_landing_plan_final.md
-- [job_id]/page.tsx
+- commercial_engine.py
 - data/page.tsx
-- DeliveryService
+- create_webhook
 - CinematicHero.tsx
 - AGENTS.md
 - CloudClient
@@ -96,7 +95,7 @@
 - entrypoint.sh
 - run.sh
 - eslint.config.mjs
-- stations.py
+- next-intl
 - postprocessing
 - three
 - @types/node
@@ -137,8 +136,8 @@
 - 9. Scene Contents
 - CURRENT_FUNCTIONALITY.md — AfriGround (Pre-Migration Audit)
 - web/README.md
-- emit
-- business.py
+- OutboxEvent
+- Settings
 - AfriGround Station Gateway
 - 1. Design Principles
 - 20. Performance Requirements
@@ -147,50 +146,41 @@
 - 2. Anti-Generic AI Design Rules
 - 8. Cinematic Scene Concept
 - AfriGround — Distinctive Cinematic Landing Page Implementation Plan
-- AgentDispatchService
-- env.py
-- test_sla.py
-- CachedJob
+- tasks.py
+- test_outbox.py
+- SLAService
+- outbox_worker.py
 - opencode.json
-- test_edge_agent.py
-- edge_agent.py
-- .create_contract
-- request_artifact_upload
-- commercial/page.tsx
-- operator.py
-- trigger_auto_failover
-- missions/page.tsx
+- emit
+- create_key
+- .get_job
+- _truncate_all
+- _CaptureHandler
+- CachedJob
+- StateMachine
 - K. Detailed Implementation Plan for Phase 2 (Orchestration Runtime & Data Value Chain)
-- PassSimulatorWidget.tsx
 - L. Detailed Implementation Plan for Phase 3 (Commercial Value Chain & Integrations)
 - M. Detailed Implementation Plan for Phase 4 (Edge Agent & Data Integration Layer)
 - O. Detailed Implementation Plan for Phase 8 (Smart Raw IQ Data Delivery)
 - N. Detailed Implementation Plan for Phase 6 (Real Orbit Dynamics & Booking Integration)
-- _CaptureHandler
-- Q. Detailed Implementation Plan for Phase 10 (Frontend UI Enhancements)
-- network_ranking
-- orchestration_metrics
-- R. Detailed Implementation Plan for Phase 11 (Advanced Frontend Workflows)
 - verify_token
 - tenant_context_middleware
-- telemetry_stream
-- next
+- network_ranking
+- orchestration_metrics
 
 ## God Nodes (most connected - your core abstractions)
-1. `TenantContext` - 131 edges
+1. `TenantContext` - 130 edges
 2. `Base` - 80 edges
-3. `ObservationJob` - 71 edges
-4. `ObservationOrchestrator` - 70 edges
+3. `ObservationOrchestrator` - 69 edges
+4. `ObservationJob` - 66 edges
 5. `_post()` - 63 edges
 6. `ContactPlanningService` - 52 edges
 7. `EdgeAgentService` - 46 edges
 8. `RegulatoryAuthorizationService` - 45 edges
-9. `useT()` - 41 edges
-10. `GroundStation` - 40 edges
+9. `GroundStation` - 40 edges
+10. `StationService` - 40 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `test_agent_revoked_identity_rejected()` --uses--> `StationAgentIdentity`  [INFERRED]
-  apps/api/tests/test_agent.py → apps/api/models/station_twin.py
 - `get_current_user_db()` --uses--> `User`  [INFERRED]
   apps/api/auth.py → apps/api/models/core.py
 - `EdgeNodeFactory` --uses--> `AntennaController`  [INFERRED]
@@ -199,159 +189,157 @@
   apps/api/hal/__init__.py → apps/api/hal/interfaces.py
 - `EdgeNodeFactory` --uses--> `PowerController`  [INFERRED]
   apps/api/hal/__init__.py → apps/api/hal/interfaces.py
+- `EdgeNodeFactory` --uses--> `ReceiverController`  [INFERRED]
+  apps/api/hal/__init__.py → apps/api/hal/interfaces.py
 
 ## Import Cycles
 - None detected.
 
-## Communities (173 total, 28 thin omitted)
+## Communities (166 total, 30 thin omitted)
 
 ### Community 0 - "edge.py"
-Cohesion: 0.14
-Nodes (29): acknowledge_job(), ArtifactUploadRequest, get_assigned_jobs(), get_profile_detail(), get_station_profiles(), JobAcknowledgeRequest, list_telemetry(), AsyncSession (+21 more)
+Cohesion: 0.11
+Nodes (38): acknowledge_job(), ArtifactUploadRequest, get_assigned_jobs(), get_profile_detail(), get_station_profiles(), ingest_telemetry(), JobAcknowledgeRequest, list_telemetry() (+30 more)
 
 ### Community 1 - "ObservationJob"
-Cohesion: 0.12
-Nodes (22): ExecutionReceipt, ObservationJob, Executable unit of work for the orchestrator / edge agent., Post-execution result report for an observation job. Generated by the Edge…, insert(), JobNotFound, _now(), ObservationOrchestrator (+14 more)
+Cohesion: 0.22
+Nodes (5): ObservationJob, Executable unit of work for the orchestrator / edge agent., Everything the agent needs to execute: contact window, RF config, mission…, Jobs scheduled on this agent's station in the given states (default: DISPATCHED…, UUID
 
-### Community 2 - "routes/data.py"
-Cohesion: 0.09
-Nodes (31): decrypt_dict(), encrypt_dict(), Encrypts a dictionary into a Fernet token string., Decrypts a Fernet token string back into a dictionary., DataDeliveryJob, Dataset, add_destination(), download_dataset() (+23 more)
+### Community 2 - "DeliveryService"
+Cohesion: 0.07
+Nodes (47): decrypt_dict(), encrypt_dict(), Encrypts a dictionary into a Fernet token string., Decrypts a Fernet token string back into a dictionary., DataDeliveryDestination, DataDeliveryJob, Dataset, add_destination() (+39 more)
 
 ### Community 3 - "EarthScene.tsx"
 Cohesion: 0.07
 Nodes (32): CinematicBackground(), EarthScene, SceneBoundary, Atmosphere(), Earth(), AFRICA_POLY, createEarthTexture(), drawRing() (+24 more)
 
 ### Community 4 - "StationService"
-Cohesion: 0.15
-Nodes (14): Tracked physical hardware at a station (antenna, SDR, rotator, clock, ...)., StationHardware, CapabilityCreate, CapabilityResponse, CertificationEventResponse, CertificationResponse, HardwareCreate, LicenseCreate (+6 more)
+Cohesion: 0.11
+Nodes (34): Tracked physical hardware at a station (antenna, SDR, rotator, clock, ...)., StationHardware, add_capability(), add_hardware(), add_license(), add_quality_score(), get_certification(), get_station() (+26 more)
 
-### Community 5 - "write_audit_log"
+### Community 5 - "FastAPI"
 Cohesion: 0.08
-Nodes (50): APIKey, create_key(), key_me(), KeyCreateRequest, KeyCreateResponse, KeyListResponse, KeyMeResponse, list_keys() (+42 more)
+Nodes (45): get_current_user_db(), get_db_session(), AsyncSession, Resolve the JWT subject to the persisted User row (Phase 1 tenancy)., health_check(), healthz_check(), AsyncSession, get (+37 more)
 
 ### Community 6 - "MissionService"
 Cohesion: 0.11
 Nodes (34): activate_mission(), create_constraint(), create_mission(), create_profile(), create_rf_profile(), create_sla(), create_spacecraft(), create_tc_command() (+26 more)
 
 ### Community 7 - "OperationsEngine"
-Cohesion: 0.06
-Nodes (49): MaintenanceEvent, create_incident(), create_maintenance(), evaluate_station_risk(), list_incidents(), list_maintenance(), AsyncSession, get (+41 more)
+Cohesion: 0.09
+Nodes (35): MaintenanceEvent, create_incident(), create_maintenance(), evaluate_station_risk(), list_incidents(), list_maintenance(), AsyncSession, get (+27 more)
 
 ### Community 8 - "ContactPlanningService"
-Cohesion: 0.10
-Nodes (28): ContactOpportunity, A feasible RF contact opportunity for a mission profile on a specific pass., Customer reservation against a contact opportunity., A confirmed, executable contact on the station schedule., Raw geometric pass: a spacecraft is geometrically visible from a station., Reservation, ScheduledContact, VisibilityOpportunity (+20 more)
+Cohesion: 0.13
+Nodes (21): A confirmed, executable contact on the station schedule., ScheduledContact, MissionOperationalConstraint, Operational blackout periods, pointing restrictions, station restrictions., ContactPlanningService, _now(), datetime, UUID (+13 more)
 
-### Community 9 - "services/tenancy.py"
+### Community 9 - "simulate_edge.py"
 Cohesion: 0.12
-Nodes (36): Organization, Role, User, AuditLog, Permission, RolePermission, grant_permission(), list_audit_logs() (+28 more)
+Nodes (39): Organization, User, Mission, MissionProfile, MissionRFProfile, MissionSLA, SLA requirements attached to a mission., Operational campaign against a spacecraft. (+31 more)
 
 ### Community 10 - "readiness.py"
-Cohesion: 0.16
-Nodes (17): Engineer's manual readiness confirmation for a job. Mandatory gate before…, StationReadinessEvent, Saved, certified station configuration for a specific satellite mission.…, StationOperationProfile, _now(), AsyncSession, datetime, HTTPException (+9 more)
+Cohesion: 0.17
+Nodes (15): Saved, certified station configuration for a specific satellite mission.…, StationOperationProfile, _now(), AsyncSession, datetime, HTTPException, UUID, Station Readiness (Station-Led Configuration & Local Gateway, Step 5). The… (+7 more)
 
 ### Community 11 - "RegulatoryAuthorizationService"
-Cohesion: 0.13
-Nodes (28): Regulatory license held by the station operator., Current certification state of a station (Digital Twin lifecycle)., Auditable certification state transitions., Structured RF capability of a station (replaces loose JSONB)., StationCapability, StationCertification, StationCertificationEvent, StationLicense (+20 more)
+Cohesion: 0.12
+Nodes (29): Regulatory license held by the station operator., Current certification state of a station (Digital Twin lifecycle)., Structured RF capability of a station (replaces loose JSONB)., StationCapability, StationCertification, StationLicense, _now(), AsyncSession (+21 more)
 
 ### Community 12 - "asyncio"
-Cohesion: 0.12
-Nodes (24): Celery application for the AfriGround orchestration runtime (Phase 2.0). The…, check_rate_limit(), _client(), UUID, Rate Limiting (Phase 4.1) — Redis-backed sliding-window token bucket for API…, Record one request for the key and report {allowed, remaining, limit,…, check_heartbeats(), drain_outbox() (+16 more)
+Cohesion: 0.13
+Nodes (20): do_run_migrations(), include_name(), include_object(), In this scenario we need to create an Engine and associate a connection with…, Run migrations in 'online' mode., Only manage application tables in the 'public' schema; never touch…, Filter removed tables from non-public schemas (include_object is not called for…, Run migrations in 'offline' mode. This configures the context with just a URL… (+12 more)
 
-### Community 13 - "TenantContext"
-Cohesion: 0.06
-Nodes (28): AsyncSession, AsyncSession, TenantContext, authed_client(), client(), fixture, Route-level integration tests: real FastAPI app, real test DB, mocked Supabase…, A tenant without job.operate must get 403 on job endpoints. (+20 more)
+### Community 13 - "test_api.py"
+Cohesion: 0.07
+Nodes (23): authed_client(), client(), fixture, Route-level integration tests: real FastAPI app, real test DB, mocked Supabase…, A tenant without job.operate must get 403 on job endpoints., POST /api/v1/stations/{id}/tx requires station.manage; a tenant without…, TestClient with its own engine; connections are created inside the portal loop…, GET /api/v1/orchestration/metrics requires platform.admin. (+15 more)
 
 ### Community 14 - "useT"
-Cohesion: 0.07
-Nodes (28): BookingWizard(), PassesResponse, Quote, ContractDashboard(), ContractData, MOCK_CONTRACT, CommercialQuotesPage(), LineItem (+20 more)
+Cohesion: 0.08
+Nodes (25): ContractDashboard(), ContractData, MOCK_CONTRACT, CommercialQuotesPage(), LineItem, PRICING_TIERS, QuoteResult, ContactPage() (+17 more)
 
 ### Community 15 - "[locale]/page.tsx"
-Cohesion: 0.12
-Nodes (22): CountUp(), COAST, CoverageSection(), CoverageText, proj(), DataFlowText, DataFlowVisualization(), EarthIntelligence() (+14 more)
+Cohesion: 0.14
+Nodes (17): DataFlowText, DataFlowVisualization(), EarthIntelligence(), EarthIntelligenceText, EngineeringSection(), EngineeringText, GroundInfrastructure(), GroundInfrastructureText (+9 more)
 
 ### Community 16 - "test_webhooks.py"
 Cohesion: 0.17
 Nodes (25): Idempotent per-webhook delivery record for a published outbox event (Phase 3.1)…, Webhook, WebhookDelivery, _backoff(), _deliver_one(), deliver_org_webhooks(), _json_dumps(), _matches() (+17 more)
 
-### Community 17 - "SLAService"
-Cohesion: 0.21
-Nodes (9): Recorded SLA breach (Phase 3.0) — created by the runtime on job completion., SLASLAViolation, _now(), AsyncSession, datetime, UUID, SLA Enforcement (Phase 3.0) — evaluates mission SLAs when an observation job…, Evaluate all SLAs for the job's mission against its outcome. Creates an… (+1 more)
+### Community 17 - "CommercialEngine"
+Cohesion: 0.15
+Nodes (19): Contract, Quote, CommercialEngine, UUID, Generate a price quote for one or more bookings. Calculates cost based on…, Customer accepts a quote — transitions bookings to RESERVED., Get contract details including usage against reserved capacity. Usage is…, Sum completed contact durations (minutes) for the org in the contract window. (+11 more)
 
 ### Community 18 - "compilerOptions"
 Cohesion: 0.07
 Nodes (28): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModules, jsx, lib, module (+20 more)
 
-### Community 19 - "Base"
-Cohesion: 0.14
-Nodes (28): Base, Contract, Quote, Booking, Operation, PassPrediction, RecurringMission, Schedule (+20 more)
+### Community 19 - "booking_service.py"
+Cohesion: 0.19
+Nodes (14): BookingService, AsyncSession, UUID, Transition a Pass Prediction into a REQUESTED Booking. Also runs compatibility…, Transition a Booking to CONFIRMED and its Schedule to SCHEDULED., CompatibilityEngine, CompatibilityResult, GroundStationCapabilities (+6 more)
 
 ### Community 20 - "api.ts"
-Cohesion: 0.11
-Nodes (41): CONTACT_JOB_RE, DATASET_DOWNLOAD_RE, dynamic, GET(), MISSION_CHILD_RE, Path, POST(), resolvePath() (+33 more)
+Cohesion: 0.09
+Nodes (28): POST(), BookingWizard(), PassesResponse, Quote, StationHealthDashboard(), StationRisk, TelemetryData, Agent (+20 more)
 
-### Community 21 - "StationQualityScore"
-Cohesion: 0.15
-Nodes (18): Per-agent heartbeat records used by the missed-heartbeat watchdog., Periodic quality scoring for a station (feeds routing/risk)., StationHeartbeat, StationQualityScore, NetworkRoutingService, _now(), AsyncSession, datetime (+10 more)
+### Community 21 - "telemetry.py"
+Cohesion: 0.33
+Nodes (4): Real-time Telemetry WebSocket — Streams live pass execution data to the…, WebSocket endpoint that streams real-time telemetry during a pass execution.…, telemetry_stream(), websocket
 
-### Community 22 - "_post"
-Cohesion: 0.29
-Nodes (20): confirm_reservation(), create_contact_opportunities(), create_job(), create_reservation(), generate_visibility_opportunities(), get_job_details(), _job_dict(), list_job_events() (+12 more)
+### Community 22 - "TenantContext"
+Cohesion: 0.20
+Nodes (29): confirm_reservation(), create_contact_opportunities(), create_job(), create_reservation(), generate_visibility_opportunities(), get_job_details(), _job_dict(), list_job_events() (+21 more)
 
 ### Community 23 - "StationGatewayAdapter"
 Cohesion: 0.08
 Nodes (12): ABC, Command the antenna to immediately stow to safe position. NOTE: per the…, Immediately kill all RF transmissions. NOTE: per the Isolated Observer Profile,…, Abstract base class for interfacing with physical station hardware (MCS, ACU,…, Returns the extended Safran health snapshot used by the dashboard:…, Subscribe to RM Port 4000. Real adapter: open a TCP socket to…, FTP pull of the MCS activity table. Returns the file content (XML)., FTP pull of completed pass XML reports from D:\\MCS_PUBLIC\\Pass. (+4 more)
 
-### Community 24 - "Config"
-Cohesion: 0.18
-Nodes (10): Config, BaseSettings, Settings, CRTRedundancyLog, get_db(), init_db(), LCBEngagementLog, Local Control Box (hand-paddle) engagement log. (+2 more)
+### Community 24 - "operator.py"
+Cohesion: 0.19
+Nodes (13): Config, CachedProfile, CRTRedundancyLog, FirewallAuditLog, get_db(), init_db(), LCBEngagementLog, LocalActionAck (+5 more)
 
 ### Community 25 - "celestrak.ts"
 Cohesion: 0.15
 Nodes (19): computePasses(), eciToEcf(), geodeticToEcf(), GET(), PassInfo, GET(), epochToUtc(), FALLBACK_TLES (+11 more)
 
-### Community 26 - "outbox_worker.py"
-Cohesion: 0.39
-Nodes (7): drain_once(), main(), Orchestration runtime dispatcher — polls the outbox, publishes due events, and…, _request_stop(), run(), drain(), Poll outbox events, publish them, fan out to per-org webhooks, and (in real-…
+### Community 26 - "orchestration_runtime.py"
+Cohesion: 0.21
+Nodes (10): dispatch_due_jobs(), metrics(), _now(), AsyncSession, datetime, Phase 2.0 Orchestration Runtime — the background side of the outbox. Provides:…, System-side dispatcher (real-agent mode): transition QUEUED jobs to DISPATCHED…, Outbox health/backpressure summary for the ops endpoint. (+2 more)
 
-### Community 27 - "FastAPI"
-Cohesion: 0.18
-Nodes (12): get_current_user(), get_current_user_db(), get_db_session(), AsyncSession, Extract user information from the verified token payload. In a real app, this…, Resolve the JWT subject to the persisted User row (Phase 1 tenancy)., API Routes — Network Operations (Phase 3.2): station routing ranking and…, API Routes — Orchestration Runtime (Phase 2.0): outbox health/backpressure. (+4 more)
+### Community 27 - "api_keys.py"
+Cohesion: 0.14
+Nodes (25): APIKey, generate_api_key(), get_api_key_context(), _hash_key(), list_api_keys(), AsyncSession, UUID, API Key Authentication (Phase 3.1) — programmatic access for platform/GS… (+17 more)
 
-### Community 28 - "CommercialEngine"
-Cohesion: 0.13
-Nodes (21): accept_quote(), create_contract(), create_quote(), create_recurring_mission(), get_contract_usage(), AsyncSession, get, UUID (+13 more)
+### Community 28 - "commercial.py"
+Cohesion: 0.14
+Nodes (19): accept_quote(), create_contract(), create_quote(), create_recurring_mission(), get_contract_usage(), AsyncSession, get, UUID (+11 more)
 
 ### Community 29 - "scripts"
 Cohesion: 0.10
 Nodes (20): description, engines, node, pnpm, name, packageManager, private, scripts (+12 more)
 
-### Community 30 - "simulate_edge.py"
-Cohesion: 0.09
-Nodes (44): DataDeliveryDestination, Mission, MissionProfile, MissionRFProfile, MissionTelecommandDefinition, MissionTelemetryDefinition, Operational campaign against a spacecraft., Versioned operational profile of a mission. (+36 more)
+### Community 30 - "Base"
+Cohesion: 0.13
+Nodes (25): Base, Engineer's manual readiness confirmation for a job. Mandatory gate before…, Customer reservation against a contact opportunity., Raw geometric pass: a spacecraft is geometrically visible from a station., Reservation, StationReadinessEvent, VisibilityOpportunity, MissionTelecommandDefinition (+17 more)
 
 ### Community 31 - "AntennaController"
 Cohesion: 0.12
 Nodes (9): AntennaController, AntennaPosition, BaseModel, Controls antenna pointing and tracking., Get the current antenna azimuth/elevation., Command the antenna to slew to a specific position., Begin auto-tracking a satellite using its TLE., Emergency stop / park the antenna. (+1 more)
 
 ### Community 32 - "Implementation Plan: AfriGround GSaaS Platform (v2)"
-Cohesion: 0.13
-Nodes (14): A. Current Architecture & Tech Stack, B. Current Database Schema & API Architecture, C. Existing Scheduling/Pass-Prediction Implementation, D. Existing Authentication/Authorization & Infrastructure, E. Missing GSaaS Components, F. Recommended Architectural Adjustments, G. Repository Changes Required, H. What Not To Do Yet (Phase 1 Guardrails) (+6 more)
+Cohesion: 0.14
+Nodes (13): A. Current Architecture & Tech Stack, B. Current Database Schema & API Architecture, C. Existing Scheduling/Pass-Prediction Implementation, D. Existing Authentication/Authorization & Infrastructure, E. Missing GSaaS Components, F. Recommended Architectural Adjustments, G. Repository Changes Required, H. What Not To Do Yet (Phase 1 Guardrails) (+5 more)
 
 ### Community 33 - "devDependencies"
 Cohesion: 0.11
 Nodes (19): devDependencies, eslint, eslint-config-next, tailwindcss, @tailwindcss/postcss, @types/nodemailer, @types/react, @types/react-dom (+11 more)
 
 ### Community 34 - "publish_pending"
-Cohesion: 0.11
-Nodes (35): JobEvent, State transition history for observation jobs (idempotent audit)., dispatch_due_jobs(), metrics(), _now(), process_observation_events(), AsyncSession, datetime (+27 more)
-
-### Community 35 - "test_state_machine.py"
-Cohesion: 0.14
-Nodes (3): State Machine — shared transition maps and validation for Phase 1 domain…, Validates and applies state transitions from a declarative map., StateMachine
+Cohesion: 0.20
+Nodes (20): process_observation_events(), Consume PUBLISHED OBSERVATION_JOB.* events. In simulate mode the runtime stands…, backoff_seconds(), publish_pending(), AsyncSession, Exponential backoff capped at RETRY_MAX_S: base * 2**(attempt-1)., Dispatch up to `limit` due events. Returns count successfully published.…, _emit() (+12 more)
 
 ### Community 36 - "dependencies"
 Cohesion: 0.12
-Nodes (17): dependencies, next-intl, nodemailer, react, react-dom, @react-three/drei, @react-three/fiber, @react-three/postprocessing (+9 more)
+Nodes (17): dependencies, next, nodemailer, react, react-dom, @react-three/drei, @react-three/fiber, @react-three/postprocessing (+9 more)
 
 ### Community 37 - "What You Must Do When Invoked"
 Cohesion: 0.07
@@ -361,9 +349,9 @@ Nodes (26): For /graphify add and --watch, For /graphify query, For the commit h
 Cohesion: 0.06
 Nodes (34): 1.0 Audit & preservation, 1.1 Tenancy & RBAC, 1.2 Mission & spacecraft model, 1.3 Station digital twin & certification, 1.4 Contact planning & job state machine, 1.5 Safety & regulatory enforcement, 1.6–1.8 API contracts, seeds, outbox consumer, tests, 2.0 Orchestration runtime (+26 more)
 
-### Community 39 - "test_agent.py"
-Cohesion: 0.16
-Nodes (17): get_agent_identity(), AsyncSession, Resolve the mTLS client certificate CN to an active agent identity., agent_client(), _dispatched_job(), _now(), fixture, Phase 4.0 tests — mTLS edge agent bridge: identity resolution, station-scoped… (+9 more)
+### Community 39 - "CoverageSection.tsx"
+Cohesion: 0.21
+Nodes (9): SupportPortal(), CountUp(), COAST, CoverageSection(), CoverageText, proj(), StationNetworkMap(), GroundStationNode (+1 more)
 
 ### Community 40 - "3. Normal Pass Workflow (Execute Many)"
 Cohesion: 0.07
@@ -373,25 +361,25 @@ Nodes (28): 1.1 Station Registration (Cloud Side), 1.2 Edge Agent Installation (
 Cohesion: 0.18
 Nodes (4): Controls RF chain configuration., RFController, RFStatus, MockRFController
 
-### Community 42 - "routes/regulatory.py"
-Cohesion: 0.44
-Nodes (8): agent_heartbeat(), evaluate_tx(), AsyncSession, UUID, API Routes — Regulatory Enforcement (Phase 1.5), register_station(), report_time_status(), transition_certification()
+### Community 42 - "contract_usage"
+Cohesion: 0.21
+Nodes (12): contract_usage(), ContractUsageResponse, AsyncSession, BaseModel, get, UUID, Manually run the recurring-mission booking sweep for the org (the Celery beat…, Real reserved-capacity utilization for a contract (minutes on air). (+4 more)
 
 ### Community 43 - "What You Must Do When Invoked"
 Cohesion: 0.08
 Nodes (24): For /graphify add and --watch, For /graphify query, For the commit hook and native CLAUDE.md integration, For --update and --cluster-only, /graphify, Honesty Rules, Interpreter guard for subcommands, Part A - Structural extraction for code files (+16 more)
 
-### Community 44 - "agent.py"
-Cohesion: 0.22
-Nodes (20): acknowledge_job(), agent_heartbeat(), agent_telemetry(), agent_time_status(), assigned_jobs(), HeartbeatRequest, job_detail(), AsyncSession (+12 more)
+### Community 44 - "test_agent.py"
+Cohesion: 0.11
+Nodes (31): ExecutionReceipt, Post-execution result report for an observation job. Generated by the Edge…, GroundStation, Edge agent identity for a station (mTLS bridge, Phase 4.0)., StationAgentIdentity, get_agent_identity(), AsyncSession, Resolve the mTLS client certificate CN to an active agent identity. (+23 more)
 
 ### Community 45 - "EdgeAgentService"
-Cohesion: 0.25
-Nodes (10): Edge agent identity for a station (mTLS bridge, Phase 4.0)., Structured telemetry readings reported by station agents., StationAgentIdentity, StationTelemetryReading, EdgeAgentService, _now(), UUID, Surface operational incidents from critical telemetry. (+2 more)
+Cohesion: 0.06
+Nodes (63): ContactOpportunity, A feasible RF contact opportunity for a mission profile on a specific pass., Incident, Per-agent heartbeat records used by the missed-heartbeat watchdog., Structured telemetry readings reported by station agents., Periodic quality scoring for a station (feeds routing/risk)., Time synchronization quality reported by the station agent., StationHeartbeat (+55 more)
 
-### Community 46 - "hal/__init__.py"
-Cohesion: 0.22
-Nodes (4): HAL — Hardware Abstraction Layer package. Provides a factory to get controller…, Controls the transmitter for uplink/TT&C., TransmitterController, MockTransmitterController
+### Community 46 - "EdgeNodeFactory"
+Cohesion: 0.14
+Nodes (7): EdgeNodeFactory, Factory for creating hardware controller instances. In development, returns…, Controls the transmitter for uplink/TT&C., TransmitterController, MockModemController, MockTransmitterController, Any
 
 ### Community 47 - "ReceiverController"
 Cohesion: 0.18
@@ -410,16 +398,16 @@ Cohesion: 0.20
 Nodes (7): ModemController, ABC, Any, Hardware Abstraction Layer (HAL) — Interfaces for Ground Station Edge…, Controls the modem for data encoding/decoding., Returns frame count, error rate, throughput., Get comprehensive antenna status.
 
 ### Community 51 - "gen_agent_certs.py"
-Cohesion: 0.42
-Nodes (10): build_agent(), build_ca(), build_server(), _key(), main(), Phase 4.0 — Dev mTLS certificate bootstrap for the edge agent bridge. Generates…, _write_cert(), _write_key() (+2 more)
+Cohesion: 0.36
+Nodes (11): build_agent(), build_ca(), build_server(), _key(), main(), Phase 4.0 — Dev mTLS certificate bootstrap for the edge agent bridge. Generates…, _write_cert(), _write_key() (+3 more)
 
 ### Community 52 - "SGP4Engine"
-Cohesion: 0.17
-Nodes (8): AsyncSession, PassResult, BaseModel, datetime, Predict satellite passes over a specific ground station within a time window., SGP4Engine, EarthSatellite, Topos
+Cohesion: 0.15
+Nodes (9): AsyncSession, AsyncSession, PassResult, BaseModel, datetime, Predict satellite passes over a specific ground station within a time window., SGP4Engine, EarthSatellite (+1 more)
 
-### Community 53 - "EdgeNodeFactory"
-Cohesion: 0.24
-Nodes (6): EdgeNodeFactory, Factory for creating hardware controller instances. In development, returns…, Controls Software Defined Radio equipment., Returns spectrum analysis data., SDRController, MockSDRController
+### Community 53 - "hal/__init__.py"
+Cohesion: 0.22
+Nodes (5): HAL — Hardware Abstraction Layer package. Provides a factory to get controller…, Controls Software Defined Radio equipment., Returns spectrum analysis data., SDRController, MockSDRController
 
 ### Community 54 - "2. Station Subsystems"
 Cohesion: 0.08
@@ -441,37 +429,41 @@ Nodes (4): ibmPlexMono, spaceGrotesk, Footer(), Navbar()
 Cohesion: 0.31
 Nodes (4): PowerController, PowerStatus, Monitors and controls power systems., MockPowerController
 
-### Community 59 - "station/page.tsx"
-Cohesion: 0.22
-Nodes (6): StationHealthDashboard(), StationRisk, TelemetryData, Agent, Station, TimeStatus
+### Community 59 - "routing.py"
+Cohesion: 0.12
+Nodes (16): get_current_user(), Extract user information from the verified token payload. In a real app, this…, FailoverResponse, AsyncSession, BaseModel, UUID, API Routes — Multi-station Routing & Failover, Manually trigger an automatic failover for a scheduled pass. The routing engine… (+8 more)
 
 ### Community 60 - "support.py"
 Cohesion: 0.15
 Nodes (20): SupportTicket, create_ticket(), list_tickets(), AsyncSession, get, UUID, API Routes — Support Ticketing Engine, AsyncSession (+12 more)
 
-### Community 62 - "healthz_check"
-Cohesion: 0.33
-Nodes (6): health_check(), healthz_check(), AsyncSession, get, Liveness probe (Phase 3.3): verifies DB reachability. 503 when down., read_users_me()
+### Community 61 - "[...path]/route.ts"
+Cohesion: 0.28
+Nodes (16): dynamic, GET(), MISSION_CHILD_RE, resolvePath(), STATION_CHILD_RE, LandingPage(), apiGet(), fetchAgents() (+8 more)
+
+### Community 62 - "ObservationOrchestrator"
+Cohesion: 0.23
+Nodes (13): JobEvent, State transition history for observation jobs (idempotent audit)., ObservationOrchestrator, test_simulate_drives_job_to_completion(), test_system_driver_records_events_and_emits(), test_create_job(), test_duplicate_job_rejected(), test_invalid_transition_rejected() (+5 more)
 
 ### Community 63 - "IsolatedObserver"
-Cohesion: 0.11
-Nodes (8): IsolatedObserver, Read-only Safran Pro 730 SX health/status aggregator. Never issues a command to…, RM 4000 ping + last packet age., Inferred from ACU RM stream., Inferred from ACU RM stream., Safran PC Saphir D: occupancy percent, Nominal vs Spare vs SPOF, Interpass + rise-angle conflicts
+Cohesion: 0.09
+Nodes (11): IsolatedObserver, Read-only Safran Pro 730 SX health/status aggregator. Never issues a command to…, RM 4000 ping + last packet age., Inferred from ACU RM stream., Inferred from ACU RM stream., Safran PC Saphir D: occupancy percent, Nominal vs Spare vs SPOF, Interpass + rise-angle conflicts (+3 more)
 
 ### Community 64 - "cinematic_landing_plan_final.md"
 Cohesion: 0.11
 Nodes (17): 10. Orbital Motion, 11. Ground-to-Satellite Link, 12. Technical HUD, 13. Hero Copy, 15. Layout System, 16. Motion System, 17. File Structure, 19. Visual QA Prompt for Antigravity / OpenCode (+9 more)
 
-### Community 65 - "[job_id]/page.tsx"
-Cohesion: 0.33
-Nodes (4): ExecutionReceipt, JobDetails, JobDetailsPage(), ReadinessEvent
+### Community 65 - "commercial_engine.py"
+Cohesion: 0.30
+Nodes (10): Booking, PassPrediction, RecurringMission, Schedule, datetime, Commercial Engine — Manages Quotes, Orders, Contracts, Billing, and Recurring…, Auto-generates bookings for active recurring missions from TLE pass…, Create bookings for every due recurring mission. Returns count created. (+2 more)
 
 ### Community 66 - "data/page.tsx"
 Cohesion: 0.40
 Nodes (5): DataCatalog(), DatasetRow, mapDataset(), MOCK_DATASETS, Dataset
 
-### Community 67 - "DeliveryService"
-Cohesion: 0.16
-Nodes (16): _checksum(), DeliveryService, _now(), AsyncSession, datetime, UUID, Materialize the dataset and execute delivery to every active destination.…, _add_destinations() (+8 more)
+### Community 67 - "create_webhook"
+Cohesion: 0.23
+Nodes (12): create_webhook(), delete_webhook(), list_webhooks(), AsyncSession, BaseModel, delete, get, patch (+4 more)
 
 ### Community 68 - "CinematicHero.tsx"
 Cohesion: 0.47
@@ -480,10 +472,6 @@ Nodes (4): AfriGroundTechnicalHUD(), HudText, CinematicHero(), HeroText
 ### Community 69 - "AGENTS.md"
 Cohesion: 0.13
 Nodes (14): CURRENT REPOSITORY STATE, FINAL INSTRUCTIONS, graphify, ROLE AND CONTEXT, STEP 1: Upgrade Cloud Database Models, STEP 2: Create the Station Gateway App Skeleton, STEP 3: Implement the Station Gateway Adapter Pattern, STEP 4: Build the Local Operator Console (Edge UI) (+6 more)
-
-### Community 79 - "CloudClient"
-Cohesion: 0.15
-Nodes (3): CloudClient, Enforces Safran Pro 730 SX readiness checks before allowing cloud execution., ReadinessService
 
 ### Community 81 - "graphify reference: extra exports and benchmark"
 Cohesion: 0.22
@@ -500,10 +488,6 @@ Nodes (5): For /graphify explain, For /graphify path, graphify reference: query,
 ### Community 84 - "PRODUCTION_SESSION_LOG — 2026-08-21"
 Cohesion: 0.12
 Nodes (16): 1. Session goals, 2.1 Hydration error #418 — FIXED, DEPLOYED, VERIFIED, 2.2 Secrets hygiene — all credentials moved to environment variables, 2.3 Demo data enrichment — live feeds now look real, 2.4 JWT secret rotation, 2. What was done, 3. Operational runbooks, 4. Current live architecture (+8 more)
-
-### Community 90 - "stations.py"
-Cohesion: 0.29
-Nodes (19): add_capability(), add_hardware(), add_license(), add_quality_score(), get_certification(), get_station(), list_agents(), list_capabilities() (+11 more)
 
 ### Community 102 - "graphify reference: query, path, explain"
 Cohesion: 0.33
@@ -609,13 +593,9 @@ Nodes (5): API Surface (current), Behavior notes, CURRENT_FUNCTIONALITY.md — A
 Cohesion: 0.50
 Nodes (3): Deploy on Vercel, Getting Started, Learn More
 
-### Community 134 - "emit"
-Cohesion: 0.13
-Nodes (27): OutboxEvent, Transactional outbox: durable events emitted with their owning transaction., dispatch_job_to_webhook(), dispatch_receipt_to_webhook(), dispatch_station_to_webhook(), _json_dumps(), _post_webhook(), Publish hooks for the transactional outbox — concrete consumers registered… (+19 more)
-
-### Community 135 - "business.py"
-Cohesion: 0.21
-Nodes (15): contract_usage(), ContractUsageResponse, list_contracts(), AsyncSession, BaseModel, get, UUID, API Routes — Business tier (Phase 3.0): SLA violations, contract usage,… (+7 more)
+### Community 134 - "OutboxEvent"
+Cohesion: 0.23
+Nodes (14): OutboxEvent, Transactional outbox: durable events emitted with their owning transaction., dispatch_job_to_webhook(), dispatch_receipt_to_webhook(), dispatch_station_to_webhook(), _json_dumps(), _post_webhook(), Publish hooks for the transactional outbox — concrete consumers registered… (+6 more)
 
 ### Community 137 - "1. Design Principles"
 Cohesion: 0.67
@@ -629,65 +609,49 @@ Nodes (3): 20. Performance Requirements, Desktop, Mobile
 Cohesion: 0.67
 Nodes (3): 3.1 Color Direction, 3.2 Typography, 3. AfriGround Visual Identity — "Orbital Infrastructure"
 
-### Community 145 - "AgentDispatchService"
-Cohesion: 0.19
-Nodes (8): AgentDispatchService, AsyncSession, ExecutionReceipt, UUID, Persist an execution receipt; terminal state is applied if the job has not…, Everything the agent needs to execute: contact window, RF config, mission…, Jobs scheduled on this agent's station in the given states (default: DISPATCHED…, Agent-driven execution-chain transition (validated against AGENT_CHAIN).
-
-### Community 146 - "env.py"
-Cohesion: 0.19
-Nodes (13): do_run_migrations(), include_name(), include_object(), In this scenario we need to create an Engine and associate a connection with…, Run migrations in 'online' mode., Only manage application tables in the 'public' schema; never touch…, Filter removed tables from non-public schemas (include_object is not called for…, Run migrations in 'offline' mode. This configures the context with just a URL… (+5 more)
-
-### Community 147 - "test_sla.py"
+### Community 145 - "tasks.py"
 Cohesion: 0.26
-Nodes (13): MissionSLA, SLA requirements attached to a mission., _add_sla(), _make_job(), Phase 3.0 tests — SLA enforcement on job completion, contract usage., SystemJobDriver terminal transitions trigger enforcement automatically., A COMPLETED job whose wall-clock processing time exceeds the delay., _slow_job() (+5 more)
+Nodes (12): Celery application for the AfriGround orchestration runtime (Phase 2.0). The…, check_heartbeats(), drain_outbox(), outbox_metrics(), Celery tasks for the orchestration runtime (Phase 2.0). Each task runs its own…, Publish due outbox events, then drive the simulated edge lifecycle., Snapshot of outbox health for alerting / dashboards., Flag stations whose edge agents missed their heartbeat window. (+4 more)
 
-### Community 148 - "CachedJob"
+### Community 146 - "test_outbox.py"
+Cohesion: 0.31
+Nodes (10): _emit_event(), A hook returning False leaves the event PENDING for a later retry., The worker's core drain loop must be idempotent and safe., test_emit_writes_pending_outbox_row(), test_hook_failure_marks_failed(), test_hook_false_skips_and_retries(), test_publish_pending_only_publishes_once(), test_publish_pending_without_hook_marks_published() (+2 more)
+
+### Community 147 - "SLAService"
 Cohesion: 0.23
-Nodes (5): CachedJob, CachedProfile, ExecutionService, Validates the 12 Safran safety checks + LCB + CRT SPOF. Returns (is_ready,…, BackgroundWorker
+Nodes (5): UUID, AsyncSession, UUID, Evaluate all SLAs for the job's mission against its outcome. Creates an…, SLAService
+
+### Community 148 - "outbox_worker.py"
+Cohesion: 0.39
+Nodes (7): drain_once(), main(), Orchestration runtime dispatcher — polls the outbox, publishes due events, and…, _request_stop(), run(), drain(), Poll outbox events, publish them, fan out to per-org webhooks, and (in real-…
 
 ### Community 149 - "opencode.json"
 Cohesion: 0.50
 Nodes (3): plugin, $schema, .opencode/plugins/graphify.js
 
-### Community 150 - "test_edge_agent.py"
-Cohesion: 0.22
-Nodes (11): Incident, check_missed_heartbeats(), AsyncSession, Flag stations whose active agents stopped heartbeating and surface incidents., Phase 2.1/2.2 tests — edge agent heartbeat/time ingestion, telemetry, missed-…, test_recompute_quality(), test_register_agent_and_heartbeat(), test_signal_telemetry_does_not_open_incident() (+3 more)
+### Community 150 - "emit"
+Cohesion: 0.18
+Nodes (9): JobNotFound, _now(), AsyncSession, datetime, ExecutionReceipt, HTTPException, Observation Orchestrator — drives ObservationJob lifecycle with a strict state…, emit() (+1 more)
 
-### Community 151 - "edge_agent.py"
-Cohesion: 0.29
-Nodes (9): ingest_telemetry(), HeartbeatRequest, BaseModel, datetime, Edge Agent data foundation (Phase 2.1/2.2) — heartbeat & time-sync ingestion,…, TelemetryRequest, TelemetryResponse, TimeStatusRequest (+1 more)
+### Community 151 - "create_key"
+Cohesion: 0.25
+Nodes (11): create_key(), key_me(), KeyCreateRequest, KeyCreateResponse, KeyListResponse, KeyMeResponse, list_keys(), AsyncSession (+3 more)
 
-### Community 152 - ".create_contract"
-Cohesion: 0.24
-Nodes (6): ContractResponse, UUID, Create a reserved-capacity enterprise contract., Get contract details including usage against reserved capacity. Usage is…, Sum completed contact durations (minutes) for the org in the contract window., Contract
-
-### Community 153 - "request_artifact_upload"
+### Community 152 - ".get_job"
 Cohesion: 0.33
-Nodes (5): Edge Agent requests pre-signed S3/MinIO URLs for artifact upload (Phase 8.1…, request_artifact_upload(), Any, Generate a pre-signed URL for uploading artifacts to the specified destination.…, StorageService
+Nodes (4): ExecutionReceipt, UUID, Persist an execution receipt; terminal state is applied if the job has not…, Agent-driven execution-chain transition (validated against AGENT_CHAIN).
 
-### Community 154 - "commercial/page.tsx"
-Cohesion: 0.29
-Nodes (5): CommercialDashboard(), Contract, MOCK_CONTRACTS, MOCK_VIOLATIONS, SlaViolation
+### Community 153 - "_truncate_all"
+Cohesion: 0.25
+Nodes (8): engine(), AsyncSession, fixture, A CONFIRMED scheduled contact ready for job creation., Truncate every app table, preserving only alembic_version + spatial_ref_sys., scheduled_contact(), session(), _truncate_all()
 
-### Community 155 - "operator.py"
-Cohesion: 0.15
-Nodes (20): get_adapter(), FirewallAuditLog, LocalActionAck, Per-rule firewall posture audit. Local-first; never assumes cloud., Engineer acknowledgement of the passive / no-active-commands notice., confirm_ready(), dashboard(), get_job_status() (+12 more)
-
-### Community 156 - "trigger_auto_failover"
-Cohesion: 0.33
-Nodes (6): FailoverResponse, AsyncSession, BaseModel, UUID, Manually trigger an automatic failover for a scheduled pass. The routing engine…, trigger_auto_failover()
-
-### Community 157 - "missions/page.tsx"
-Cohesion: 0.40
-Nodes (3): Mission, MissionsIndex(), MOCK_MISSIONS
+### Community 155 - "CachedJob"
+Cohesion: 0.16
+Nodes (18): get_adapter(), CachedJob, confirm_ready(), dashboard(), get_job_status(), local_action_ack(), pass_console(), AsyncSession (+10 more)
 
 ### Community 158 - "K. Detailed Implementation Plan for Phase 2 (Orchestration Runtime & Data Value Chain)"
 Cohesion: 0.29
 Nodes (7): K. Detailed Implementation Plan for Phase 2 (Orchestration Runtime & Data Value Chain), Phase 2.0 — Orchestration Runtime — COMPLETE, Phase 2.1 — Edge Agent Heartbeat & Time-Sync Ingestion — COMPLETE, Phase 2.2 — Telemetry & Monitoring — COMPLETE, Phase 2.3 — Data Delivery Pipeline — COMPLETE, Phase 2.4 — End-to-End Simulation & Demo — COMPLETE, Phase 2.5 — Verification — COMPLETE
-
-### Community 159 - "PassSimulatorWidget.tsx"
-Cohesion: 0.40
-Nodes (4): PassResult, PassSimulatorWidget(), SATELLITE_PRESETS, SatellitePreset
 
 ### Community 160 - "L. Detailed Implementation Plan for Phase 3 (Commercial Value Chain & Integrations)"
 Cohesion: 0.33
@@ -705,9 +669,13 @@ Nodes (5): O. Detailed Implementation Plan for Phase 8 (Smart Raw IQ Data Delive
 Cohesion: 0.50
 Nodes (4): N. Detailed Implementation Plan for Phase 6 (Real Orbit Dynamics & Booking Integration), Phase 6.1 — Booking Page Refactor (Frontend), Phase 6.2 — API Proxy Extension, Phase 6.3 — State Machine Execution (Backend)
 
-### Community 165 - "Q. Detailed Implementation Plan for Phase 10 (Frontend UI Enhancements)"
-Cohesion: 0.50
-Nodes (4): Phase 10.1 — Cinematic 3D Landing Page, Phase 10.2 — Job Details & Pass Report (Operations UI), Phase 10.3 — Live Platform Metrics Dashboard, Q. Detailed Implementation Plan for Phase 10 (Frontend UI Enhancements)
+### Community 164 - "verify_token"
+Cohesion: 0.67
+Nodes (3): Verify the JWT token from Supabase., verify_token(), HTTPAuthorizationCredentials
+
+### Community 165 - "tenant_context_middleware"
+Cohesion: 0.67
+Nodes (3): Stamp request state with the verified JWT subject (tenant resolution happens in…, tenant_context_middleware(), middleware
 
 ### Community 166 - "network_ranking"
 Cohesion: 0.67
@@ -717,41 +685,25 @@ Nodes (3): network_ranking(), AsyncSession, get
 Cohesion: 0.67
 Nodes (3): orchestration_metrics(), AsyncSession, get
 
-### Community 168 - "R. Detailed Implementation Plan for Phase 11 (Advanced Frontend Workflows)"
-Cohesion: 0.50
-Nodes (4): Phase 11.1 — Operations Command Center (Jobs Index), Phase 11.2 — Spacecraft & Missions Index, Phase 11.3 — Commercial & Contracts Dashboard, R. Detailed Implementation Plan for Phase 11 (Advanced Frontend Workflows)
-
-### Community 169 - "verify_token"
-Cohesion: 0.67
-Nodes (3): Verify the JWT token from Supabase., verify_token(), HTTPAuthorizationCredentials
-
-### Community 170 - "tenant_context_middleware"
-Cohesion: 0.67
-Nodes (3): Stamp request state with the verified JWT subject (tenant resolution happens in…, tenant_context_middleware(), middleware
-
-### Community 171 - "telemetry_stream"
-Cohesion: 0.67
-Nodes (3): WebSocket endpoint that streams real-time telemetry during a pass execution.…, telemetry_stream(), websocket
-
 ## Knowledge Gaps
-- **520 isolated node(s):** `$schema`, `.opencode/plugins/graphify.js`, `entrypoint.sh script`, `run.sh script`, `eslintConfig` (+515 more)
+- **504 isolated node(s):** `$schema`, `.opencode/plugins/graphify.js`, `entrypoint.sh script`, `run.sh script`, `eslintConfig` (+499 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **28 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **30 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `TenantContext` connect `TenantContext` to `edge.py`, `ObservationJob`, `StationService`, `write_audit_log`, `MissionService`, `business.py`, `ContactPlanningService`, `services/tenancy.py`, `readiness.py`, `RegulatoryAuthorizationService`, `_post`, `edge_agent.py`, `test_edge_agent.py`, `request_artifact_upload`, `FastAPI`, `simulate_edge.py`, `network_ranking`, `orchestration_metrics`, `routes/regulatory.py`, `SGP4Engine`, `stations.py`?**
-  _High betweenness centrality (0.038) - this node is a cross-community bridge._
-- **Why does `ObservationJob` connect `ObservationJob` to `edge.py`, `routes/data.py`, `DeliveryService`, `publish_pending`, `test_agent.py`, `ContactPlanningService`, `readiness.py`, `AgentDispatchService`, `SLAService`, `Base`, `_post`, `request_artifact_upload`, `CommercialEngine`, `simulate_edge.py`?**
-  _High betweenness centrality (0.033) - this node is a cross-community bridge._
-- **Why does `Base` connect `Base` to `ObservationJob`, `routes/data.py`, `StationService`, `write_audit_log`, `emit`, `OperationsEngine`, `ContactPlanningService`, `services/tenancy.py`, `readiness.py`, `RegulatoryAuthorizationService`, `test_webhooks.py`, `SLAService`, `env.py`, `test_sla.py`, `CachedJob`, `StationQualityScore`, `test_edge_agent.py`, `Config`, `operator.py`, `simulate_edge.py`, `publish_pending`, `EdgeAgentService`, `support.py`?**
-  _High betweenness centrality (0.031) - this node is a cross-community bridge._
+- **Why does `TenantContext` connect `TenantContext` to `edge.py`, `create_webhook`, `StationService`, `FastAPI`, `MissionService`, `network_ranking`, `orchestration_metrics`, `simulate_edge.py`, `contract_usage`, `ContactPlanningService`, `readiness.py`, `EdgeAgentService`, `RegulatoryAuthorizationService`, `test_api.py`, `SGP4Engine`, `emit`, `create_key`?**
+  _High betweenness centrality (0.043) - this node is a cross-community bridge._
+- **Why does `Base` connect `Base` to `ObservationJob`, `DeliveryService`, `StationService`, `FastAPI`, `OutboxEvent`, `OperationsEngine`, `ContactPlanningService`, `simulate_edge.py`, `readiness.py`, `RegulatoryAuthorizationService`, `asyncio`, `test_webhooks.py`, `CommercialEngine`, `operator.py`, `api_keys.py`, `CachedJob`, `test_agent.py`, `EdgeAgentService`, `support.py`, `ObservationOrchestrator`, `commercial_engine.py`?**
+  _High betweenness centrality (0.035) - this node is a cross-community bridge._
+- **Why does `ObservationJob` connect `ObservationJob` to `edge.py`, `commercial_engine.py`, `DeliveryService`, `publish_pending`, `simulate_edge.py`, `readiness.py`, `test_agent.py`, `CommercialEngine`, `SLAService`, `TenantContext`, `emit`, `.get_job`, `ObservationOrchestrator`, `orchestration_runtime.py`, `Base`?**
+  _High betweenness centrality (0.034) - this node is a cross-community bridge._
 - **Are the 3 inferred relationships involving `TenantContext` (e.g. with `Organization` and `Role`) actually correct?**
   _`TenantContext` has 3 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 17 inferred relationships involving `ObservationJob` (e.g. with `get_job_details()` and `_job_dict()`) actually correct?**
-  _`ObservationJob` has 17 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 13 inferred relationships involving `ObservationOrchestrator` (e.g. with `create_job()` and `list_job_events()`) actually correct?**
-  _`ObservationOrchestrator` has 13 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 12 inferred relationships involving `ObservationOrchestrator` (e.g. with `create_job()` and `list_job_events()`) actually correct?**
+  _`ObservationOrchestrator` has 12 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 15 inferred relationships involving `ObservationJob` (e.g. with `get_job_details()` and `_job_dict()`) actually correct?**
+  _`ObservationJob` has 15 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `$schema`, `.opencode/plugins/graphify.js`, `entrypoint.sh script` to the rest of the system?**
-  _520 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _504 weakly-connected nodes found - possible documentation gaps or missing edges._
