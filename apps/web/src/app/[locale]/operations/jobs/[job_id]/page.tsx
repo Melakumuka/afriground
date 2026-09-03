@@ -7,7 +7,7 @@ import { useT } from "@/lib/useT";
 type ReadinessEvent = {
   status: string;
   confirmed_at: string;
-  checklist_results: any;
+  checklist_results: Record<string, unknown>;
   notes: string | null;
 };
 

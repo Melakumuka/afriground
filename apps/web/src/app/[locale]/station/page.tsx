@@ -31,7 +31,6 @@ export default function StationHealthDashboard() {
   const [station, setStation] = useState<Station | null>(null);
   const [agents, setAgents] = useState<Agent[] | null>(null);
   const [timeStatus, setTimeStatus] = useState<TimeStatus[] | null>(null);
-  const [source, setSource] = useState<"mock" | "api">("mock");
   const [stationName, setStationName] = useState("Entoto Observatory · Antenna A (12m)");
 
   // Mock data for MVP UI
@@ -57,7 +56,6 @@ export default function StationHealthDashboard() {
         const first: Station = payload.data[0];
         setStation(first);
         setStationName(`${first.name} · ${first.code}`);
-        setSource("api");
         const [agentsRes, timeRes] = await Promise.all([
           fetch(`/api/platform/stations/${first.id}/agents`).then((r) => (r.ok ? r.json() : null)),
           fetch(`/api/platform/stations/${first.id}/time-status`).then((r) => (r.ok ? r.json() : null)),

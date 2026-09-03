@@ -60,12 +60,18 @@ function ProgressRing({ value, max, label, color }: { value: number; max: number
 export default function ContractDashboard({ params }: { params: { contract_id: string } }) {
   const { t } = useT("Commercial");
   const [contract, setContract] = useState<ContractData | null>(null);
+  const [daysRemaining, setDaysRemaining] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // In a real app: fetch(`/api/v1/commercial/contracts/${params.contract_id}`)
     setTimeout(() => {
-      setContract({ ...MOCK_CONTRACT, id: params.contract_id });
+      const loaded = { ...MOCK_CONTRACT, id: params.contract_id };
+      setContract(loaded);
+      const remaining = Math.max(0, Math.ceil(
+        (new Date(loaded.end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+      ));
+      setDaysRemaining(remaining);
       setLoading(false);
     }, 400);
   }, [params.contract_id]);
@@ -87,9 +93,6 @@ export default function ContractDashboard({ params }: { params: { contract_id: s
   }
 
   const usagePct = (contract.used_minutes / contract.reserved_capacity_minutes) * 100;
-  const daysRemaining = Math.max(0, Math.ceil(
-    (new Date(contract.end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-  ));
 
   return (
     <main className="min-h-screen bg-black/95 text-white/90 p-8 md:p-16">

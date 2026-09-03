@@ -10,7 +10,7 @@ export type DataFlowText = {
 
 export default function DataFlowVisualization({ text }: { text: DataFlowText }) {
   return (
-    <section id="data" className="relative z-10 bg-mineral/90 text-graphite py-24 px-6 sm:px-10 lg:px-14 overflow-hidden">
+    <div className="relative z-10 bg-mineral/90 text-graphite py-24 px-6 sm:px-10 lg:px-14 overflow-hidden">
       <div className="max-w-6xl mx-auto">
         <RevealOnScroll>
           <div className="text-left max-w-2xl">
@@ -51,6 +51,6 @@ export default function DataFlowVisualization({ text }: { text: DataFlowText }) 
 
         <p className="mono-label text-steel mt-8">{text.simulationLabel}</p>
       </div>
-    </section>
+    </div>
   );
 }

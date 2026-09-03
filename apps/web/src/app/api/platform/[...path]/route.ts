@@ -79,6 +79,10 @@ function resolvePath(path: Path): Promise<unknown> | undefined {
         return import("@/lib/api").then((m) => m.fetchJobDetails(jobMatch[1]));
       }
 
+      if (key === "support/tickets") {
+        return import("@/lib/api").then((m) => m.fetchSupportTickets());
+      }
+
       return undefined; // path not exposed
     }
   }

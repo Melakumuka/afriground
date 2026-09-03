@@ -24,7 +24,7 @@ export default function ContactForm() {
       const data = (await res.json().catch(() => null)) as { error?: string } | null;
       if (!res.ok) {
         setStatus("error");
-        setError(t("err_transmit", "传输失败（状态码 {status}）", "Transmission failed ({status})").replace("{status}", String(res.status)));
+        setError(data?.error || t("err_transmit", "传输失败（状态码 {status}）", "Transmission failed ({status})").replace("{status}", String(res.status)));
         return;
       }
       setStatus("sent");

@@ -223,20 +223,20 @@ export function fetchDatasetDownload(jobId: string): Promise<{ ok: boolean; down
   return apiGet<{ ok: boolean; download_url?: string }>(`/api/v1/data/datasets/${jobId}/download`);
 }
 
-export function fetchJobs(): Promise<any[] | null> {
-  return apiGet<any[]>(`/api/v1/contact/jobs`);
+export function fetchJobs(): Promise<Record<string, unknown>[] | null> {
+  return apiGet<Record<string, unknown>[]>(`/api/v1/contact/jobs`);
 }
 
-export function fetchJobDetails(jobId: string): Promise<any | null> {
-  return apiGet<any>(`/api/v1/contact/jobs/${jobId}`);
+export function fetchJobDetails(jobId: string): Promise<Record<string, unknown> | null> {
+  return apiGet<Record<string, unknown>>(`/api/v1/contact/jobs/${jobId}`);
 }
 
-export function fetchContracts(): Promise<any[] | null> {
-  return apiGet<any[]>(`/api/v1/business/contracts`);
+export function fetchContracts(): Promise<Record<string, unknown>[] | null> {
+  return apiGet<Record<string, unknown>[]>(`/api/v1/business/contracts`);
 }
 
-export function fetchContractUsage(contractId: string): Promise<any | null> {
-  return apiGet<any>(`/api/v1/business/contracts/${contractId}/usage`);
+export function fetchContractUsage(contractId: string): Promise<Record<string, unknown> | null> {
+  return apiGet<Record<string, unknown>>(`/api/v1/business/contracts/${contractId}/usage`);
 }
 
 export function createSupportTicket(body: {
@@ -247,6 +247,12 @@ export function createSupportTicket(body: {
   description: string;
 }): Promise<SupportTicket | null> {
   return apiPost<SupportTicket>("/api/v1/support/tickets", body);
+}
+
+export function fetchSupportTickets(): Promise<SupportTicket[] | null> {
+  const orgId = serviceOrgId();
+  if (!orgId) return Promise.resolve(null);
+  return apiGet<SupportTicket[]>(`/api/v1/support/tickets?org_id=${orgId}`);
 }
 
 // ── Contact Planning ────────────────────────────────────────────────────────
