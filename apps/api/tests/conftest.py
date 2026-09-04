@@ -38,7 +38,11 @@ async def session(engine):
 
 
 async def _truncate_all(session: AsyncSession) -> None:
-    """Truncate every app table, preserving only alembic_version + spatial_ref_sys."""
+    """Clear every app table, preserving only alembic_version + spatial_ref_sys.
+
+    Uses a single TRUNCATE statement for all tables to acquire locks atomically,
+    preventing deadlocks when the Celery worker or API container is also running.
+    """
     tables = (
         await session.execute(
             text(
@@ -48,8 +52,9 @@ async def _truncate_all(session: AsyncSession) -> None:
             )
         )
     ).scalars().all()
-    for t in tables:
-        await session.execute(text(f'TRUNCATE TABLE "{t}" CASCADE'))
+    if tables:
+        quoted = ", ".join(f'"{t}"' for t in tables)
+        await session.execute(text(f"TRUNCATE {quoted} RESTART IDENTITY CASCADE"))
     await session.commit()
 
 
@@ -67,11 +72,14 @@ PERMISSION_CODES = [
 
 
 async def _seed_tenancy(session: AsyncSession, perm_codes: list[str]) -> dict:
+    from sqlalchemy import select
     perms = {}
     for code in perm_codes:
-        p = Permission(code=code, name=code)
-        session.add(p)
-        await session.flush()
+        p = (await session.execute(select(Permission).where(Permission.code == code))).scalar_one_or_none()
+        if not p:
+            p = Permission(code=code, name=code)
+            session.add(p)
+            await session.flush()
         perms[code] = p
 
     role = Role(name="Test Platform Admin", is_system=True)

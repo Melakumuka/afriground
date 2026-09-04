@@ -142,7 +142,7 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
   // Primary links for Desktop Navbar
   const primaryDesktopLinks = [
     {
-      href: `/${currentLocale}/network`,
+      href: `/${currentLocale}/station`,
       label: nav.network || (isZh ? "地面站网络" : "Ground Station Network"),
     },
     {
@@ -258,6 +258,97 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
               </Link>
             );
           })}
+
+          {/* Desktop "More" Dropdown for additional tools */}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              type="button"
+              onClick={() => setMoreDropdownOpen(!moreDropdownOpen)}
+              className={`px-3 py-2 text-sm font-medium transition-all rounded-md flex items-center gap-1.5 cursor-pointer ${
+                moreDropdownOpen
+                  ? "text-white bg-white/10"
+                  : "text-steel-2 hover:text-white hover:bg-white/5"
+              }`}
+              aria-expanded={moreDropdownOpen}
+            >
+              <span>{isZh ? "更多模块" : "More"}</span>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={`transition-transform duration-200 ${moreDropdownOpen ? "rotate-180 text-signal-soft" : ""}`}
+              >
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </button>
+
+            {moreDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-72 bg-graphite-800 border border-graphite-600/80 rounded-lg shadow-2xl p-3 z-50 animate-fade-up backdrop-blur-xl">
+                <div className="text-[11px] font-mono text-steel-2 uppercase tracking-wider px-2.5 py-1 mb-1 border-b border-graphite-600/60">
+                  {isZh ? "全部平台服务" : "All Platform Modules"}
+                </div>
+                <div className="flex flex-col gap-1">
+                  <Link
+                    href={`/${currentLocale}/missions/new`}
+                    onClick={() => setMoreDropdownOpen(false)}
+                    className="px-2.5 py-2 text-sm text-steel-2 hover:text-white hover:bg-white/5 rounded flex items-center justify-between transition-colors"
+                  >
+                    <span>{nav.missions_new || (isZh ? "注册卫星 (ICD)" : "Register Satellite")}</span>
+                    <span className="text-[10px] font-mono bg-graphite-600 px-1.5 py-0.5 rounded text-signal-soft">RF</span>
+                  </Link>
+                  <Link
+                    href={`/${currentLocale}/station/new`}
+                    onClick={() => setMoreDropdownOpen(false)}
+                    className="px-2.5 py-2 text-sm text-steel-2 hover:text-white hover:bg-white/5 rounded flex items-center justify-between transition-colors"
+                  >
+                    <span>{nav.station_new || (isZh ? "接入地面站" : "Register Station")}</span>
+                    <span className="text-[10px] font-mono bg-graphite-600 px-1.5 py-0.5 rounded text-green-soft">EDGE</span>
+                  </Link>
+                  <Link
+                    href={`/${currentLocale}/data/egress`}
+                    onClick={() => setMoreDropdownOpen(false)}
+                    className="px-2.5 py-2 text-sm text-steel-2 hover:text-white hover:bg-white/5 rounded flex items-center justify-between transition-colors"
+                  >
+                    <span>{nav.egress || (isZh ? "云端出口配置" : "Cloud Egress")}</span>
+                    <span className="text-[10px] font-mono bg-graphite-600 px-1.5 py-0.5 rounded text-steel">S3/GCS</span>
+                  </Link>
+                  <Link
+                    href={`/${currentLocale}/commercial`}
+                    onClick={() => setMoreDropdownOpen(false)}
+                    className="px-2.5 py-2 text-sm text-steel-2 hover:text-white hover:bg-white/5 rounded flex items-center justify-between transition-colors"
+                  >
+                    <span>{nav.commercial || (isZh ? "商务合同与 SLA" : "Commercial & SLA")}</span>
+                  </Link>
+                  <Link
+                    href={`/${currentLocale}/commercial/quotes`}
+                    onClick={() => setMoreDropdownOpen(false)}
+                    className="px-2.5 py-2 text-sm text-steel-2 hover:text-white hover:bg-white/5 rounded flex items-center justify-between transition-colors"
+                  >
+                    <span>{nav.quotes || (isZh ? "商务报价计算器" : "Quote Calculator")}</span>
+                  </Link>
+                  <Link
+                    href={`/${currentLocale}/support`}
+                    onClick={() => setMoreDropdownOpen(false)}
+                    className="px-2.5 py-2 text-sm text-steel-2 hover:text-white hover:bg-white/5 rounded flex items-center justify-between transition-colors"
+                  >
+                    <span>{nav.support || (isZh ? "SLA 与支持工单" : "SLA & Support")}</span>
+                  </Link>
+                  <Link
+                    href={`/${currentLocale}/contact`}
+                    onClick={() => setMoreDropdownOpen(false)}
+                    className="px-2.5 py-2 text-sm text-steel-2 hover:text-white hover:bg-white/5 rounded flex items-center justify-between transition-colors"
+                  >
+                    <span>{nav.contact || (isZh ? "联系我们" : "Contact Team")}</span>
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
         </nav>
 
         {/* Desktop Network Status & Actions (Visible on xl+) */}
@@ -325,7 +416,7 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
       {/* Mobile & Tablet Full Screen Overlay Menu */}
       {mobileMenuOpen && (
         <div
-          className="fixed inset-x-0 top-20 bottom-0 z-50 bg-graphite/98 backdrop-blur-2xl overflow-y-auto lg:hidden flex flex-col border-t border-graphite-600/80 animate-fade-up"
+          className="fixed inset-x-0 top-20 bottom-0 z-50 bg-graphite/98 backdrop-blur-2xl overflow-y-auto xl:hidden flex flex-col border-t border-graphite-600/80 animate-fade-up"
           role="dialog"
           aria-modal="true"
         >

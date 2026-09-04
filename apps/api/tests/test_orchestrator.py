@@ -38,6 +38,14 @@ async def test_job_full_lifecycle(session, tenant, scheduled_contact):
     await orch.dispatch(job.id)
     await orch.acknowledge(job.id)
     await orch.prepare(job.id)
+
+    # Post readiness so the execute() gate passes
+    from services.readiness import StationReadinessService
+    await StationReadinessService(session, tenant).record_readiness(
+        job_id=job.id, status="READY",
+        checklist_results={"mcs_profile_loaded": True},
+    )
+
     await orch.execute(job.id)
     await orch.receive(job.id)
     await orch.process(job.id)
@@ -83,6 +91,14 @@ async def test_record_receipt_finalizes_job(session, tenant, scheduled_contact):
     await orch.dispatch(job.id)
     await orch.acknowledge(job.id)
     await orch.prepare(job.id)
+
+    # Post readiness so the execute() gate passes
+    from services.readiness import StationReadinessService
+    await StationReadinessService(session, tenant).record_readiness(
+        job_id=job.id, status="READY",
+        checklist_results={"mcs_profile_loaded": True},
+    )
+
     await orch.execute(job.id)
     await orch.receive(job.id)
     await orch.process(job.id)
