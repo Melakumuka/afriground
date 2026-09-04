@@ -6,8 +6,7 @@ const withNextIntl = createNextIntlPlugin(
 );
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
-  /* config options here */
+  ...(process.env.DOCKER_BUILD === '1' ? { output: 'standalone' } : {}),
 };
 
 export default withNextIntl(nextConfig);
