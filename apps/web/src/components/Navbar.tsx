@@ -146,6 +146,10 @@ export default function Navbar({ currentLocale }: { currentLocale: string }) {
       label: nav.network || (isZh ? "地面站网络" : "Ground Station Network"),
     },
     {
+      href: `/${currentLocale}/operations`,
+      label: nav.operations || (isZh ? "任务运营" : "Operations"),
+    },
+    {
       href: `/${currentLocale}/booking`,
       label: nav.scheduling || (isZh ? "过境调度" : "Scheduling"),
     },
