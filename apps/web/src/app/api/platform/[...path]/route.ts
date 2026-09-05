@@ -10,6 +10,7 @@ import {
   fetchSlaViolations,
   fetchStations,
   fetchTimeStatus,
+  fetchDestinations,
   serviceOrgId,
 } from "@/lib/api";
 
@@ -43,6 +44,8 @@ function resolvePath(path: Path): Promise<unknown> | undefined {
       return fetchNetworkRanking();
     case "data/datasets":
       return fetchDatasets();
+    case "data/destinations":
+      return fetchDestinations();
     default: {
       const match = key.match(STATION_CHILD_RE);
       if (match) return match[2] === "time-status" ? fetchTimeStatus(match[1]) : fetchAgents(match[1]);

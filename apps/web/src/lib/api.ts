@@ -170,6 +170,16 @@ export type Dataset = {
   storage_url: string | null;
 };
 
+export type DeliveryDestination = {
+  id: string;
+  org_id: string;
+  name: string;
+  protocol: string;
+  bucket_name: string | null;
+  endpoint_url: string | null;
+  is_active: boolean;
+};
+
 export type SupportTicket = {
   id: string;
   org_id: string;
@@ -221,6 +231,10 @@ export function fetchDatasets(): Promise<Dataset[] | null> {
 
 export function fetchDatasetDownload(jobId: string): Promise<{ ok: boolean; download_url?: string } | null> {
   return apiGet<{ ok: boolean; download_url?: string }>(`/api/v1/data/datasets/${jobId}/download`);
+}
+
+export function fetchDestinations(): Promise<DeliveryDestination[] | null> {
+  return apiGet<DeliveryDestination[]>("/api/v1/data/destinations");
 }
 
 export function fetchJobs(): Promise<Record<string, unknown>[] | null> {

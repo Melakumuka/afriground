@@ -342,10 +342,10 @@
     "semantic_hash": "5925f98107455521362c65ecf524e303"
   },
   "apps/api/scripts/seed_phase1.py": {
-    "mtime": 1788542363.2732127,
-    "seen": 1788586994.1480482,
-    "ast_hash": "5ca51f194d241422f8e33dcfba734e3b",
-    "semantic_hash": ""
+    "mtime": 1787314363.357373,
+    "seen": 1787589672.084518,
+    "ast_hash": "8c6b88a9a8d057b5f757b3db767abbb4",
+    "semantic_hash": "8c6b88a9a8d057b5f757b3db767abbb4"
   },
   "apps/api/scripts/simulate_edge.py": {
     "mtime": 1787247953.3191447,
@@ -738,9 +738,9 @@
     "semantic_hash": ""
   },
   "apps/web/package.json": {
-    "mtime": 1788533316.8430016,
-    "seen": 1788533326.0539997,
-    "ast_hash": "bfd03a767f8d32bea4753fa5ee1c1fca",
+    "mtime": 1788477230.9687023,
+    "seen": 1788533232.3893504,
+    "ast_hash": "57fb1156cd81601760dbed909094eda2",
     "semantic_hash": ""
   },
   "apps/web/postcss.config.mjs": {
@@ -852,9 +852,9 @@
     "semantic_hash": "e06c7deeb3ff0d82c7217c0bf5e418aa"
   },
   "apps/web/src/app/api/platform/[...path]/route.ts": {
-    "mtime": 1788586865.758213,
-    "seen": 1788586994.1670666,
-    "ast_hash": "bbb1cf57016b04b44c32c0f7b5d6d964",
+    "mtime": 1788477231.0022337,
+    "seen": 1788533232.3893504,
+    "ast_hash": "1efbba013dd6921d79f1700d60345a07",
     "semantic_hash": ""
   },
   "apps/web/src/app/api/satellites/route.ts": {
@@ -1068,9 +1068,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/lib/api.ts": {
-    "mtime": 1788586853.1457777,
-    "seen": 1788586994.175068,
-    "ast_hash": "5aaea9649cdf5afb90765652d38a3dca",
+    "mtime": 1788477231.0182345,
+    "seen": 1788533232.3893504,
+    "ast_hash": "a99b543ee3f3403c43e42f88df69d16b",
     "semantic_hash": ""
   },
   "apps/web/src/lib/celestrak.ts": {
@@ -1124,43 +1124,43 @@
   "apps/api/scripts/init_db.sql": {
     "mtime": 1786594508.6770668,
     "seen": 1788533232.3893504,
-    "ast_hash": "",
+    "ast_hash": "1fc88c7681a01d0e93bb5cfbc1a94b87",
     "semantic_hash": ""
   },
   "terraform/free/.terraform.lock.hcl": {
     "mtime": 1787228974.513251,
     "seen": 1788533232.3893504,
-    "ast_hash": "",
+    "ast_hash": "2cccdf2fe39ecc02780ee21010f6b93c",
     "semantic_hash": ""
   },
   "terraform/free/main.tf": {
     "mtime": 1787237295.4591906,
     "seen": 1788533232.3893504,
-    "ast_hash": "",
+    "ast_hash": "804977c86d68f20b618f597bfd2ab9e9",
     "semantic_hash": ""
   },
   "terraform/free/variables.tf": {
     "mtime": 1787228843.6167428,
     "seen": 1788533232.3893504,
-    "ast_hash": "",
+    "ast_hash": "09f48099d1da7863956dd6844f5228f2",
     "semantic_hash": ""
   },
   "terraform/main.tf": {
     "mtime": 1787228939.3494155,
     "seen": 1788533232.3893504,
-    "ast_hash": "",
+    "ast_hash": "8222c86865c29b3766d843ff8804558e",
     "semantic_hash": ""
   },
   "terraform/outputs.tf": {
     "mtime": 1787222579.394256,
     "seen": 1788533232.3893504,
-    "ast_hash": "",
+    "ast_hash": "009206e6e7ea40aef3795379b9ba4be7",
     "semantic_hash": ""
   },
   "terraform/variables.tf": {
     "mtime": 1787222573.5737488,
     "seen": 1788533232.3893504,
-    "ast_hash": "",
+    "ast_hash": "a4659e0cba842ca42d09ab8c3db1647b",
     "semantic_hash": ""
   },
   ".agents/skills/graphify/SKILL.md": {
@@ -1407,12 +1407,6 @@
     "mtime": 1788477231.0192347,
     "seen": 1788533232.3893504,
     "ast_hash": "58ffe2b2fb03c7d15e2fe45c1f143bbf",
-    "semantic_hash": ""
-  },
-  "test_token.ts": {
-    "mtime": 1788542738.2210793,
-    "seen": 1788586994.1780682,
-    "ast_hash": "ae0b1aaf4725a2532e49e7ed321aed95",
     "semantic_hash": ""
   }
 }

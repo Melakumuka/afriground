@@ -248,7 +248,7 @@ async def seed(db):
         db, StationLicense, station_id=station.id, license_type="uplink",
         issuing_authority="ICASA", license_number="ICASA-UPLINK-2026-0001",
         country="South Africa", frequency_bands=[{"min_hz": 430_000_000, "max_hz": 440_000_000}],
-        valid_until=now + timedelta(days=365 * 2),
+        expires_at=now + timedelta(days=365 * 2),
     )
 
     # Entoto Station
